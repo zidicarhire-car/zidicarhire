@@ -1,0 +1,25 @@
+{% load humanize %}
+<section class="fleet" id="cars">
+  <div class="wrap">
+    {% if location %}
+    <div class="fleet-head">
+      <h2>Cars in {{ location.name }} for {{ start|date:"D j M" }} to {{ end|date:"D j M" }}</h2>
+      <p>{{ days }} day{{ days|pluralize }}. Prices are for the car hire.{% if return_route %} Returning to {{ return_route.to_location.name }} adds a one-way fee of KES {{ return_route.fee|intcomma }}.{% endif %} Airport and delivery pick-ups are added when you book.</p>
+    </div>
+
+    {% if suggestions or not cars %}{% include "fleet/_no_cars.html" %}{% endif %}
+
+    {% if cars %}
+    <ul class="car-grid" id="car-grid" data-from="{{ start|date:'Y-m-d' }}" data-to="{{ end|date:'Y-m-d' }}" data-city="{{ location.slug }}">
+      {% for car in cars %}{% include "fleet/_car_card.html" %}{% endfor %}
+    </ul>
+    {% endif %}
+    {% else %}
+    <div class="empty">
+      <h3>We're getting our branches ready</h3>
+      <p>Chat with us and we'll find you a car.</p>
+      <button type="button" class="btn btn-primary" data-open-chat>Chat with us</button>
+    </div>
+    {% endif %}
+  </div>
+</section>

@@ -1,0 +1,11 @@
+<div class="accordion faq-list">
+  {% for item in faq %}{% if not home_only or item.home %}
+  <details class="accordion-item">
+    <summary>{{ item.q }}</summary>
+    <div class="accordion-body">
+      {% if item.confirmed %}<p>{{ item.a }}</p>
+      {% else %}<p><mark class="owner-edit">Owner to confirm: {{ item.a }}</mark></p>{% endif %}
+    </div>
+  </details>
+  {% endif %}{% endfor %}
+</div>

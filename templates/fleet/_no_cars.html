@@ -1,0 +1,21 @@
+<div class="empty no-cars">
+  <h3>{% if cars %}All our {{ location.name }} cars are booked for these dates{% elif category %}No cars of that type in {{ location.name }} right now{% else %}No cars in {{ location.name }} right now{% endif %}</h3>
+  {% if suggestions %}
+  <p>These nearby branches have cars free for your dates:</p>
+  <ul class="nearby">
+    {% for city in suggestions %}
+    <li>
+      <a class="btn btn-ghost" href="{{ city.get_absolute_url }}?from={{ start|date:'Y-m-d' }}&amp;to={{ end|date:'Y-m-d' }}{% if category %}&amp;category={{ category }}{% endif %}#cars">See cars in {{ city.name }}</a>
+      <small>{{ city.free_cars }} car{{ city.free_cars|pluralize }} free{% if city.distance %}, about {{ city.distance|floatformat:"0" }} km away{% endif %}</small>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <p>Or tell us what you need and we'll try to arrange a car in {{ location.name }}.</p>
+  <div class="no-cars-actions">
+    <button type="button" class="btn btn-primary" data-open-chat data-chat-city="{{ location.slug }}">Chat with us</button>
+    {% if location.whatsapp_link %}
+    <a class="btn btn-ghost" href="{{ location.whatsapp_link }}?text={% filter urlencode %}Hi, I need a car in {{ location.name }} from {{ start|date:'j M' }} to {{ end|date:'j M' }}.{% endfilter %}" target="_blank" rel="noopener">WhatsApp our {{ location.name }} branch</a>
+    {% endif %}
+  </div>
+</div>

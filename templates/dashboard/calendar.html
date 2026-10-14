@@ -1,0 +1,52 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Calendar{% endblock %}
+{% block content %}
+<header class="dash-head">
+  <h1>Calendar {% if view_location %}in {{ view_location.name }}{% endif %}</h1>
+  <div class="cal-nav" role="group" aria-label="Choose dates">
+    <a class="btn btn-ghost btn-sm" href="?start={{ prev_start|date:'Y-m-d' }}&amp;days={{ length }}">Earlier</a>
+    <a class="btn btn-ghost btn-sm" href="?days={{ length }}">Today</a>
+    <a class="btn btn-ghost btn-sm" href="?start={{ next_start|date:'Y-m-d' }}&amp;days={{ length }}">Later</a>
+    {% for n in lengths %}<a class="chip" href="?start={{ start|date:'Y-m-d' }}&amp;days={{ n }}"{% if n == length %} aria-current="true"{% endif %}>{{ n }} days</a>{% endfor %}
+  </div>
+</header>
+
+<p class="cal-legend">
+  <span class="cal-key status-paid">Paid</span>
+  <span class="cal-key status-picked_up">Picked up</span>
+  <span class="cal-key status-completed">Returned</span>
+  <span class="cal-key status-pending">Waiting for payment</span>
+</p>
+
+{% if rows %}
+<div class="cal-scroll" tabindex="0" aria-label="Bookings calendar, scroll sideways for more days">
+  <div class="cal" style="--days: {{ length }};">
+    <div class="cal-corner" style="grid-row: 1; grid-column: 1;">Car</div>
+    {% for d in days %}
+    <div class="cal-day{% if d == today %} is-today{% endif %}{% if d.weekday >= 5 %} is-weekend{% endif %}" style="grid-row: 1; grid-column: {{ forloop.counter|add:1 }};">
+      <span>{{ d|date:"D" }}</span><strong>{{ d|date:"j" }}</strong>{% if d.day == 1 or forloop.first %}<small>{{ d|date:"M" }}</small>{% endif %}
+    </div>
+    {% endfor %}
+    {% for r, col, d in day_cells %}<div class="cal-cell{% if d == today %} is-today{% endif %}{% if d.weekday >= 5 %} is-weekend{% endif %}" style="grid-row: {{ r }}; grid-column: {{ col }};"></div>{% endfor %}
+    {% for r in rows %}
+    <div class="cal-car{% if not r.car.is_active %} is-hidden{% endif %}" style="grid-row: {{ r.row }} / span {{ r.lanes }}; grid-column: 1;">
+      <a href="{% url 'dashboard:car_edit' r.car.pk %}">{{ r.car.name }}</a>
+      <small>{% if not view_location %}{{ r.car.location.name }}, {% endif %}{{ r.car.units }} unit{{ r.car.units|pluralize }}</small>
+    </div>
+    {% for blk in r.blocks %}
+    <a class="cal-block status-{{ blk.booking.status }}{% if blk.starts_before %} starts-before{% endif %}{% if blk.ends_after %} ends-after{% endif %}"
+       style="grid-row: {{ blk.row }}; grid-column: {{ blk.col }} / span {{ blk.span }};"
+       href="{% url 'dashboard:booking_detail' blk.booking.ref %}"
+       title="{{ blk.booking.ref }}: {{ blk.booking.customer_name }}, {{ blk.booking.pickup_date|date:'j M' }} {{ blk.booking.pickup_time|time:'H:i' }} to {{ blk.booking.return_date|date:'j M' }} {{ blk.booking.return_time|time:'H:i' }} ({{ blk.booking.get_status_display }})">
+      <span>{{ blk.booking.customer_name }}</span>
+      <span class="sr-only">, {{ blk.booking.pickup_date|date:'j M' }} to {{ blk.booking.return_date|date:'j M' }}, {{ blk.booking.get_status_display }}</span>
+    </a>
+    {% endfor %}
+    {% endfor %}
+  </div>
+</div>
+<p class="muted small">A block covers the days the car is out. The car can go out again on the day it comes back. Click a block to open the booking.</p>
+{% else %}
+<p class="muted">No cars here yet. Add cars under Cars and prices.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "dashboard/base.html" %}
+{% load static humanize %}
+{% block title %}Cars and prices{% endblock %}
+{% block content %}
+<header class="dash-head"><h1>Cars and prices {% if view_location %}in {{ view_location.name }}{% else %}across Kenya{% endif %}</h1></header>
+
+<div class="cars-layout">
+  <section class="panel">
+    <h2>Your fleet <span class="count">{{ cars|length }}</span></h2>
+    {% if cars %}
+    <ul class="fleet-list">
+      {% for car in cars %}
+      {% with cover=car.cover %}
+      <li class="fleet-item{% if not car.is_active %} is-hidden{% endif %}">
+        <img src="{% if cover %}{{ cover.thumbnail.url }}{% else %}{% static 'img/car-placeholder.svg' %}{% endif %}" alt="" width="96" height="64" loading="lazy">
+        <div class="fleet-info">
+          <strong><a href="{% url 'dashboard:car_edit' car.pk %}">{{ car.name }}</a></strong>
+          <span>{{ car.location.name }} branch &middot; {{ car.get_category_display }}, {{ car.seats }} seats</span>
+          <span class="plate plate-sm">KES {{ car.price_per_day|intcomma }}/day</span>
+          {% if car.weekly_rate or car.monthly_rate %}<span>{% if car.weekly_rate %}KES {{ car.weekly_rate|intcomma }}/week{% endif %}{% if car.weekly_rate and car.monthly_rate %} &middot; {% endif %}{% if car.monthly_rate %}KES {{ car.monthly_rate|intcomma }}/month{% endif %}</span>{% endif %}
+          <span>{{ car.units }} unit{{ car.units|pluralize }} &middot; {{ car.upcoming }} upcoming booking{{ car.upcoming|pluralize }}{% if not cover %} &middot; no photos yet{% endif %}</span>
+          {% if not car.is_active %}<span class="status status-cancelled">Hidden from website</span>{% endif %}
+          {% for booking in car.returning %}
+          <div class="returning">
+            <span class="status status-pending">Returning to {{ booking.return_location.name }}</span>
+            <small>{{ booking.ref }}, due {{ booking.return_date|date:"D j M" }}. The car stays listed in {{ car.location.name }} until you move it.</small>
+            <form method="post" action="{% url 'dashboard:booking_relocate' booking.ref %}" data-confirm="Has {{ car.name }} arrived in {{ booking.return_location.name }}? It will be listed there from now on." data-confirm-yes="Yes, move the car">{% csrf_token %}
+              <button class="btn btn-ghost btn-sm" type="submit">Arrived: move to {{ booking.return_location.name }}</button>
+            </form>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="fleet-actions">
+          <a class="btn btn-ghost btn-sm" href="{% url 'dashboard:car_edit' car.pk %}">Edit</a>
+          <form method="post" action="{% url 'dashboard:car_duplicate' car.pk %}" data-confirm="Make a hidden copy of {{ car.name }}, with its photos? Use this for the same model in another branch." data-confirm-yes="Yes, copy it">{% csrf_token %}
+            <button class="btn btn-ghost btn-sm" type="submit">Duplicate</button>
+          </form>
+          <form method="post" action="{% url 'dashboard:car_toggle' car.pk %}">{% csrf_token %}
+            <button class="btn btn-ghost btn-sm" type="submit">{% if car.is_active %}Hide{% else %}Show{% endif %}</button>
+          </form>
+          <form method="post" action="{% url 'dashboard:car_delete' car.pk %}" data-confirm="Delete {{ car.name }} and its photos? Cars with bookings are hidden instead, so their history is kept." data-confirm-yes="Yes, delete">{% csrf_token %}
+            <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+          </form>
+        </div>
+      </li>
+      {% endwith %}
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted">No cars here yet. Add your first car with the form and it will appear on the website straight away.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <h2>Add a car</h2>
+    <p class="muted small">The same model in two cities is two separate cars, each with its own units and price. You can add photos after saving.</p>
+    <form method="post" class="car-form">
+      {% csrf_token %}
+      {% include "dashboard/_form.html" %}
+      <button class="btn btn-primary" type="submit">Add car and continue to photos</button>
+    </form>
+  </section>
+</div>
+
+<dialog class="modal dash-dialog" id="confirm-dialog" aria-labelledby="confirm-text">
+  <p id="confirm-text"></p>
+  <div class="dialog-actions">
+    <button type="button" class="btn btn-ghost" data-close-dialog>Go back</button>
+    <button type="button" class="btn btn-primary" id="confirm-yes">Yes</button>
+  </div>
+</dialog>
+{% endblock %}

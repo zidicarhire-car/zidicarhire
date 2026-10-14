@@ -1,0 +1,61 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Payment settings check{% endblock %}
+{% block content %}
+<header class="dash-head">
+  <h1>Payment settings check</h1>
+  <p class="muted">What's filled in your .env file. Passwords and tokens are never shown here.</p>
+</header>
+
+<div class="cars-layout">
+  <section class="panel">
+    {% for group, rows in groups.items %}
+    <h2>{{ group }}</h2>
+    <ul class="check-list">
+      {% for row in rows %}
+      <li class="{% if row.ok %}is-ok{% else %}is-missing{% endif %}">
+        <span class="check-icon" aria-hidden="true">{% if row.ok %}&#10003;{% else %}!{% endif %}</span>
+        <span><strong>{{ row.label }}</strong><small>{{ row.detail }}</small></span>
+        <span class="sr-only">{% if row.ok %}OK{% else %}Needs attention{% endif %}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+    <p class="muted small">After changing .env on PythonAnywhere, click Reload on the Web tab for it to take effect.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Send a test M-Pesa prompt</h2>
+    <p class="muted small">Sends a real prompt for KES 1 to your phone through PayHero, so you can check that the till is connected. The shilling goes to your own till.</p>
+    <form method="post" class="car-form">
+      {% csrf_token %}
+      <label for="test-phone">Your Safaricom number</label>
+      <input id="test-phone" name="phone" type="tel" inputmode="tel" placeholder="0712 345 678" required>
+      <p><button class="btn btn-mpesa" type="submit">Send test STK push for KES 1 to my phone</button></p>
+    </form>
+
+    <h3>Recent test prompts</h3>
+    {% if tests %}
+    <ul class="fleet-list">
+      {% for t in tests %}
+      <li class="fleet-item branch-item">
+        <div class="fleet-info">
+          <strong>{{ t.reference }}: {{ t.get_status_display }}</strong>
+          <span>{{ t.masked_phone }}, {{ t.created_at|date:"j M, H:i" }}{% if t.requested_by %} by {{ t.requested_by.get_username }}{% endif %}</span>
+          {% if t.result_desc %}<span>{{ t.result_desc }}</span>{% endif %}
+          {% if t.mpesa_receipt %}<span>M-Pesa receipt {{ t.mpesa_receipt }}</span>{% endif %}
+        </div>
+        {% if t.status == 'pending' and t.payhero_reference %}
+        <form method="post" class="fleet-actions">{% csrf_token %}
+          <input type="hidden" name="action" value="check"><input type="hidden" name="payment" value="{{ t.pk }}">
+          <button class="btn btn-ghost btn-sm" type="submit">Check result</button>
+        </form>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted">No test prompts yet.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

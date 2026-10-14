@@ -1,0 +1,89 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <meta name="theme-color" content="#1C2340">
+  <title>{% block title %}{{ business.name }} | Car hire across Kenya, pay with M-Pesa{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Car hire across Kenya from {{ business.name }} branches in the major cities. Saloons, SUVs and 4x4s. Book online and pay instantly with M-Pesa.{% endblock %}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ business.name }}">
+  <meta property="og:title" content="{% block og_title %}{{ business.name }}: car hire across Kenya, pay with M-Pesa{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Book a car online in minutes and pay with M-Pesa. Branches in Kenya's major cities.{% endblock %}">
+  <meta property="og:url" content="{{ site_url }}{{ request.path }}">
+  {% block og_image %}<meta property="og:image" content="{{ site_url }}{% static 'img/og-image.png' %}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ business.name }} number-plate logo">{% endblock %}
+  <meta name="twitter:card" content="summary_large_image">
+  {% block head %}{% endblock %}
+  <link rel="icon" href="{% static 'img/zidicarhire-favicon.svg' %}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="{% url 'fleet:home' %}">
+        <img class="brand-logo" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire" width="160" height="40">
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="{% url 'fleet:cars' %}">Cars</a>
+        <a href="{% url 'fleet:home' %}#branches">Branches</a>
+        <a href="{% url 'pages:faq' %}">Questions</a>
+        <a href="{% url 'bookings:find' %}">Find my booking</a>
+        <a href="tel:{{ business.phone }}" class="nav-phone">{{ business.phone }}</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">{% block content %}{% endblock %}</main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div class="footer-brand">
+        <a href="{% url 'fleet:home' %}"><img class="brand-logo" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire" width="160" height="40" loading="lazy"></a>
+        <p>Car hire across Kenya.<br>Pay with M-Pesa, drive the same day.</p>
+        <p><a href="tel:{{ business.phone }}">{{ business.phone }}</a><br><a href="mailto:{{ business.email }}">{{ business.email }}</a></p>
+      </div>
+      {% if branches %}
+      <nav aria-label="Branches">
+        <h2 class="footer-h">Branches</h2>
+        <ul>{% for branch in branches %}<li><a href="{{ branch.get_absolute_url }}">Car hire in {{ branch.name }}</a></li>{% endfor %}</ul>
+      </nav>
+      {% endif %}
+      <nav aria-label="Help">
+        <h2 class="footer-h">Help</h2>
+        <ul>
+          <li><a href="{% url 'bookings:find' %}">Find my booking</a></li>
+          <li><a href="{% url 'pages:faq' %}">Questions</a></li>
+          <li><a href="{% url 'pages:contact' %}">Contact us</a></li>
+          <li><a href="{% url 'pages:about' %}">About us</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Legal">
+        <h2 class="footer-h">Legal</h2>
+        <ul>
+          <li><a href="{% url 'pages:terms' %}">Terms of hire</a></li>
+          <li><a href="{% url 'pages:privacy' %}">Privacy policy</a></li>
+        </ul>
+      </nav>
+      <p class="footer-small">&copy; {% now "Y" %} {{ business.name }}</p>
+    </div>
+  </footer>
+
+  {% include "chat_widget.html" %}
+
+  <script src="{% static 'js/common.js' %}"></script>
+  <script src="{% static 'js/chat.js' %}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

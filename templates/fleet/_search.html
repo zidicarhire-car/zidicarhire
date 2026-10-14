@@ -1,0 +1,37 @@
+{% load humanize %}
+<form class="search{% if hide_category %} search-4{% endif %}" id="search" method="get" action="{% url 'fleet:cars' %}"
+  data-city="{{ location.slug }}" data-explicit-city="{{ explicit_city|yesno:'1,0' }}">
+  <label>Pick-up city
+    <select name="city" required>
+      {% for loc in locations %}
+      <option value="{{ loc.slug }}"{% if loc == location %} selected{% endif %}>{{ loc.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Return to
+    <select name="return_to">
+      <option value="">Same city</option>
+      {% for route in routes %}
+      <option value="{{ route.to_location.slug }}"{% if route == return_route %} selected{% endif %}>{{ route.to_location.name }} (one-way, +KES {{ route.fee|intcomma }})</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Pick-up date
+    <input type="date" name="from" value="{{ start|date:'Y-m-d' }}" min="{{ today|date:'Y-m-d' }}" required>
+  </label>
+  <label>Return date
+    <input type="date" name="to" value="{{ end|date:'Y-m-d' }}" min="{{ today|date:'Y-m-d' }}" required>
+  </label>
+  {% if not hide_category %}
+  <label>Type of car
+    <select name="category">
+      <option value="">Any type</option>
+      {% for value, label in categories %}
+      <option value="{{ value }}"{% if value == category %} selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  {% endif %}
+  <button class="btn btn-plate" type="submit">Show available cars</button>
+</form>
+{{ routes_by_city|json_script:"routes-data" }}

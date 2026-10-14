@@ -1,0 +1,86 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <meta name="robots" content="noindex">
+  <title>{% block title %}Dashboard{% endblock %} | ZIDICARHIRE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+  <link rel="icon" href="{% static 'img/zidicarhire-favicon.svg' %}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body class="dash" data-feed-url="{% url 'dashboard:api_feed' %}" data-city="{{ view_location.slug|default:'' }}" data-owner="{{ is_owner|yesno:'1,0' }}">
+  <aside class="dash-side">
+    <a class="brand dash-brand" href="{% url 'dashboard:home' %}">
+      <img class="brand-logo" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire" width="128" height="32">
+      <span class="brand-word">Dashboard</span>
+    </a>
+    <nav class="dash-nav" aria-label="Dashboard">
+      <a href="{% url 'dashboard:home' %}"{% if nav == 'overview' %} aria-current="page"{% endif %}>Today</a>
+      <a href="{% url 'dashboard:bookings' %}"{% if nav == 'bookings' %} aria-current="page"{% endif %}>Bookings</a>
+      <a href="{% url 'dashboard:calendar' %}"{% if nav == 'calendar' %} aria-current="page"{% endif %}>Calendar</a>
+      <a href="{% url 'dashboard:cars' %}"{% if nav == 'cars' %} aria-current="page"{% endif %}>Cars and prices</a>
+      <a href="{% url 'dashboard:chats' %}"{% if nav == 'chats' %} aria-current="page"{% endif %}>Live chat <span class="badge" id="chat-badge" hidden>0</span></a>
+      <a href="{% url 'dashboard:reports' %}"{% if nav == 'reports' %} aria-current="page"{% endif %}>Reports</a>
+      {% if is_owner %}
+      <a href="{% url 'dashboard:locations' %}"{% if nav == 'branches' %} aria-current="page"{% endif %}>Branches</a>
+      <a href="{% url 'dashboard:routes' %}"{% if nav == 'routes' %} aria-current="page"{% endif %}>One-way routes</a>
+      {% endif %}
+      <a href="{% url 'dashboard:settings_check' %}"{% if nav == 'settings' %} aria-current="page"{% endif %}>Payment settings check</a>
+    </nav>
+    <div class="dash-city">
+      {% if staff_location %}
+      <span class="dash-city-label">Your branch</span>
+      <strong>{{ staff_location.name }}</strong>
+      {% else %}
+      <form method="post" action="{% url 'dashboard:set_city' %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <label class="dash-city-label" for="dash-city">Showing</label>
+        <select id="dash-city" name="city" onchange="this.form.submit()">
+          <option value="">All of Kenya</option>
+          {% for loc in all_locations %}
+          <option value="{{ loc.pk }}"{% if loc == view_location %} selected{% endif %}>{{ loc.name }}{% if not loc.is_active %} (hidden){% endif %}</option>
+          {% endfor %}
+        </select>
+        <noscript><button class="btn btn-ghost btn-sm" type="submit">Show</button></noscript>
+      </form>
+      {% endif %}
+    </div>
+    <div class="dash-side-foot">
+      <button type="button" class="btn btn-ghost btn-sm" id="alerts-btn">Turn on desktop alerts</button>
+      <a href="{% url 'fleet:home' %}" target="_blank" rel="noopener">View website</a>
+      <a href="{% url 'dashboard:styleguide' %}"{% if nav == 'styleguide' %} aria-current="page"{% endif %}>Style guide</a>
+      <form method="post" action="{% url 'dashboard:logout' %}">{% csrf_token %}<button type="submit" class="linklike">Sign out</button></form>
+    </div>
+  </aside>
+
+  <main class="dash-main" id="main">
+    {% if payment_problems %}
+    <div class="alert alert-error" role="alert">
+      <strong>M-Pesa payments are not set up, so customers can't pay.</strong>
+      <ul>{% for problem in payment_problems %}<li>{{ problem }}</li>{% endfor %}</ul>
+      <a href="{% url 'dashboard:settings_check' %}">Open the payment settings check</a>
+    </div>
+    {% endif %}
+    {% if messages %}
+    <ul class="alerts">{% for m in messages %}<li class="alert alert-{{ m.tags }}">{{ m }}</li>{% endfor %}</ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <div class="toasts" id="toasts" aria-live="assertive"></div>
+
+  <script src="{% static 'js/common.js' %}"></script>
+  <script src="{% static 'js/dashboard.js' %}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

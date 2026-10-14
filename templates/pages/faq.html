@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Questions about car hire | {{ business.name }}{% endblock %}
+{% block meta_description %}Answers about hiring a car with {{ business.name }}: paying with M-Pesa, what to bring, airport pick-up, one-way hire and receipts.{% endblock %}
+{% block og_title %}Questions about car hire{% endblock %}
+{% block head %}
+<link rel="canonical" href="{{ site_url }}{% url 'pages:faq' %}">
+<script type="application/ld+json">{{ jsonld }}</script>
+{% endblock %}
+
+{% block content %}
+<section class="page">
+  <div class="wrap narrow">
+    <h1>Questions about car hire</h1>
+    <p class="lead">Can't find your answer? <a href="{% url 'pages:contact' %}">Contact us</a> or use the chat.</p>
+    {% include "pages/_faq_list.html" %}
+  </div>
+</section>
+{% endblock %}

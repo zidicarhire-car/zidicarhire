@@ -1,0 +1,16 @@
+<p class="results-count" id="results-count" role="status">
+  {% if cars|length == all_cars_count %}{{ cars|length }} car{{ cars|length|pluralize }}{% else %}{{ cars|length }} of {{ all_cars_count }} car{{ all_cars_count|pluralize }} match your filters{% endif %}
+  in {{ location.name }}, {{ start|date:"D j M" }} to {{ end|date:"D j M" }} ({{ days }} day{{ days|pluralize }})
+</p>
+{% if not cars and all_cars_count %}
+<div class="empty">
+  <h3>No cars match these filters</h3>
+  <p>Try a wider price range, fewer seats, or any gearbox.</p>
+  <a class="btn btn-primary" href="?city={{ location.slug }}&amp;from={{ start|date:'Y-m-d' }}&amp;to={{ end|date:'Y-m-d' }}" data-clear-filters>Clear the filters</a>
+</div>
+{% elif suggestions or not cars %}{% include "fleet/_no_cars.html" %}{% endif %}
+{% if cars %}
+<ul class="car-grid" id="car-grid" data-from="{{ start|date:'Y-m-d' }}" data-to="{{ end|date:'Y-m-d' }}" data-city="{{ location.slug }}">
+  {% for car in cars %}{% include "fleet/_car_card.html" %}{% endfor %}
+</ul>
+{% endif %}

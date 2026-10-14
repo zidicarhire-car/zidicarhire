@@ -1,0 +1,39 @@
+{% extends "dashboard/base.html" %}
+{% load humanize %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<header class="dash-head">
+  <h1>Reports {% if view_location %}for {{ view_location.name }}{% else %}across Kenya{% endif %}</h1>
+  <p class="muted">Paid bookings by the month they were paid, per pick-up city. Last 12 months.</p>
+</header>
+
+<div class="table-wrap">
+  <table class="table report-table">
+    <thead>
+      <tr>
+        <th scope="col">Month</th>
+        {% for city in cities %}<th scope="col" class="num">{{ city.name }}</th>{% endfor %}
+        {% if cities|length > 1 %}<th scope="col" class="num">All cities</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <th scope="row">{{ row.month|date:"F Y" }}</th>
+        {% for n, revenue in row.cells %}
+        <td class="num">{% if n %}KES {{ revenue|intcomma }}<small>{{ n }} booking{{ n|pluralize }}</small>{% else %}<span class="muted">-</span>{% endif %}</td>
+        {% endfor %}
+        {% if cities|length > 1 %}<td class="num"><strong>KES {{ row.revenue|intcomma }}</strong><small>{{ row.n }} booking{{ row.n|pluralize }}</small></td>{% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <th scope="row">12 months</th>
+        {% for n, revenue in column_totals %}<td class="num"><strong>KES {{ revenue|intcomma }}</strong><small>{{ n }} booking{{ n|pluralize }}</small></td>{% endfor %}
+        {% if cities|length > 1 %}<td class="num"><strong>KES {{ grand_revenue|intcomma }}</strong><small>{{ grand_n }} booking{{ grand_n|pluralize }}</small></td>{% endif %}
+      </tr>
+    </tfoot>
+  </table>
+</div>
+{% endblock %}

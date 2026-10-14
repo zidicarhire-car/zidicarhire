@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Booking {{ booking.ref }} | {{ business.name }}{% endblock %}
+{% block head %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block content %}
+<section class="receipt-page">
+  <div class="wrap narrow">
+    <p class="plate plate-ref">{{ booking.ref }}</p>
+    <h1>{% if booking.is_paid %}Your booking is confirmed{% elif booking.status == 'pending' %}Waiting for your M-Pesa payment{% elif booking.status == 'cancelled' %}This booking was cancelled{% else %}This booking wasn't paid{% endif %}</h1>
+
+    {% if links %}
+    {% if booking.is_paid %}
+    <div class="receipt-tools">
+      <a class="btn btn-primary" href="{{ links.receipt_url }}">Download receipt (PDF)</a>
+      <a class="btn btn-ghost" href="{{ links.receipt_page_url }}">Printable receipt</a>
+      <a class="btn btn-ghost" href="{{ links.ics_url }}">Add to calendar (.ics)</a>
+    </div>
+    {% endif %}
+
+    <dl class="receipt">
+      <div><dt>Car</dt><dd>{{ booking.car.name }}</dd></div>
+      <div><dt>Name</dt><dd>{{ booking.customer_name }}</dd></div>
+      {% if booking.pickup_location %}<div><dt>City</dt><dd>{{ booking.pickup_location.name }}</dd></div>{% endif %}
+      {% if booking.pickup_point %}<div><dt>Pick-up point</dt><dd>{{ booking.pickup_point.name }}</dd></div>{% endif %}
+      <div><dt>Pick-up</dt><dd>{{ booking.pickup_date|date:"l j F Y" }}, {{ booking.pickup_time|time:"H:i" }}</dd></div>
+      <div><dt>Return</dt><dd>{{ booking.return_date|date:"l j F Y" }}, {{ booking.return_time|time:"H:i" }}{% if booking.is_one_way %}, in {{ booking.return_location.name }}{% endif %}</dd></div>
+      <div><dt>Length</dt><dd>{{ booking.days }} day{{ booking.days|pluralize }}</dd></div>
+      {% if booking.notes %}<div><dt>Notes</dt><dd>{{ booking.notes }}</dd></div>{% endif %}
+    </dl>
+
+    <h2 class="receipt-sub">Price</h2>
+    <dl class="receipt">
+      {% for line in booking.price_lines %}
+      <div{% if line.total %} class="receipt-total"{% endif %}><dt>{{ line.label }}</dt><dd>KES {{ line.amount|intcomma }}</dd></div>
+      {% endfor %}
+      <div><dt>Status</dt><dd><span class="status status-{{ booking.status }}">{{ booking.get_status_display }}</span></dd></div>
+      {% if booking.mpesa_receipt %}<div><dt>M-Pesa receipt</dt><dd>{{ booking.mpesa_receipt }}</dd></div>{% endif %}
+    </dl>
+    {% else %}
+    <dl class="receipt">
+      <div><dt>Car</dt><dd>{{ booking.car.name }}</dd></div>
+      <div><dt>Dates</dt><dd>{{ booking.pickup_date|date:"j M" }} to {{ booking.return_date|date:"j M Y" }}</dd></div>
+      <div><dt>Status</dt><dd><span class="status status-{{ booking.status }}">{{ booking.get_status_display }}</span></dd></div>
+    </dl>
+    <p>To see the full booking and download your receipt, <a href="{% url 'bookings:find' %}">find your booking</a> with its number and your phone number, or open the link in your confirmation email.</p>
+    {% endif %}
+
+    {% with phone=booking.pickup_location.contact_phone|default:business.phone %}
+    <p>Need to change something? Call <a href="tel:{{ phone }}">{{ phone }}</a> or use the chat, and quote your booking number.</p>
+    {% endwith %}
+    <a class="btn btn-ghost" href="{% if booking.pickup_location %}{{ booking.pickup_location.get_absolute_url }}{% else %}{% url 'fleet:home' %}{% endif %}">Back to cars</a>
+  </div>
+</section>
+{% endblock %}

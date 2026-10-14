@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static humanize %}
+
+{% block title %}{{ location.page_title }}{% endblock %}
+{% block meta_description %}{{ location.page_description }}{% endblock %}
+{% block og_title %}{{ location.page_title }}{% endblock %}
+{% block og_description %}{{ location.page_description }}{% endblock %}
+{% block head %}
+<link rel="canonical" href="{{ site_url }}{{ location.get_absolute_url }}">
+{% if jsonld %}<script type="application/ld+json">{{ jsonld }}</script>{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="wrap">
+    <p class="hero-kicker"><a href="{% url 'fleet:home' %}#branches">All branches</a></p>
+    <h1 class="hero-title">Car hire in {{ location.name }}</h1>
+    <p class="hero-sub">{{ location.page_intro|linebreaksbr }}</p>
+    {% include "fleet/_search.html" %}
+  </div>
+</section>
+
+{% include "fleet/_cars.html" %}
+
+<section class="branch-detail" id="branch">
+  <div class="wrap branch-detail-grid">
+    <div>
+      <h2>Our {{ location.name }} branch</h2>
+      <dl class="receipt">
+        <div><dt>Address</dt><dd>{% if location.address %}{{ location.address }}{% else %}{{ location.city }}{% if location.county and location.county != location.city %}, {{ location.county }} County{% endif %}{% endif %}</dd></div>
+        {% if location.opening_hours %}<div><dt>Opening hours</dt><dd>{{ location.opening_hours }}</dd></div>{% endif %}
+        <div><dt>Phone</dt><dd><a href="tel:{{ location.contact_phone }}">{{ location.contact_phone }}</a></dd></div>
+        {% if location.whatsapp_link %}<div><dt>WhatsApp</dt><dd><a href="{{ location.whatsapp_link }}" target="_blank" rel="noopener">{{ location.whatsapp }}</a></dd></div>{% endif %}
+      </dl>
+      {% if location.maps_url %}<a class="btn btn-ghost" href="{{ location.maps_url }}" target="_blank" rel="noopener">Directions on Google Maps</a>{% endif %}
+    </div>
+    <div>
+      <h2>Where to collect your car</h2>
+      {% if pickup_points %}
+      <ul class="points">
+        {% for point in pickup_points %}
+        <li><span>{{ point.name }}</span><strong>{% if point.fee %}+KES {{ point.fee|intcomma }}{% else %}Free{% endif %}</strong></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="muted">Collect your car from the branch office.</p>
+      {% endif %}
+      {% if routes %}
+      <h3>One-way hire from {{ location.name }}</h3>
+      <ul class="points">
+        {% for route in routes %}
+        <li><span>Return to {{ route.to_location.name }}</span><strong>+KES {{ route.fee|intcomma }}</strong></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% include "fleet/_how.html" %}
+{% include "fleet/_booking_dialog.html" %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/search.js' %}"></script>
+<script src="{% static 'js/rangecal.js' %}"></script>
+<script src="{% static 'js/booking.js' %}"></script>
+{% endblock %}

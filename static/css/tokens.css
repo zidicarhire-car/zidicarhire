@@ -1,0 +1,159 @@
+/*
+ * ZIDICARHIRE design tokens. Every colour, size, space, radius, shadow and motion value lives here;
+ * the other stylesheets only use these variables. See /dashboard/styleguide/ for all of them in use.
+ *
+ * Load order: tokens.css, base.css, components.css, then site.css or dashboard.css.
+ * Breakpoints (media queries can't read variables, so they are written as numbers):
+ *   480px large phone, 768px tablet, 1024px small laptop, 1280px desktop. Mobile-first: min-width.
+ *
+ * Colour rules
+ *   - Indigo is the brand: header, footer, primary buttons.
+ *   - Plate yellow with black is the number-plate motif: prices, booking refs, step numbers.
+ *   - M-Pesa green is ONLY for payment actions and paid status.
+ *   - Every text/background pair is checked for WCAG AA in light and dark mode by
+ *     config/tests_design.py, so change a colour there too if you add a new pair.
+ */
+:root {
+  color-scheme: light;
+
+  /* ---- Brand ---- */
+  --brand: #1C2340;              /* indigo: header, footer, primary button */
+  --brand-hover: #2E3760;
+  --on-brand: #FFFFFF;
+  --on-brand-muted: #C9CEE4;     /* secondary text on indigo */
+  --plate: #F6C21C;              /* Kenyan number-plate yellow */
+  --plate-hover: #FFD23F;
+  --plate-ink: #000000;
+  --mpesa: #2E9E3E;              /* M-Pesa green: icons, ticks, borders, large text */
+  --mpesa-fill: #1F7A2C;         /* behind white button text (the brand green is too light for AA) */
+  --mpesa-fill-hover: #18642A;
+  --on-mpesa: #FFFFFF;
+
+  /* ---- Surfaces and text ---- */
+  --bg: #EEF1F5;                 /* cool light grey page */
+  --surface: #FFFFFF;            /* cards, panels, inputs */
+  --surface-2: #F5F7FA;          /* sunken areas inside a card, hovered rows */
+  --placeholder: #E1E5EC;        /* photo boxes before the image loads */
+  --text: #1C2340;
+  --text-muted: #555E7A;         /* the one muted grey */
+  --border: #D5DBE4;             /* the one border grey (dividers, cards) */
+  --control-border: #7D86A0;     /* input and checkbox outlines: 3:1 against the surface */
+
+  /* ---- Primary button (flips to light-on-dark in dark mode) ---- */
+  --primary: var(--brand);
+  --primary-hover: var(--brand-hover);
+  --on-primary: #FFFFFF;
+
+  /* ---- Feedback ---- */
+  --danger: #B3261E;
+  --danger-bg: #FCEBEA;
+  --success-text: #1B6B27;       /* paid status text on --success-bg */
+  --success-bg: #E3F3E6;
+  --warn-text: #7A4F00;
+  --warn-bg: #FFF4D6;
+  --info-text: #2A3C9E;          /* picked-up status */
+  --info-bg: #E3E9FF;
+  --neutral-text: #1C2340;
+  --neutral-bg: #E4E8EE;
+  --focus: #3D5AFE;
+  --scrim: rgba(10, 13, 30, .6);
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23555E7A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+
+  /* ---- Type: Archivo variable (width 62–125%, weight 400–800) ---- */
+  --font-sans: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --fs-display: clamp(2.25rem, 1.35rem + 4.5vw, 5rem);
+  --fs-h1: clamp(1.75rem, 1.35rem + 2vw, 2.75rem);
+  --fs-h2: clamp(1.375rem, 1.15rem + 1.1vw, 1.875rem);
+  --fs-h3: clamp(1.125rem, 1.07rem + .3vw, 1.3rem);
+  --fs-body: clamp(1rem, .97rem + .15vw, 1.0625rem);  /* never under 16px */
+  --fs-lead: clamp(1.0625rem, 1rem + .35vw, 1.2rem);
+  --fs-small: .875rem;
+  --fs-xs: .8125rem;             /* badges and table headings only */
+  --wdth-display: 125%;
+  --wdth-wide: 115%;             /* headings */
+  --wdth-normal: 100%;
+  --wdth-narrow: 70%;            /* number plates */
+  --fw-regular: 400;
+  --fw-medium: 550;
+  --fw-semibold: 650;
+  --fw-bold: 750;
+  --fw-black: 800;
+  --lh-tight: 1.1;
+  --lh-snug: 1.3;
+  --lh-body: 1.55;
+  --measure: 65ch;               /* longest comfortable paragraph */
+
+  /* ---- Space (4 8 12 16 24 32 48 64 96 px) ---- */
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --section: clamp(var(--space-7), 6vw, var(--space-9));   /* vertical padding of page sections */
+
+  /* ---- Layout ---- */
+  --content-max: 1200px;
+  --gutter: clamp(1rem, 4vw, 1.5rem);
+  --tap: 44px;                   /* smallest touch target */
+  --header-h: 64px;
+
+  /* ---- Shape ---- */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --shadow-1: 0 1px 2px rgba(16, 20, 45, .06), 0 2px 8px rgba(16, 20, 45, .06);
+  --shadow-2: 0 12px 32px rgba(10, 13, 30, .22);
+  --ring: 0 0 0 3px color-mix(in srgb, var(--focus) 30%, transparent);
+
+  /* ---- Motion ---- */
+  --dur: 180ms;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+
+  /* ---- Layers ---- */
+  --z-sticky: 20;
+  --z-float: 50;
+  --z-toast: 70;
+  --z-overlay: 80;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --brand-hover: #2A3366;
+    --bg: #12162B;
+    --surface: #1B2140;
+    --surface-2: #232A4D;
+    --placeholder: #2A3156;
+    --text: #E8EBF5;
+    --text-muted: #A3ABC6;
+    --border: #2F3860;
+    --control-border: #6E78A0;
+    --primary: #E8EBF5;
+    --primary-hover: #FFFFFF;
+    --on-primary: #1C2340;
+    --danger: #FF8A80;
+    --danger-bg: #3A1C22;
+    --success-text: #7FD48A;
+    --success-bg: #173323;
+    --warn-text: #F6C21C;
+    --warn-bg: #3A3016;
+    --info-text: #C8D2FF;
+    --info-bg: #26306A;
+    --neutral-text: #E8EBF5;
+    --neutral-bg: #2F3860;
+    --focus: #8C9EFF;
+    --scrim: rgba(3, 5, 15, .72);
+    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23A3ABC6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, .3), 0 2px 8px rgba(0, 0, 0, .25);
+    --shadow-2: 0 14px 36px rgba(0, 0, 0, .5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur: 0ms; }
+}

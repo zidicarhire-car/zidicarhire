@@ -1,0 +1,33 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Live chat{% endblock %}
+{% block content %}
+<header class="dash-head"><h1>Live chat</h1><p class="live-note"><span class="live-dot" aria-hidden="true"></span> Visitors see you as online while this dashboard is open.</p></header>
+<div class="inbox">
+  <ul class="inbox-list" id="inbox-list" aria-label="Conversations"><li class="muted pad">Loading chats&hellip;</li></ul>
+  <section class="inbox-thread" id="inbox-thread" aria-live="polite">
+    <div class="inbox-empty" id="inbox-empty"><p>Choose a conversation to reply.</p></div>
+    <div class="inbox-active" id="inbox-active" hidden>
+      <header class="inbox-head">
+        <strong id="thread-name"></strong><span id="thread-contact" class="muted"></span>
+        {% if is_owner %}
+        <label class="thread-city">Branch
+          <select id="thread-city">
+            <option value="">No city</option>
+            {% for loc in all_locations %}<option value="{{ loc.pk }}">{{ loc.name }}</option>{% endfor %}
+          </select>
+        </label>
+        {% else %}
+        <span class="city-tag" id="thread-city-tag"></span>
+        {% endif %}
+      </header>
+      <ol class="chat-messages" id="thread-messages"></ol>
+      <form class="chat-compose" id="reply-form">
+        <label class="sr-only" for="reply-input">Reply</label>
+        <textarea id="reply-input" rows="2" maxlength="1000" placeholder="Type your reply. Enter sends, Shift+Enter adds a line."></textarea>
+        <button class="btn btn-primary" type="submit">Send</button>
+      </form>
+    </div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script>ZCHDash.initChats();</script>{% endblock %}

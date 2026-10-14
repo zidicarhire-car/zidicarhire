@@ -1,0 +1,333 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% block title %}Style guide{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'css/site.css' %}">{% endblock %}
+{% block content %}
+<div class="dash-head">
+  <div>
+    <h1>Style guide</h1>
+    <p class="muted" style="margin:0">Every design token and component, in one place. Switch your device to dark mode to check the dark colours.</p>
+  </div>
+</div>
+
+<nav class="chip-group sg-row" aria-label="Style guide sections">
+  <a class="chip" href="#colours">Colours</a>
+  <a class="chip" href="#contrast">Contrast</a>
+  <a class="chip" href="#type">Type</a>
+  <a class="chip" href="#space">Space and shape</a>
+  <a class="chip" href="#buttons">Buttons</a>
+  <a class="chip" href="#forms">Forms</a>
+  <a class="chip" href="#chips">Chips</a>
+  <a class="chip" href="#cards">Cards</a>
+  <a class="chip" href="#status">Status and badges</a>
+  <a class="chip" href="#alerts">Alerts and toasts</a>
+  <a class="chip" href="#overlays">Modal and tabs</a>
+  <a class="chip" href="#tables">Tables</a>
+  <a class="chip" href="#loading">Loading and empty</a>
+</nav>
+
+{# ---------------------------------------------------------------- Colours #}
+<section class="sg-section" id="colours" aria-labelledby="sg-colours">
+  <h2 id="sg-colours">Colours</h2>
+  <p class="prose muted">Indigo is the brand. Plate yellow with black is the number-plate motif (prices, booking refs, step numbers). M-Pesa green is only for payment actions and paid status.</p>
+  {% for title, tokens in color_groups %}
+  <h3>{{ title }}</h3>
+  <ul class="sg-swatches" role="list" style="list-style:none;padding:0;margin:0 0 var(--space-5)">
+    {% for t in tokens %}
+    <li class="sg-swatch">
+      <span class="sg-chip" style="display:block;background:var({{ t.name }})"></span>
+      <div><strong>{{ t.use }}</strong><code>{{ t.name }}</code><span class="sg-meta">Light {{ t.light }} · Dark {{ t.dark }}</span></div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endfor %}
+</section>
+
+{# ---------------------------------------------------------------- Contrast #}
+<section class="sg-section" id="contrast" aria-labelledby="sg-contrast">
+  <h2 id="sg-contrast">Contrast (WCAG AA)</h2>
+  <p class="prose muted">4.5:1 for body text, 3:1 for large text and UI parts such as outlines and focus rings. The tests check every pair below, so a colour change that breaks one fails the tests.</p>
+  <div class="table-wrap">
+    <table class="table sg-pairs">
+      <thead><tr><th scope="col">Pair</th><th scope="col">Sample</th><th scope="col" class="num">Needs</th><th scope="col" class="num">Light</th><th scope="col" class="num">Dark</th></tr></thead>
+      <tbody>
+        {% for p in pairs %}
+        <tr>
+          <td>{{ p.label }}<small>{{ p.fg }} on {{ p.bg }}</small></td>
+          <td><span class="sg-sample" style="color:var({{ p.fg }});background:var({{ p.bg }});border:1px solid var(--border)">Aa 123</span></td>
+          <td class="num">{{ p.min }}:1</td>
+          <td class="num"><span class="{{ p.light_ok|yesno:'sg-pass,sg-fail' }}">{{ p.light }}:1 {{ p.light_ok|yesno:'Pass,Fail' }}</span></td>
+          <td class="num"><span class="{{ p.dark_ok|yesno:'sg-pass,sg-fail' }}">{{ p.dark }}:1 {{ p.dark_ok|yesno:'Pass,Fail' }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{# ---------------------------------------------------------------- Type #}
+<section class="sg-section" id="type" aria-labelledby="sg-type">
+  <h2 id="sg-type">Type</h2>
+  <p class="prose muted">Archivo variable. Headings are wide (115–125%), number plates narrow (70%). Sizes are fluid with clamp(); body text never goes under 16px. Paragraphs stop at about 65 characters.</p>
+  <div class="sg-type panel">
+    <p class="display">Display</p><p class="fine">--fs-display, for the home page headline only</p>
+    <p style="font-size:var(--fs-h1);font-stretch:118%;font-weight:var(--fw-bold);line-height:var(--lh-tight)">Heading 1 · --fs-h1</p>
+    <p style="font-size:var(--fs-h2);font-stretch:var(--wdth-wide);font-weight:var(--fw-bold);line-height:var(--lh-tight)">Heading 2 · --fs-h2</p>
+    <p style="font-size:var(--fs-h3);font-stretch:105%;font-weight:var(--fw-bold)">Heading 3 · --fs-h3</p>
+    <p class="lead">Lead · --fs-lead. One supporting sentence under a page title.</p>
+    <p class="prose">Body · --fs-body. Pick up your car at the branch, the airport or your hotel. Pay with M-Pesa and get your confirmation and receipt straight away.</p>
+    <p class="small">Small · --fs-small. Hints, captions and secondary details.</p>
+    <p><span class="plate">KES 3,500 / day</span> &nbsp; <span class="plate plate-lg">ZCH2CF12805</span> &nbsp; <span class="plate-num">1</span></p>
+  </div>
+</section>
+
+{# ---------------------------------------------------------------- Space, shape, motion #}
+<section class="sg-section" id="space" aria-labelledby="sg-space">
+  <h2 id="sg-space">Space, shape and motion</h2>
+  <div class="sg-grid">
+    <div class="panel">
+      <h3>Spacing scale</h3>
+      <div class="sg-scale">
+        {% for name, px in space %}<div><code style="min-width:6.5rem">{{ name }}</code><span class="sg-bar" style="width:var({{ name }})"></span>{{ px }}px</div>{% endfor %}
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Radius and shadows</h3>
+      <div class="sg-row">
+        <div class="sg-box" style="border-radius:var(--radius-sm)">--radius-sm<br>6px</div>
+        <div class="sg-box" style="border-radius:var(--radius)">--radius<br>10px</div>
+        <div class="sg-box" style="border-radius:var(--radius-lg)">--radius-lg<br>16px</div>
+      </div>
+      <div class="sg-row">
+        <div class="sg-box" style="border-radius:var(--radius);box-shadow:var(--shadow-1)">--shadow-1</div>
+        <div class="sg-box" style="border-radius:var(--radius);box-shadow:var(--shadow-2)">--shadow-2</div>
+      </div>
+      <p class="fine">Motion: one duration (--dur, 180ms) and one easing (--ease). With reduced motion turned on, everything is instant.</p>
+    </div>
+  </div>
+</section>
+
+{# ---------------------------------------------------------------- Buttons #}
+<section class="sg-section" id="buttons" aria-labelledby="sg-buttons">
+  <h2 id="sg-buttons">Buttons</h2>
+  <p class="prose muted">Labels say exactly what happens ("Pay KES 10,500 with M-Pesa"). Loading keeps the width and shows a spinner. Small buttons grow to 44px on touch screens.</p>
+  <div class="sg-row">
+    <button type="button" class="btn btn-primary">Primary</button>
+    <button type="button" class="btn btn-plate">Book a car</button>
+    <button type="button" class="btn btn-mpesa">Pay KES 10,500 with M-Pesa</button>
+    <button type="button" class="btn btn-ghost">Ghost</button>
+    <button type="button" class="btn btn-danger">Cancel booking</button>
+  </div>
+  <div class="sg-row">
+    <button type="button" class="btn btn-primary" disabled>Disabled</button>
+    <button type="button" class="btn btn-plate" disabled>Disabled</button>
+    <button type="button" class="btn btn-mpesa" disabled>Disabled</button>
+    <button type="button" class="btn btn-ghost" disabled>Disabled</button>
+  </div>
+  <div class="sg-row">
+    <button type="button" class="btn btn-primary" aria-busy="true">Saving</button>
+    <button type="button" class="btn btn-mpesa" aria-busy="true">Pay KES 10,500 with M-Pesa</button>
+    <button type="button" class="btn btn-ghost" id="sg-busy">Click to see loading</button>
+  </div>
+  <div class="sg-row">
+    <button type="button" class="btn btn-primary btn-sm">Small</button>
+    <button type="button" class="btn btn-primary">Medium</button>
+    <button type="button" class="btn btn-primary btn-lg">Large</button>
+    <button type="button" class="icon-btn" aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+  </div>
+  <div style="max-width:360px"><button type="button" class="btn btn-plate btn-block btn-lg">Full width</button></div>
+</section>
+
+{# ---------------------------------------------------------------- Forms #}
+<section class="sg-section" id="forms" aria-labelledby="sg-forms">
+  <h2 id="sg-forms">Forms</h2>
+  <form class="sg-grid" onsubmit="return false" novalidate>
+    <div>
+      <label>Full name<input type="text" autocomplete="name" placeholder="e.g. Achieng Otieno"></label>
+      <label>M-Pesa phone number<input type="tel" inputmode="tel" autocomplete="tel" value="0712 345 678"><span class="field-hint">The number that gets the payment prompt.</span></label>
+      <label>Email<input type="email" inputmode="email" aria-invalid="true" aria-describedby="sg-email-err" value="achieng@"><span class="field-error" id="sg-email-err">Enter a full email address, like name@example.com.</span></label>
+      <label>Disabled<input type="text" value="Can't change this" disabled></label>
+    </div>
+    <div>
+      <label>Car type<select><option>Any type</option><option>Saloon</option><option>SUV</option><option>4x4</option></select></label>
+      <label>Message<textarea rows="3" placeholder="Tell us what you need"></textarea></label>
+      <fieldset>
+        <legend>Extras</legend>
+        <label class="check"><input type="checkbox" checked> Child seat <small>KES 500 per day</small></label>
+        <label class="check"><input type="checkbox"> Extra driver</label>
+        <label class="check"><input type="checkbox" disabled> Not available</label>
+      </fieldset>
+      <fieldset>
+        <legend>Transmission</legend>
+        <label class="check"><input type="radio" name="sg-t" checked> Any</label>
+        <label class="check"><input type="radio" name="sg-t"> Automatic</label>
+      </fieldset>
+    </div>
+  </form>
+</section>
+
+{# ---------------------------------------------------------------- Chips #}
+<section class="sg-section" id="chips" aria-labelledby="sg-chips">
+  <h2 id="sg-chips">Chips and filters</h2>
+  <div class="chip-group sg-row" role="group" aria-label="Quick picks">
+    <button type="button" class="chip" aria-pressed="true">This weekend</button>
+    <button type="button" class="chip" aria-pressed="false">3 days</button>
+    <button type="button" class="chip" aria-pressed="false">1 week</button>
+    <button type="button" class="chip" disabled>Unavailable</button>
+  </div>
+  <div class="chip-group sg-row" aria-label="Active filters">
+    <button type="button" class="chip chip-remove" aria-label="Remove filter: SUV">SUV</button>
+    <button type="button" class="chip chip-remove" aria-label="Remove filter: 7 seats">7 seats</button>
+  </div>
+</section>
+
+{# ---------------------------------------------------------------- Cards #}
+<section class="sg-section" id="cards" aria-labelledby="sg-cards">
+  <h2 id="sg-cards">Cards and panels</h2>
+  <div class="sg-grid">
+    <ul class="car-grid sg-demo-card" style="grid-template-columns:1fr" role="list">
+      <li class="car card">
+        <span class="car-photo" style="display:block"><img src="{% static 'img/car-placeholder.svg' %}" alt="" width="600" height="375"><span class="car-category">SUV</span></span>
+        <div class="car-body">
+          <h3>Toyota Prado</h3>
+          <ul class="specs"><li>7 seats</li><li>Automatic</li><li>Diesel</li></ul>
+          <div class="car-foot">
+            <div class="price"><span class="plate">KES 9,500</span><span class="per">per day</span><span class="total">KES 28,500 for 3 days</span></div>
+            <button type="button" class="btn btn-primary">Book this car</button>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <div class="panel">
+      <h2>Panel</h2>
+      <p class="muted">Panels hold forms and lists in the dashboard and on Find my booking.</p>
+      <dl class="facts">
+        <div><dt>Pick-up</dt><dd>Fri 14 Nov, 10:00</dd></div>
+        <div><dt>Return</dt><dd>Mon 17 Nov, 10:00</dd></div>
+        <div class="facts-total"><dt>Total</dt><dd>KES 28,500</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+{# ---------------------------------------------------------------- Status #}
+<section class="sg-section" id="status" aria-labelledby="sg-status">
+  <h2 id="sg-status">Status pills, badges and tags</h2>
+  <div class="sg-row">{% for key, label in statuses %}<span class="status status-{{ key }}">{{ label }}</span>{% endfor %}</div>
+  <div class="sg-row"><span class="badge">3</span><span class="tag">SUV</span><span class="tag tag-quiet">Nairobi</span><span class="plate plate-sm">KES 3,500</span></div>
+</section>
+
+{# ---------------------------------------------------------------- Alerts and toasts #}
+<section class="sg-section" id="alerts" aria-labelledby="sg-alerts">
+  <h2 id="sg-alerts">Alerts and toasts</h2>
+  <div class="sg-grid">
+    <div class="alerts" style="margin:0">
+      <div class="alert alert-success"><strong>Booking paid</strong>KES 28,500 received from 0712 345 678.</div>
+      <div class="alert alert-info">Prices include VAT and unlimited mileage.</div>
+      <div class="alert alert-warning">This car is held for 10 minutes while you pay.</div>
+      <div class="alert alert-error"><strong>Payment didn't go through</strong>The M-Pesa prompt was cancelled. Check your phone and try again.</div>
+    </div>
+    <div>
+      <p class="muted">Toasts confirm that something worked, then disappear after a few seconds.</p>
+      <div class="sg-row">
+        <button type="button" class="btn btn-ghost" data-toast="success">Show success toast</button>
+        <button type="button" class="btn btn-ghost" data-toast="error">Show error toast</button>
+        <button type="button" class="btn btn-ghost" data-toast="">Show info toast</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ---------------------------------------------------------------- Modal and tabs #}
+<section class="sg-section" id="overlays" aria-labelledby="sg-overlays">
+  <h2 id="sg-overlays">Modal, bottom sheet and tabs</h2>
+  <p class="prose muted">On screens under 768px wide, a modal with the sheet style rises from the bottom. Esc or the close button closes it.</p>
+  <div class="sg-row">
+    <button type="button" class="btn btn-primary" id="sg-open-modal">Open modal</button>
+  </div>
+  <dialog class="modal modal-sheet" id="sg-modal" aria-labelledby="sg-modal-title">
+    <div class="modal-head">
+      <h2 id="sg-modal-title">Change dates</h2>
+      <button type="button" class="icon-btn modal-close" data-close aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <p>The modal body scrolls on its own, while the header and footer stay in place.</p>
+      <label>New return date<input type="date"></label>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" data-close>Keep dates</button>
+      <button type="button" class="btn btn-primary" data-close>Change dates</button>
+    </div>
+  </dialog>
+
+  <div class="panel" style="margin-top:var(--space-5)">
+    <div class="tabs" role="tablist" aria-label="Booking sections">
+      <button type="button" class="tab" role="tab" id="sg-tab-1" aria-controls="sg-panel-1" aria-selected="true">Details</button>
+      <button type="button" class="tab" role="tab" id="sg-tab-2" aria-controls="sg-panel-2">Payments</button>
+      <button type="button" class="tab" role="tab" id="sg-tab-3" aria-controls="sg-panel-3">Timeline</button>
+    </div>
+    <div class="tab-panel" role="tabpanel" id="sg-panel-1" aria-labelledby="sg-tab-1" tabindex="0">Customer and car details.</div>
+    <div class="tab-panel" role="tabpanel" id="sg-panel-2" aria-labelledby="sg-tab-2" tabindex="0" hidden>Every M-Pesa prompt for this booking.</div>
+    <div class="tab-panel" role="tabpanel" id="sg-panel-3" aria-labelledby="sg-tab-3" tabindex="0" hidden>What happened, and who did it.</div>
+  </div>
+
+  <h3 style="margin-top:var(--space-5)">Accordion</h3>
+  <div class="accordion" style="max-width:640px">
+    <details class="accordion-item"><summary>Do I need a deposit?</summary><div class="accordion-body"><p>The answer appears here, at a readable width.</p></div></details>
+    <details class="accordion-item"><summary>Can I return the car in another city?</summary><div class="accordion-body"><p>Yes, on routes where one-way hire is offered.</p></div></details>
+  </div>
+</section>
+
+{# ---------------------------------------------------------------- Tables #}
+<section class="sg-section" id="tables" aria-labelledby="sg-tables">
+  <h2 id="sg-tables">Tables</h2>
+  <p class="prose muted">Wide tables scroll inside their own box, never the page.</p>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th scope="col">Booking</th><th scope="col">Customer</th><th scope="col">Car</th><th scope="col">Dates</th><th scope="col" class="num">Amount</th><th scope="col">Status</th></tr></thead>
+      <tbody>
+        <tr><td class="mono-ref">ZCH2CF12805</td><td>Achieng Otieno<small>0712 345 678</small></td><td>Toyota Prado</td><td>14–17 Nov</td><td class="num">KES 28,500</td><td><span class="status status-paid">Paid</span></td></tr>
+        <tr><td class="mono-ref">ZCH8AB31F02</td><td>Brian Kamau<small>0722 000 111</small></td><td>Mazda Demio</td><td>15–16 Nov</td><td class="num">KES 3,500</td><td><span class="status status-pending">Waiting for payment</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{# ---------------------------------------------------------------- Loading and empty #}
+<section class="sg-section" id="loading" aria-labelledby="sg-loading">
+  <h2 id="sg-loading">Loading and empty states</h2>
+  <div class="sg-grid">
+    <ul class="car-grid" style="grid-template-columns:1fr" role="list">
+      <li class="car skeleton" aria-hidden="true"><div class="sk-photo"></div><div class="car-body"><div class="sk-line"></div><div class="sk-line sk-short"></div><div class="sk-line"></div></div></li>
+    </ul>
+    <div class="empty">
+      <h3>No cars match these filters</h3>
+      <p>Try other dates, or remove a filter to see more cars.</p>
+      <div class="empty-actions"><button type="button" class="btn btn-primary">Clear filters</button><a class="btn btn-ghost" href="#loading">See all cars</a></div>
+    </div>
+  </div>
+  <p style="margin-top:var(--space-4)"><span class="spinner" aria-hidden="true"></span> <span class="muted">Inline spinner</span></p>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const { busy, toast } = window.ZCH;
+  document.getElementById('sg-busy').addEventListener('click', (e) => {
+    const btn = e.currentTarget;
+    busy(btn);
+    setTimeout(() => busy(btn, false), 1800);
+  });
+  document.querySelectorAll('[data-toast]').forEach((b) => b.addEventListener('click', () => {
+    const kind = b.dataset.toast;
+    if (kind === 'success') toast('Booking marked as picked up', 'ZCH2CF12805 · Toyota Prado', { kind });
+    else if (kind === 'error') toast("Couldn't save", 'Check your connection and try again.', { kind });
+    else toast('New chat', 'A visitor in Mombasa wrote to you.');
+  }));
+  const modal = document.getElementById('sg-modal');
+  document.getElementById('sg-open-modal').addEventListener('click', () => modal.showModal());
+  modal.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => modal.close()));
+})();
+</script>
+{% endblock %}

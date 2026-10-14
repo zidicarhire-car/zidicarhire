@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Contact us | {{ business.name }}{% endblock %}
+{% block meta_description %}Call, WhatsApp or message {{ business.name }} about hiring a car in Kenya.{% endblock %}
+{% block head %}<link rel="canonical" href="{{ site_url }}{% url 'pages:contact' %}">{% endblock %}
+
+{% block content %}
+<section class="page">
+  <div class="wrap page-cols">
+    <div>
+      <h1>Contact us</h1>
+      <p class="lead">The quickest way to reach us is the chat on this page or WhatsApp. You can also call or send a message below.</p>
+      <dl class="contact-list">
+        <div><dt>Phone</dt><dd><a href="tel:{{ business.phone }}">{{ business.phone }}</a></dd></div>
+        {% if business.whatsapp %}<div><dt>WhatsApp</dt><dd><a href="https://wa.me/{{ business.whatsapp }}" target="_blank" rel="noopener">Message us on WhatsApp</a></dd></div>{% endif %}
+        <div><dt>Email</dt><dd><a href="mailto:{{ business.email }}">{{ business.email }}</a></dd></div>
+        {% if business.address %}<div><dt>Office</dt><dd>{{ business.address }}</dd></div>{% endif %}
+      </dl>
+      {% if branches %}<p>Each branch has its own phone number: see <a href="{% url 'fleet:home' %}#branches">our branches</a>.</p>{% endif %}
+    </div>
+
+    <div>
+      {% if messages %}{% for m in messages %}<p class="alert alert-{{ m.tags }}" role="status">{{ m }}</p>{% endfor %}{% endif %}
+      <form method="post" class="panel-form" novalidate>
+        {% csrf_token %}
+        <h2 class="form-title">Send us a message</h2>
+        {% if form.non_field_errors %}<p class="form-error" role="alert">{{ form.non_field_errors|join:" " }}</p>{% endif %}
+        {% for field in form %}
+        {% if field.name == 'website' %}
+        <div class="hp" aria-hidden="true"><label>{{ field.label }}{{ field }}</label></div>
+        {% else %}
+        <label>{{ field.label }}{% if not field.field.required %} <span class="optional">(optional)</span>{% endif %}
+          {{ field }}
+          {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        </label>
+        {% endif %}
+        {% endfor %}
+        <p class="fine">Give a phone number or an email address so we can reply.</p>
+        <button class="btn btn-primary" type="submit">Send message</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

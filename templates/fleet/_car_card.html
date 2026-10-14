@@ -1,0 +1,38 @@
+{% load static humanize %}
+<li class="car{% if not car.available %} is-booked{% endif %}" data-car-id="{{ car.pk }}">
+  <a class="car-photo" href="{{ car.get_absolute_url }}?from={{ start|date:'Y-m-d' }}&amp;to={{ end|date:'Y-m-d' }}" tabindex="-1" aria-hidden="true">
+    {% with cover=car.cover %}
+    {% if cover %}
+      <img src="{{ cover.thumbnail.url }}" srcset="{{ cover.thumbnail.url }} 600w, {{ cover.image.url }} 1600w"
+           sizes="(max-width: 640px) 100vw, 380px" alt="" loading="lazy" width="600" height="375">
+    {% else %}
+      <img src="{% static 'img/car-placeholder.svg' %}" alt="" loading="lazy" width="600" height="375">
+    {% endif %}
+    {% endwith %}
+    <span class="car-category">{{ car.get_category_display }}</span>
+  </a>
+  <div class="car-body">
+    <h3><a href="{{ car.get_absolute_url }}?from={{ start|date:'Y-m-d' }}&amp;to={{ end|date:'Y-m-d' }}">{{ car.name }}</a></h3>
+    <p class="car-city">
+      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9.5" r="2.5" fill="currentColor"/></svg>
+      {{ car.location.name }}
+    </p>
+    <ul class="specs">
+      <li>{{ car.seats }} seats</li>
+      <li>{{ car.get_transmission_display }}</li>
+      <li>{{ car.get_fuel_display }}</li>
+    </ul>
+    {% if car.description %}<p class="car-desc">{{ car.description|truncatechars:110 }}</p>{% endif %}
+    <div class="car-foot">
+      <div class="price">
+        <span class="plate">KES {{ car.price_per_day|intcomma }}</span>
+        <span class="per">per day</span>
+        <span class="total">KES {{ car.total|intcomma }} for {{ days }} day{{ days|pluralize }}{% if car.rate_type != 'daily' %} at the {{ car.rate_type }} rate{% endif %}</span>
+      </div>
+      <button type="button" class="btn btn-primary book-btn"
+        data-car-id="{{ car.pk }}" data-name="{{ car.name }}" data-city="{{ car.location.name }}" data-price="{{ car.price_per_day }}">
+        <span class="when-free">Book this car</span><span class="when-booked">Booked then. Pick other dates</span>
+      </button>
+    </div>
+  </div>
+</li>

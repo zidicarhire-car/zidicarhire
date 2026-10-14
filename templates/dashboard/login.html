@@ -1,0 +1,32 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Sign in | ZIDICARHIRE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+  <link rel="icon" href="{% static 'img/zidicarhire-favicon.svg' %}" type="image/svg+xml">
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body class="login-page">
+  <main class="login-card">
+    <picture>
+      <source srcset="{% static 'img/zidicarhire-logo-white.svg' %}" media="(prefers-color-scheme: dark)">
+      <img class="login-logo" src="{% static 'img/zidicarhire-logo.svg' %}" alt="ZidiCarHire" width="192" height="48">
+    </picture>
+    <h1>Sign in to the dashboard</h1>
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<p class="form-error">{{ form.non_field_errors|join:" " }}</p>{% endif %}
+      <label>Username<input name="username" autocomplete="username" required autofocus value="{{ form.username.value|default:'' }}"></label>
+      <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+    </form>
+  </main>
+</body>
+</html>

@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load static humanize %}
+
+{% block title %}{{ car.name }} for hire in {{ car.location.name }} | {{ business.name }}{% endblock %}
+{% block meta_description %}Hire a {{ car.name }} in {{ car.location.name }} from KES {{ car.price_per_day|intcomma }} a day. {{ car.seats }} seats, {{ car.get_transmission_display|lower }}, {{ car.get_fuel_display|lower }}. Book online and pay with M-Pesa.{% endblock %}
+{% block og_title %}{{ car.name }} for hire in {{ car.location.name }}{% endblock %}
+{% block og_description %}From KES {{ car.price_per_day|intcomma }} a day. Book online and pay with M-Pesa.{% endblock %}
+{% block og_image %}{% with cover=car.cover %}{% if cover %}<meta property="og:image" content="{{ site_url }}{{ cover.image.url }}">
+<meta property="og:image:alt" content="{{ car.name }}">{% else %}{{ block.super }}{% endif %}{% endwith %}{% endblock %}
+{% block head %}
+<link rel="canonical" href="{{ site_url }}{{ car.get_absolute_url }}">
+{% endblock %}
+
+{% block content %}
+<section class="car-page">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="{{ car.location.get_absolute_url }}">Car hire in {{ car.location.name }}</a> <span aria-hidden="true">/</span> <span aria-current="page">{{ car.name }}</span>
+    </nav>
+
+    <div class="car-layout">
+      <div class="car-media">
+        {% if photos %}
+        <div class="gallery" data-gallery>
+          <div class="gallery-track" tabindex="0" role="region" aria-roledescription="carousel"
+               aria-label="Photos of {{ car.name }}. Use the arrow keys to move between photos.">
+            {% for p in photos %}
+            <figure class="gallery-slide" aria-label="Photo {{ forloop.counter }} of {{ photos|length }}">
+              <button type="button" class="gallery-open" data-index="{{ forloop.counter0 }}" data-full="{{ p.image.url }}"
+                      aria-label="Open photo {{ forloop.counter }} full screen">
+                <img src="{{ p.thumbnail.url }}" srcset="{{ p.thumbnail.url }} 600w, {{ p.image.url }} 1600w"
+                     sizes="(max-width: 900px) 100vw, 640px" alt="{{ car.name }}, photo {{ forloop.counter }}"
+                     width="{{ p.width|default:1600 }}" height="{{ p.height|default:1000 }}"{% if not forloop.first %} loading="lazy"{% endif %}>
+              </button>
+            </figure>
+            {% endfor %}
+          </div>
+          {% if photos|length > 1 %}
+          <button type="button" class="gallery-nav gallery-prev icon-btn" aria-label="Previous photo">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" class="gallery-nav gallery-next icon-btn" aria-label="Next photo">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <p class="gallery-count" aria-live="polite"><span data-current>1</span> / {{ photos|length }}</p>
+          <div class="gallery-thumbs" role="group" aria-label="Choose a photo">
+            {% for p in photos %}<button type="button" data-index="{{ forloop.counter0 }}" aria-label="Show photo {{ forloop.counter }}"{% if forloop.first %} aria-current="true"{% endif %}><img src="{{ p.thumbnail.url }}" alt="" width="96" height="60" loading="lazy"></button>{% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        <dialog class="lightbox" id="lightbox" aria-label="Photos of {{ car.name }}">
+          <img id="lightbox-img" alt="">
+          <p class="lightbox-count" aria-live="polite"></p>
+          <button type="button" class="icon-btn lightbox-close" data-close-lightbox aria-label="Close photos">
+            <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+          {% if photos|length > 1 %}
+          <button type="button" class="icon-btn lightbox-prev" aria-label="Previous photo">
+            <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" class="icon-btn lightbox-next" aria-label="Next photo">
+            <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          {% endif %}
+        </dialog>
+        {% else %}
+        <div class="gallery gallery-empty"><img src="{% static 'img/car-placeholder.svg' %}" alt="" width="600" height="375"></div>
+        {% endif %}
+      </div>
+
+      <div class="car-info">
+        <p class="car-kicker">{{ car.get_category_display }} &middot; {{ car.location.name }}</p>
+        <h1>{{ car.name }}</h1>
+        <p class="car-price"><span class="plate">KES {{ car.price_per_day|intcomma }}</span> <span class="per">per day</span></p>
+        <ul class="spec-grid" aria-label="Specifications">
+          <li><strong>{{ car.seats }}</strong> seats</li>
+          <li><strong>{{ car.doors }}</strong> doors</li>
+          <li><strong>{{ car.luggage }}</strong> large bag{{ car.luggage|pluralize }}</li>
+          <li><strong>{{ car.get_transmission_display }}</strong></li>
+          <li><strong>{{ car.get_fuel_display }}</strong></li>
+          {% if car.engine_size %}<li><strong>{{ car.engine_size }}</strong> engine</li>{% endif %}
+          <li><strong>{% if car.air_con %}Air conditioning{% else %}No air conditioning{% endif %}</strong></li>
+        </ul>
+        <button type="button" class="btn btn-primary btn-block book-btn btn-lg"
+          data-car-id="{{ car.pk }}" data-name="{{ car.name }}" data-city="{{ car.location.name }}" data-price="{{ car.price_per_day }}">
+          Choose dates and book
+        </button>
+        <p class="fine">Pay with M-Pesa. Your booking is confirmed the moment you pay.</p>
+
+        <h2 class="car-h2">Prices</h2>
+        <table class="price-table">
+          <caption class="sr-only">Prices for the {{ car.name }}</caption>
+          <tbody>
+            {% for label, rate, note in prices %}
+            <tr><th scope="row">{{ label }}</th><td><strong>KES {{ rate|intcomma }}</strong> <span class="muted">{{ note }}</span></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <p class="fine">Every started 24 hours counts as a day. Airport and delivery pick-ups and one-way returns are added when you book.</p>
+      </div>
+    </div>
+
+    <div class="car-more">
+      <div>
+        {% if car.description %}<h2 class="car-h2">About this car</h2><p>{{ car.description|linebreaksbr }}</p>{% endif %}
+        {% if car.feature_labels %}
+        <h2 class="car-h2">Features</h2>
+        <ul class="feature-list">{% for f in car.feature_labels %}<li>{{ f }}</li>{% endfor %}</ul>
+        {% endif %}
+        <h2 class="car-h2">Where to collect it</h2>
+        <ul class="points">
+          {% for point in pickup_points %}<li><span>{{ point.name }}</span><strong>{% if point.fee %}+KES {{ point.fee|intcomma }}{% else %}Free{% endif %}</strong></li>
+          {% empty %}<li><span>{{ car.location.name }} branch</span><strong>Free</strong></li>{% endfor %}
+        </ul>
+      </div>
+      <div>
+        <h2 class="car-h2">When it's free</h2>
+        <p class="muted small">Struck-through days are booked. Tap a free day to start booking from then.</p>
+        <div class="rangecal rangecal-preview" id="availability-preview" data-car-id="{{ car.pk }}" data-today="{{ today|date:'Y-m-d' }}"></div>
+      </div>
+    </div>
+
+    {% if others %}
+    <h2 class="car-h2">More cars in {{ car.location.name }}</h2>
+    <ul class="car-grid car-grid-small">
+      {% for other in others %}
+      {% with cover=other.cover %}
+      <li class="car mini-car">
+        <a href="{{ other.get_absolute_url }}">
+          <img src="{% if cover %}{{ cover.thumbnail.url }}{% else %}{% static 'img/car-placeholder.svg' %}{% endif %}" alt="" loading="lazy" width="600" height="375">
+          <span><strong>{{ other.name }}</strong> from KES {{ other.price_per_day|intcomma }} a day</span>
+        </a>
+      </li>
+      {% endwith %}
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</section>
+
+{% include "fleet/_booking_dialog.html" %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/rangecal.js' %}"></script>
+<script src="{% static 'js/booking.js' %}"></script>
+<script src="{% static 'js/gallery.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% load humanize %}
+<li class="bk-item">
+  <a class="bk-link" href="{% url 'dashboard:booking_detail' b.ref %}">
+    <span class="bk-top"><strong class="mono-ref">{{ b.ref }}</strong> <span class="status status-{{ b.status }}">{{ b.get_status_display }}</span></span>
+    <span class="bk-main">{{ b.customer_name }} &middot; {{ b.car.name }}</span>
+    <span class="bk-sub">{% if when == 'pickup' %}Pick-up {{ b.pickup_time|time:"H:i" }}{% if b.pickup_point %}, {{ b.pickup_point.name }}{% endif %}{% elif when == 'return' %}Return {{ b.return_time|time:"H:i" }}{% if b.is_one_way %}, in {{ b.return_location.name }}{% endif %}{% else %}{{ b.pickup_date|date:"D j M" }} to {{ b.return_date|date:"D j M" }}{% endif %}{% if b.pickup_location and not view_location %} &middot; {{ b.pickup_location.name }}{% endif %} &middot; KES {{ b.amount|intcomma }}</span>
+  </a>
+  <a class="bk-call" href="tel:{{ b.local_phone }}" aria-label="Call {{ b.customer_name }}">Call</a>
+</li>

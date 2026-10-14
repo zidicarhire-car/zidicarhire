@@ -1,0 +1,32 @@
+{% extends "dashboard/base.html" %}
+{% block title %}One-way routes{% endblock %}
+{% block content %}
+<header class="dash-head"><h1>One-way routes</h1><a href="{% url 'dashboard:locations' %}">Branches</a></header>
+
+<section class="panel">
+  <p class="muted">Customers can only return a car to another city on a route listed and offered here. The fee is added to their total.
+    Each direction is its own route, so Nairobi to Mombasa and Mombasa to Nairobi can have different fees. Untick "Offer" to stop a route.
+    Fill in a blank row to add one.</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    {% if formset.non_form_errors %}<p class="form-error">{{ formset.non_form_errors|join:" " }}</p>{% endif %}
+    <div class="table-wrap">
+      <table class="table compact-table">
+        <thead><tr><th>From</th><th>Return to</th><th>One-way fee (KES)</th><th>Offer</th></tr></thead>
+        <tbody>
+          {% for f in formset %}
+          <tr>
+            <td>{{ f.id }}{{ f.from_location }}{% for e in f.from_location.errors %}<small class="form-error">{{ e }}</small>{% endfor %}{% for e in f.non_field_errors %}<small class="form-error">{{ e }}</small>{% endfor %}</td>
+            <td>{{ f.to_location }}{% for e in f.to_location.errors %}<small class="form-error">{{ e }}</small>{% endfor %}</td>
+            <td>{{ f.fee }}{% for e in f.fee.errors %}<small class="form-error">{{ e }}</small>{% endfor %}</td>
+            <td>{{ f.is_active }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p><button class="btn btn-primary" type="submit">Save routes</button></p>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% load humanize %}
+<section class="stats" aria-label="Summary">
+  <div class="stat"><span class="stat-num">KES {{ stats.revenue_today|intcomma }}</span><span class="stat-label">Paid today ({{ stats.paid_today }} booking{{ stats.paid_today|pluralize }})</span></div>
+  <div class="stat"><span class="stat-num">KES {{ stats.revenue_month|intcomma }}</span><span class="stat-label">Paid this month</span></div>
+  <div class="stat"><span class="stat-num">{{ stats.on_the_road }}</span><span class="stat-label">Cars out now</span></div>
+  <div class="stat"><span class="stat-num">{{ stats.awaiting_payment }}</span><span class="stat-label">Waiting for payment</span></div>
+  {% if stats.returning %}<div class="stat"><span class="stat-num">{{ stats.returning }}</span><span class="stat-label">One-way cars to move</span></div>{% endif %}
+</section>
+
+<div class="overview-grid">
+  <section class="panel">
+    <h2>Pick-ups today <span class="count">{{ pickups|length }}</span></h2>
+    {% if pickups %}<ul class="bk-list">{% for b in pickups %}{% include "dashboard/_booking_item.html" with when="pickup" %}{% endfor %}</ul>
+    {% else %}<p class="muted">No pick-ups today.</p>{% endif %}
+  </section>
+  <section class="panel">
+    <h2>Returns today <span class="count">{{ returns|length }}</span></h2>
+    {% if returns %}<ul class="bk-list">{% for b in returns %}{% include "dashboard/_booking_item.html" with when="return" %}{% endfor %}</ul>
+    {% else %}<p class="muted">No returns today.</p>{% endif %}
+  </section>
+  <section class="panel">
+    <h2>Cars out now <span class="count">{{ out|length }}</span></h2>
+    {% if out %}<ul class="bk-list">{% for b in out %}{% include "dashboard/_booking_item.html" %}{% endfor %}</ul>
+    {% else %}<p class="muted">No cars are out right now.</p>{% endif %}
+  </section>
+  <section class="panel">
+    <h2>Waiting for payment <span class="count">{{ awaiting|length }}</span></h2>
+    {% if awaiting %}<ul class="bk-list">{% for b in awaiting %}{% include "dashboard/_booking_item.html" %}{% endfor %}</ul>
+    {% else %}<p class="muted">Nobody is paying right now.</p>{% endif %}
+  </section>
+</div>
+
+<section class="panel">
+  <h2>Latest bookings</h2>
+  {% if latest %}<ul class="bk-list bk-list-wide">{% for b in latest %}{% include "dashboard/_booking_item.html" %}{% endfor %}</ul>
+  <p><a href="{% url 'dashboard:bookings' %}">See all bookings</a></p>
+  {% else %}<p class="muted">No bookings yet. They appear here the moment a customer starts paying.</p>{% endif %}
+</section>

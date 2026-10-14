@@ -1,0 +1,187 @@
+{% extends "dashboard/base.html" %}
+{% load humanize %}
+{% block title %}{{ booking.ref }}{% endblock %}
+{% block content %}
+<header class="dash-head">
+  <div>
+    <p class="crumbs"><a href="{% url 'dashboard:bookings' %}">Bookings</a></p>
+    <h1><span class="plate plate-ref">{{ booking.ref }}</span> <span class="status status-{{ booking.status }}">{{ booking.get_status_display }}</span></h1>
+    <p class="muted">Booked {{ booking.created_at|date:"j M Y, H:i" }}{% if booking.paid_at %} &middot; paid {{ booking.paid_at|date:"j M, H:i" }}{% endif %}</p>
+  </div>
+</header>
+
+<div class="action-bar" role="group" aria-label="Booking actions">
+  {% if allowed.pickup %}
+  <form method="post" data-confirm="Mark {{ booking.car.name }} as picked up by {{ booking.customer_name }}?" data-confirm-yes="Yes, mark picked up">{% csrf_token %}
+    <input type="hidden" name="action" value="pickup"><button class="btn btn-primary btn-sm" type="submit">Mark picked up</button>
+  </form>
+  {% endif %}
+  {% if allowed.return %}
+  <form method="post" data-confirm="Mark {{ booking.car.name }} as returned? It becomes free to book again from today." data-confirm-yes="Yes, mark returned">{% csrf_token %}
+    <input type="hidden" name="action" value="return"><button class="btn btn-primary btn-sm" type="submit">Mark returned</button>
+  </form>
+  {% endif %}
+  {% if allowed.relocate %}
+  <form method="post" data-confirm="Has {{ booking.car.name }} arrived in {{ booking.return_location.name }}? It will be listed there from now on." data-confirm-yes="Yes, move the car">{% csrf_token %}
+    <input type="hidden" name="action" value="relocate"><button class="btn btn-ghost btn-sm" type="submit">Car arrived in {{ booking.return_location.name }}</button>
+  </form>
+  {% endif %}
+  {% if allowed.mark_paid %}<button type="button" class="btn btn-ghost btn-sm" data-open-dialog="dlg-paid">Mark paid manually</button>{% endif %}
+  {% if allowed.dates %}<button type="button" class="btn btn-ghost btn-sm" data-open-dialog="dlg-dates">Change dates</button>{% endif %}
+  {% if allowed.resend %}
+  <form method="post" data-confirm="Send the confirmation and receipt again to {{ booking.email }}?" data-confirm-yes="Yes, send it">{% csrf_token %}
+    <input type="hidden" name="action" value="resend"><button class="btn btn-ghost btn-sm" type="submit">Resend confirmation email</button>
+  </form>
+  {% endif %}
+  {% if allowed.receipt %}<a class="btn btn-ghost btn-sm" href="{% url 'dashboard:booking_receipt' booking.ref %}">Download receipt</a>{% endif %}
+  {% if allowed.cancel %}<button type="button" class="btn btn-danger btn-sm" data-open-dialog="dlg-cancel">Cancel booking</button>{% endif %}
+</div>
+
+<div class="detail-grid">
+  <section class="panel">
+    <h2>Customer</h2>
+    <dl class="facts">
+      <div><dt>Name</dt><dd>{{ booking.customer_name }}</dd></div>
+      <div><dt>Phone</dt><dd><a href="tel:{{ booking.local_phone }}">{{ booking.local_phone }}</a>{% if booking.whatsapp_link %} &middot; <a href="{{ booking.whatsapp_link }}" target="_blank" rel="noopener">WhatsApp</a>{% endif %}</dd></div>
+      <div><dt>Email</dt><dd>{% if booking.email %}<a href="mailto:{{ booking.email }}">{{ booking.email }}</a>{% else %}<span class="muted">Not given</span>{% endif %}</dd></div>
+      <div><dt>ID or passport</dt><dd>{{ booking.id_number|default:"Not given" }}</dd></div>
+      <div><dt>Driving licence</dt><dd>{{ booking.licence_number|default:"Not given" }}</dd></div>
+    </dl>
+  </section>
+
+  <section class="panel">
+    <h2>Car and dates</h2>
+    <dl class="facts">
+      <div><dt>Car</dt><dd>{{ booking.car.name }}</dd></div>
+      <div><dt>Pick-up</dt><dd>{{ booking.pickup_date|date:"D j M Y" }}, {{ booking.pickup_time|time:"H:i" }}<br>{% if booking.pickup_point %}{{ booking.pickup_point.name }}, {% endif %}{{ booking.pickup_location.name }}</dd></div>
+      <div><dt>Return</dt><dd>{{ booking.return_date|date:"D j M Y" }}, {{ booking.return_time|time:"H:i" }}<br>{{ booking.return_location.name|default:booking.pickup_location.name }}{% if booking.is_one_way %} <span class="one-way">(one-way{% if booking.awaiting_relocation %}, car not moved yet{% endif %})</span>{% endif %}</dd></div>
+      <div><dt>Length</dt><dd>{{ booking.days }} day{{ booking.days|pluralize }}</dd></div>
+      {% if booking.notes %}<div><dt>Customer notes</dt><dd>{{ booking.notes|linebreaksbr }}</dd></div>{% endif %}
+    </dl>
+  </section>
+
+  <section class="panel">
+    <h2>Price</h2>
+    <dl class="facts">
+      {% for line in booking.price_lines %}
+      <div{% if line.total %} class="facts-total"{% endif %}><dt>{{ line.label }}</dt><dd>KES {{ line.amount|intcomma }}</dd></div>
+      {% endfor %}
+      <div><dt>Paid</dt><dd>KES {{ booking.amount_paid|intcomma }}{% if booking.mpesa_receipt %} ({{ booking.mpesa_receipt }}){% endif %}</dd></div>
+      {% if booking.balance > 0 %}<div class="facts-warn"><dt>Customer still owes</dt><dd>KES {{ booking.balance|intcomma }}</dd></div>
+      {% elif booking.balance < 0 %}<div class="facts-warn"><dt>Refund due to customer</dt><dd>KES {{ booking.balance_abs|intcomma }}</dd></div>{% endif %}
+    </dl>
+  </section>
+
+  <section class="panel">
+    <h2>M-Pesa payment attempts <span class="count">{{ booking.payments.all|length }}</span></h2>
+    {% if booking.payments.all %}
+    <ul class="attempts">
+      {% for p in booking.payments.all %}
+      <li>
+        <span class="status status-{% if p.status == 'success' %}paid{% elif p.status == 'pending' %}pending{% else %}failed{% endif %}">{{ p.get_status_display }}</span>
+        <span>KES {{ p.amount|intcomma }} to {{ p.masked_phone }} &middot; {{ p.created_at|date:"j M, H:i:s" }}</span>
+        {% if p.mpesa_receipt %}<small>M-Pesa receipt {{ p.mpesa_receipt }}</small>{% endif %}
+        {% if p.result_desc %}<small>{{ p.result_desc }}{% if p.result_code %} (code {{ p.result_code }}){% endif %}</small>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="muted">No M-Pesa prompts were sent for this booking.</p>{% endif %}
+  </section>
+</div>
+
+<section class="panel">
+  <h2>Timeline and notes</h2>
+  <form method="post" class="note-form">{% csrf_token %}
+    <input type="hidden" name="action" value="note">
+    <label for="note">Add an internal note <span class="optional">(only staff see this)</span></label>
+    <textarea id="note" name="note" rows="2" maxlength="2000" placeholder="e.g. Customer asked for delivery to Westlands at 9am"></textarea>
+    <button class="btn btn-ghost btn-sm" type="submit">Add note</button>
+  </form>
+  <ol class="timeline">
+    {% for e in booking.events.all %}
+    <li class="tl-{{ e.kind }}">
+      <span class="tl-when">{{ e.created_at|date:"j M, H:i" }}</span>
+      <span class="tl-what"><strong>{{ e.get_kind_display }}</strong> &middot; {{ e.who }}{% if e.message %}<br>{{ e.message|linebreaksbr }}{% endif %}</span>
+    </li>
+    {% empty %}
+    <li class="muted">Nothing recorded yet.</li>
+    {% endfor %}
+  </ol>
+</section>
+
+{# ---------- Dialogs ---------- #}
+{% if allowed.cancel %}
+<dialog class="modal dash-dialog" id="dlg-cancel" aria-labelledby="dlg-cancel-title">
+  <form method="post">{% csrf_token %}
+    <input type="hidden" name="action" value="cancel">
+    <h2 id="dlg-cancel-title">Cancel {{ booking.ref }}?</h2>
+    {% if booking.is_paid %}<p class="alert alert-warning">The customer paid KES {{ booking.amount_paid|intcomma }}. Cancelling does not refund M-Pesa: send any refund from your till by hand.</p>{% endif %}
+    <label for="reason">Why is it cancelled?</label>
+    <textarea id="reason" name="reason" rows="3" required minlength="3" maxlength="500" placeholder="e.g. Customer changed plans, refund sent by M-Pesa"></textarea>
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-ghost" data-close-dialog>Keep the booking</button>
+      <button type="submit" class="btn btn-danger">Cancel booking</button>
+    </div>
+  </form>
+</dialog>
+{% endif %}
+
+{% if allowed.mark_paid %}
+<dialog class="modal dash-dialog" id="dlg-paid" aria-labelledby="dlg-paid-title">
+  <form method="post">{% csrf_token %}
+    <input type="hidden" name="action" value="mark_paid">
+    <h2 id="dlg-paid-title">Mark {{ booking.ref }} as paid</h2>
+    <p>Only do this after you see the KES {{ booking.amount|intcomma }} payment on your till statement.</p>
+    <label for="code">M-Pesa code</label>
+    <input id="code" name="code" required pattern="[A-Za-z0-9]{8,12}" maxlength="12" autocapitalize="characters" placeholder="SJK1ABC2DE">
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-ghost" data-close-dialog>Go back</button>
+      <button type="submit" class="btn btn-primary">Mark as paid</button>
+    </div>
+  </form>
+</dialog>
+{% endif %}
+
+{% if allowed.dates %}
+<dialog class="modal dash-dialog" id="dlg-dates" aria-labelledby="dlg-dates-title"{% if open_dates %} data-open-on-load{% endif %}>
+  <form method="post">{% csrf_token %}
+    <h2 id="dlg-dates-title">Change dates for {{ booking.ref }}</h2>
+    <div class="form-grid">
+      <label>Pick-up date<input type="date" name="pickup_date" value="{{ dates.pickup_date }}" required></label>
+      <label>Pick-up time<select name="pickup_time">{% for t in time_choices %}<option{% if t == dates.pickup_time %} selected{% endif %}>{{ t }}</option>{% endfor %}</select></label>
+      <label>Return date<input type="date" name="return_date" value="{{ dates.return_date }}" required></label>
+      <label>Return time<select name="return_time">{% for t in time_choices %}<option{% if t == dates.return_time %} selected{% endif %}>{{ t }}</option>{% endfor %}</select></label>
+    </div>
+    {% if date_error %}<p class="form-error" role="alert">{{ date_error }}</p>{% endif %}
+    {% if preview %}
+    <div class="preview-box" role="status">
+      <p><strong>{{ booking.car.name }} is free on those dates.</strong></p>
+      <dl class="facts">
+        <div><dt>New length</dt><dd>{{ preview.days }} day{{ preview.days|pluralize }} at KES {{ preview.daily_rate|intcomma }}</dd></div>
+        <div><dt>Old total</dt><dd>KES {{ preview.old_total|intcomma }}</dd></div>
+        <div class="facts-total"><dt>New total</dt><dd>KES {{ preview.total|intcomma }}</dd></div>
+        {% if booking.is_paid %}
+        <div class="facts-warn"><dt>{% if preview.difference > 0 %}Customer owes{% elif preview.difference < 0 %}Refund to customer{% else %}Difference{% endif %}</dt>
+          <dd>KES {{ preview.difference_abs|intcomma }}</dd></div>
+        {% endif %}
+      </dl>
+      <p class="fine">Collect or refund the difference by M-Pesa yourself. The booking keeps a record of it.</p>
+    </div>
+    {% endif %}
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-ghost" data-close-dialog>Go back</button>
+      <button type="submit" name="action" value="preview_dates" class="btn btn-ghost">Check dates and price</button>
+      {% if preview %}<button type="submit" name="action" value="change_dates" class="btn btn-primary">Change to these dates</button>{% endif %}
+    </div>
+  </form>
+</dialog>
+{% endif %}
+
+<dialog class="modal dash-dialog" id="confirm-dialog" aria-labelledby="confirm-text">
+  <p id="confirm-text"></p>
+  <div class="dialog-actions">
+    <button type="button" class="btn btn-ghost" data-close-dialog>Go back</button>
+    <button type="button" class="btn btn-primary" id="confirm-yes">Yes</button>
+  </div>
+</dialog>
+{% endblock %}

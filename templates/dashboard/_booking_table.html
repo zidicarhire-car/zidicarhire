@@ -1,0 +1,29 @@
+{% load humanize %}
+<p class="muted small">{{ total }} booking{{ total|pluralize }}{% if page.paginator.num_pages > 1 %}, page {{ page.number }} of {{ page.paginator.num_pages }}{% endif %}</p>
+<div class="table-wrap">
+  <table class="table wide-table responsive-table">
+    <thead>
+      <tr><th scope="col">Booking</th><th scope="col">Customer</th><th scope="col">Car and dates</th><th scope="col">Amount</th><th scope="col">Status</th></tr>
+    </thead>
+    <tbody>
+      {% for b in page %}
+      <tr class="row-{{ b.status }}">
+        <td data-label="Booking"><a class="mono-ref" href="{% url 'dashboard:booking_detail' b.ref %}"><strong>{{ b.ref }}</strong></a><small>{{ b.created_at|date:"j M, H:i" }}</small></td>
+        <td data-label="Customer">{{ b.customer_name }}<small><a href="tel:{{ b.local_phone }}">{{ b.local_phone }}</a></small></td>
+        <td data-label="Car and dates">{{ b.car.name }}<small>{{ b.pickup_date|date:"D j M" }} {{ b.pickup_time|time:"H:i" }} to {{ b.return_date|date:"D j M" }} ({{ b.days }}d){% if b.pickup_location %}<br>{{ b.pickup_location.name }}{% if b.pickup_point %}: {{ b.pickup_point.name }}{% endif %}{% endif %}{% if b.is_one_way %}<br><span class="one-way">{% if b.awaiting_relocation %}Returning{% else %}One-way{% endif %} to {{ b.return_location.name }}</span>{% endif %}</small></td>
+        <td data-label="Amount">KES {{ b.amount|intcomma }}{% if b.mpesa_receipt %}<small>{{ b.mpesa_receipt }}</small>{% endif %}</td>
+        <td data-label="Status"><span class="status status-{{ b.status }}">{{ b.get_status_display }}</span>{% if b.status == 'failed' and b.result_desc %}<small>{{ b.result_desc|truncatechars:80 }}</small>{% endif %}</td>
+      </tr>
+      {% empty %}
+      <tr class="empty-row"><td colspan="5">No bookings match. Change the filters, or clear them to see everything.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if page.paginator.num_pages > 1 %}
+<nav class="pager" aria-label="Pages">
+  {% if page.has_previous %}<a class="btn btn-ghost btn-sm" href="?{{ query }}{% if query %}&amp;{% endif %}page={{ page.previous_page_number }}">Previous page</a>{% endif %}
+  <span class="muted">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+  {% if page.has_next %}<a class="btn btn-ghost btn-sm" href="?{{ query }}{% if query %}&amp;{% endif %}page={{ page.next_page_number }}">Next page</a>{% endif %}
+</nav>
+{% endif %}

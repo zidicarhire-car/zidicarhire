@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Find my booking | {{ business.name }}{% endblock %}
+{% block meta_description %}Check your {{ business.name }} car hire booking and download your receipt with your booking number and phone number.{% endblock %}
+
+{% block content %}
+<section class="receipt-page">
+  <div class="wrap narrow">
+    <h1>Find my booking</h1>
+    <p>Enter your booking number and the M-Pesa phone number you paid with to see your booking and download your receipt.</p>
+    <form method="post" class="panel-form" novalidate>
+      {% csrf_token %}
+      <label>Booking number
+        <input name="ref" value="{{ ref }}" placeholder="ZCH1A2B3C4D" autocomplete="off" autocapitalize="characters" required maxlength="20" aria-describedby="find-hint">
+        <span class="field-hint" id="find-hint">It starts with ZCH and is in your confirmation email and SMS.</span>
+      </label>
+      <label>M-Pesa phone number
+        <input name="phone" type="tel" inputmode="tel" value="{{ phone }}" placeholder="0712 345 678" autocomplete="tel" required>
+      </label>
+      {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+      <button class="btn btn-primary" type="submit">Find my booking</button>
+    </form>
+    <p class="fine">Can't find it? <button type="button" class="linklike" data-open-chat>Chat with us</button> or call <a href="tel:{{ business.phone }}">{{ business.phone }}</a>.</p>
+  </div>
+</section>
+{% endblock %}

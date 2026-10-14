@@ -1,0 +1,38 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Edit {{ loc.name }}{% endblock %}
+{% block content %}
+<header class="dash-head"><h1>{{ loc.name }} branch</h1><a href="{% url 'dashboard:locations' %}">Back to all branches</a></header>
+
+<form method="post" class="car-form">
+  {% csrf_token %}
+  <div class="cars-layout">
+    <section class="panel">
+      <h2>Branch details and city page</h2>
+      {% include "dashboard/_form.html" %}
+    </section>
+
+    <section class="panel">
+      <h2>Pick-up points</h2>
+      <p class="muted small">Customers choose one when they book. The fee is added to their total. Untick "Offer" to hide a point. Fill in a blank row to add one.</p>
+      {{ points.management_form }}
+      {% if points.non_form_errors %}<p class="form-error">{{ points.non_form_errors|join:" " }}</p>{% endif %}
+      <div class="table-wrap">
+        <table class="table compact-table">
+          <thead><tr><th>Name</th><th>Fee (KES)</th><th>Order</th><th>Offer</th></tr></thead>
+          <tbody>
+            {% for f in points %}
+            <tr>
+              <td>{{ f.id }}{{ f.name }}{% for e in f.name.errors %}<small class="form-error">{{ e }}</small>{% endfor %}{% for e in f.non_field_errors %}<small class="form-error">{{ e }}</small>{% endfor %}</td>
+              <td>{{ f.fee }}{% for e in f.fee.errors %}<small class="form-error">{{ e }}</small>{% endfor %}</td>
+              <td>{{ f.display_order }}</td>
+              <td>{{ f.is_active }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <p><button class="btn btn-primary" type="submit">Save branch</button></p>
+</form>
+{% endblock %}

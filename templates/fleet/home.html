@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static humanize %}
+
+{% block head %}
+<link rel="canonical" href="{{ site_url }}{% url 'fleet:home' %}">
+{% if jsonld %}<script type="application/ld+json">{{ jsonld }}</script>{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="wrap">
+    <h1 class="hero-title">Car hire across Kenya. Pay with M-Pesa.</h1>
+    <p class="hero-sub">{% if locations %}Branches in {% for loc in locations %}{% if not forloop.first %}{% if forloop.last %} and {% else %}, {% endif %}{% endif %}{{ loc.name }}{% endfor %}. {% endif %}Choose your city and dates, pick a car, and approve the M-Pesa prompt on your phone. You're booked the moment you pay.</p>
+    {% include "fleet/_search.html" %}
+  </div>
+</section>
+
+<section class="fleet" id="cars">
+  <div class="wrap">
+    {% if location %}
+    <div class="fleet-head">
+      <h2>Cars in {{ location.name }}</h2>
+      <p>Prices for {{ start|date:"D j M" }} to {{ end|date:"D j M" }} ({{ days }} day{{ days|pluralize }}). Airport and delivery pick-ups are added when you book.</p>
+    </div>
+    {% if suggestions or not cars %}{% include "fleet/_no_cars.html" %}{% endif %}
+    {% if featured %}
+    <ul class="car-grid" id="car-grid" data-from="{{ start|date:'Y-m-d' }}" data-to="{{ end|date:'Y-m-d' }}" data-city="{{ location.slug }}">
+      {% for car in featured %}{% include "fleet/_car_card.html" %}{% endfor %}
+    </ul>
+    {% if cars|length > featured|length %}
+    <p class="more-link"><a class="btn btn-ghost" href="{% url 'fleet:cars' %}?city={{ location.slug }}&amp;from={{ start|date:'Y-m-d' }}&amp;to={{ end|date:'Y-m-d' }}">See all {{ cars|length }} cars in {{ location.name }}</a></p>
+    {% endif %}
+    {% endif %}
+    {% else %}
+    <div class="empty"><h3>We're getting our branches ready</h3><p>Chat with us and we'll find you a car.</p>
+      <button type="button" class="btn btn-primary" data-open-chat>Chat with us</button></div>
+    {% endif %}
+  </div>
+</section>
+
+{% include "fleet/_how.html" %}
+
+<section class="why" id="why">
+  <div class="wrap">
+    <h2>Why book with us</h2>
+    <ul class="why-grid">
+      <li><h3>Confirmed in seconds</h3><p>Approve the M-Pesa prompt and your car is booked. Your receipt comes by email and you can download it any time.</p></li>
+      <li><h3>Collect where it suits you</h3><p>Pick up at our branch, the airport or your hotel. Any pick-up fee is shown before you pay.</p></li>
+      <li><h3>The price you see is the price you pay</h3><p>Every fee you choose is in the total before you pay. Hires of a week or more often cost less per day.</p></li>
+      <li><h3>Branches across Kenya</h3><p>Hire in {% for loc in locations %}{% if not forloop.first %}{% if forloop.last %} or {% else %}, {% endif %}{% endif %}{{ loc.name }}{% empty %}our branch{% endfor %}, and return to another city on set routes.</p></li>
+      <li><h3>Talk to a real person</h3><p>Use the chat on this page{% if business.whatsapp %} or WhatsApp us{% endif %}. We usually reply within a few minutes.</p></li>
+    </ul>
+  </div>
+</section>
+
+{% if locations %}{% include "fleet/_branches.html" %}{% endif %}
+
+<section class="faq-home" id="faq">
+  <div class="wrap narrow">
+    <h2>Questions</h2>
+    {% include "pages/_faq_list.html" with home_only=True %}
+    <p><a href="{% url 'pages:faq' %}">See all questions</a></p>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap cta-inner">
+    <h2>Need a car this week?</h2>
+    <p>See which cars are free for your dates and book in a couple of minutes.</p>
+    <a class="btn btn-plate" href="{% url 'fleet:cars' %}{% if location %}?city={{ location.slug }}{% endif %}">See available cars</a>
+  </div>
+</section>
+
+{% if location %}{% include "fleet/_booking_dialog.html" %}{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/search.js' %}"></script>
+<script src="{% static 'js/rangecal.js' %}"></script>
+<script src="{% static 'js/booking.js' %}"></script>
+{% endblock %}

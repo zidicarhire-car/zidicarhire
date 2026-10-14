@@ -1,0 +1,19 @@
+<section class="branches" id="branches">
+  <div class="wrap">
+    <h2>Our branches</h2>
+    <p class="muted">Collect your car from a branch office, the airport or your hotel. Each branch has its own cars and prices.</p>
+    <ul class="branch-grid">
+      {% for branch in locations %}
+      <li class="branch">
+        <h3>{{ branch.name }}</h3>
+        <dl>
+          <div><dt>Address</dt><dd>{% if branch.address %}{{ branch.address }}{% else %}{{ branch.city }}{% if branch.county and branch.county != branch.city %}, {{ branch.county }} County{% endif %}{% endif %}{% if branch.maps_url %}<br><a href="{{ branch.maps_url }}" target="_blank" rel="noopener">Open in Google Maps</a>{% endif %}</dd></div>
+          {% if branch.opening_hours %}<div><dt>Hours</dt><dd>{{ branch.opening_hours }}</dd></div>{% endif %}
+          <div><dt>Phone</dt><dd><a href="tel:{{ branch.contact_phone }}">{{ branch.contact_phone }}</a>{% if branch.whatsapp_link %}<br><a href="{{ branch.whatsapp_link }}" target="_blank" rel="noopener">WhatsApp</a>{% endif %}</dd></div>
+        </dl>
+        <a class="btn btn-primary btn-sm" href="{{ branch.get_absolute_url }}">See cars in {{ branch.name }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>

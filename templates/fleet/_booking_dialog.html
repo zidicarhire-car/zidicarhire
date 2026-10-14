@@ -1,0 +1,187 @@
+{% load humanize %}
+<dialog class="modal modal-sheet modal-full booking-dialog" id="booking-dialog" aria-labelledby="bd-title"
+  data-create-url="{% url 'bookings:create' %}" data-quote-url="{% url 'bookings:quote' %}"
+  data-from="{{ start|date:'Y-m-d' }}" data-to="{{ end|date:'Y-m-d' }}" data-preselect="{{ preselect_dates|yesno:'1,0' }}"
+  data-today="{{ today|date:'Y-m-d' }}" data-min-days="{{ min_days }}" data-max-days="{{ max_days }}"
+  data-prompt-seconds="{{ prompt_seconds }}" data-city="{{ location.slug }}">
+  <header class="bd-head">
+    <div class="bd-head-text">
+      <h2 id="bd-title">Book <span data-fill="car"></span></h2>
+      <p class="bd-sub"><span data-fill="city"></span> &middot; <span data-fill="price"></span> per day</p>
+    </div>
+    <button type="button" class="icon-btn dialog-close" data-close aria-label="Close booking">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <ol class="bd-progress" aria-label="Booking steps">
+      <li data-progress="dates"><span class="bd-progress-num">1</span> Dates</li>
+      <li data-progress="details"><span class="bd-progress-num">2</span> Your details</li>
+      <li data-progress="pay"><span class="bd-progress-num">3</span> Pay</li>
+      <li data-progress="done"><span class="bd-progress-num">4</span> Confirmed</li>
+    </ol>
+  </header>
+
+  <div class="bd-body">
+    {# ---------- Step 1: dates ---------- #}
+    <section class="bd-step" data-step="dates" data-progress-step="dates" aria-labelledby="bd-dates-title">
+      <h3 id="bd-dates-title" class="bd-step-title">When do you need the car?</h3>
+      <div class="rangecal" id="rangecal" aria-describedby="bd-range"></div>
+      <p class="bd-range" id="bd-range" aria-live="polite" data-fill="range">Tap your pick-up date, then your return date.</p>
+      <p class="form-error" data-error="dates" role="alert"></p>
+
+      <div class="quick-picks" role="group" aria-label="Quick picks">
+        <button type="button" class="chip" data-quick="1">1 day</button>
+        <button type="button" class="chip" data-quick="3">3 days</button>
+        <button type="button" class="chip" data-quick="7">1 week</button>
+        <button type="button" class="chip" data-quick="14">2 weeks</button>
+        <button type="button" class="chip" data-quick="30">1 month</button>
+      </div>
+
+      <form id="dates-form" class="bd-form" novalidate>
+        <div class="bd-grid2">
+          <label>Pick-up time
+            <select name="pickup_time">
+              {% for t in time_choices %}<option value="{{ t|time:'H:i' }}"{% if t == default_time %} selected{% endif %}>{{ t|time:'H:i' }}</option>{% endfor %}
+            </select>
+          </label>
+          <label>Return time
+            <select name="return_time">
+              {% for t in time_choices %}<option value="{{ t|time:'H:i' }}"{% if t == default_time %} selected{% endif %}>{{ t|time:'H:i' }}</option>{% endfor %}
+            </select>
+          </label>
+        </div>
+        <div class="bd-grid2">
+          {% if pickup_points %}
+          <label>Pick-up point
+            <select name="pickup_point">
+              {% for point in pickup_points %}
+              <option value="{{ point.pk }}">{{ point.name }}{% if point.fee %} (+KES {{ point.fee|intcomma }}){% else %} (free){% endif %}</option>
+              {% endfor %}
+            </select>
+          </label>
+          {% endif %}
+          <label>Return the car to
+            <select name="return_location">
+              <option value="">{{ location.name }} (same city)</option>
+              {% for route in routes %}
+              <option value="{{ route.to_location.slug }}"{% if route == return_route %} selected{% endif %}>{{ route.to_location.name }} (one-way, +KES {{ route.fee|intcomma }})</option>
+              {% endfor %}
+            </select>
+          </label>
+        </div>
+        {% if extras %}
+        <fieldset class="bd-extras">
+          <legend>Extras <span class="optional">(optional)</span></legend>
+          {% for extra in extras %}
+          <label class="check"><input type="checkbox" name="extras" value="{{ extra.pk }}">
+            <span>{{ extra.name }} <span class="muted">KES {{ extra.price|intcomma }}{% if extra.per_day %} per day{% endif %}</span>{% if extra.description %}<small class="muted">{{ extra.description }}</small>{% endif %}</span>
+          </label>
+          {% endfor %}
+        </fieldset>
+        {% endif %}
+      </form>
+
+      <div class="bd-summary-box">
+        <dl class="bd-breakdown" data-breakdown aria-live="polite"></dl>
+        <p class="fine">Every started 24 hours counts as a day, so returning later than your pick-up time adds a day.</p>
+      </div>
+      <div class="bd-actions">
+        <button type="button" class="btn btn-primary btn-block" data-next="details" disabled>Continue to your details</button>
+      </div>
+    </section>
+
+    {# ---------- Step 2: details ---------- #}
+    <section class="bd-step" data-step="details" data-progress-step="details" hidden aria-labelledby="bd-details-title">
+      <h3 id="bd-details-title" class="bd-step-title">Your details</h3>
+      <form id="details-form" class="bd-form" novalidate>
+        <label>Full name
+          <input name="name" autocomplete="name" required maxlength="120" aria-describedby="err-name">
+          <span class="field-error" id="err-name"></span>
+        </label>
+        <label>M-Pesa phone number
+          <input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="0712 345 678" required aria-describedby="hint-phone err-phone">
+          <span class="field-hint" id="hint-phone">We'll send the payment prompt here. 07…, 01… or +254… all work.</span>
+          <span class="field-error" id="err-phone"></span>
+        </label>
+        <label>Email <span class="optional">(optional, for your receipt)</span>
+          <input name="email" type="email" autocomplete="email" maxlength="254" aria-describedby="err-email">
+          <span class="field-error" id="err-email"></span>
+        </label>
+        <div class="bd-grid2">
+          <label>National ID or passport number
+            <input name="id_number" autocomplete="off" required maxlength="20" aria-describedby="err-id_number">
+            <span class="field-error" id="err-id_number"></span>
+          </label>
+          <label>Driving licence number
+            <input name="licence_number" autocomplete="off" required maxlength="20" aria-describedby="err-licence_number">
+            <span class="field-error" id="err-licence_number"></span>
+          </label>
+        </div>
+        <label>Pick-up notes <span class="optional">(optional)</span>
+          <textarea name="notes" rows="2" maxlength="500" placeholder="Flight number, hotel or delivery address"></textarea>
+        </label>
+        <p class="fine">Bring your ID or passport and driving licence when you collect the car.</p>
+      </form>
+      <p class="form-error" data-error="details" role="alert"></p>
+      <div class="bd-actions bd-actions-split">
+        <button type="button" class="btn btn-ghost" data-back="dates">Back to dates</button>
+        <button type="button" class="btn btn-primary" data-next="pay">Continue to payment</button>
+      </div>
+    </section>
+
+    {# ---------- Step 3: pay ---------- #}
+    <section class="bd-step" data-step="pay" data-progress-step="pay" hidden aria-labelledby="bd-pay-title">
+      <h3 id="bd-pay-title" class="bd-step-title">Check and pay</h3>
+      <dl class="bd-facts">
+        <div><dt>Car</dt><dd data-fill="car"></dd></div>
+        <div><dt>Pick-up</dt><dd data-fill="pickup"></dd></div>
+        <div><dt>Return</dt><dd data-fill="return"></dd></div>
+        <div><dt>M-Pesa number</dt><dd data-fill="phone-entered"></dd></div>
+      </dl>
+      <div class="bd-summary-box"><dl class="bd-breakdown" data-breakdown></dl></div>
+      <p class="form-error" data-error="pay" role="alert"></p>
+      <button type="button" class="btn btn-mpesa btn-block btn-pay" data-action="pay">Pay with M-Pesa</button>
+      <p class="fine">We'll send a payment prompt to your phone. The car is held for you while you pay.</p>
+      <div class="bd-actions"><button type="button" class="btn btn-ghost" data-back="details">Back to your details</button></div>
+    </section>
+
+    <section class="bd-step bd-center" data-step="waiting" data-progress-step="pay" hidden aria-labelledby="bd-wait-title">
+      <div class="phone-pulse" aria-hidden="true"></div>
+      <h3 id="bd-wait-title" class="bd-step-title">Check your phone and enter your M-Pesa PIN</h3>
+      <p>We sent a prompt for <strong data-fill="total"></strong> to <strong data-fill="phone"></strong>{% if business.till_name %}. It will show <strong>{{ business.till_name }}</strong>{% if business.till_number %} (till {{ business.till_number }}){% endif %}{% endif %}.</p>
+      <p class="countdown" aria-hidden="true">The prompt expires in <strong data-fill="countdown"></strong></p>
+      <p class="fine" aria-live="polite" data-fill="wait-note">Waiting for your payment&hellip;</p>
+      <button type="button" class="btn btn-ghost" data-action="resend" hidden>Send the prompt again</button>
+    </section>
+
+    <section class="bd-step bd-center" data-step="failed" data-progress-step="pay" hidden aria-labelledby="bd-fail-title">
+      <h3 id="bd-fail-title" class="bd-step-title">Payment didn't go through</h3>
+      <p data-fill="fail-reason">The M-Pesa payment was cancelled or timed out.</p>
+      <p class="form-error" data-error="failed" role="alert"></p>
+      <button type="button" class="btn btn-mpesa btn-block" data-action="resend">Send a new M-Pesa prompt</button>
+      <button type="button" class="btn btn-ghost btn-block" data-back="details">Change my details</button>
+    </section>
+
+    {# ---------- Step 4: confirmed ---------- #}
+    <section class="bd-step bd-center" data-step="paid" data-progress-step="done" hidden aria-labelledby="bd-paid-title">
+      <div class="tick" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="40" height="40"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h3 id="bd-paid-title" class="bd-step-title bd-big">You're booked</h3>
+      <p class="plate plate-ref" data-fill="ref"></p>
+      <p>M-Pesa receipt <strong data-fill="receipt"></strong></p>
+      <dl class="bd-facts">
+        <div><dt>Car</dt><dd data-fill="car"></dd></div>
+        <div><dt>Pick-up</dt><dd data-fill="pickup-done"></dd></div>
+        <div><dt>Return</dt><dd data-fill="return-done"></dd></div>
+        <div><dt>Paid</dt><dd data-fill="total"></dd></div>
+      </dl>
+      <p class="fine">Keep your booking number. We'll call you to confirm pick-up. Bring your ID and driving licence.</p>
+      <div class="bd-done-actions">
+        <a class="btn btn-primary btn-block" data-link="receipt_url" hidden>Download receipt (PDF)</a>
+        <a class="btn btn-ghost btn-block" data-link="ics_url" hidden>Add to calendar (.ics)</a>
+        <button type="button" class="btn btn-ghost btn-block" data-open-chat>Chat with us</button>
+        <a class="link-quiet" data-link="detail_url" hidden>View booking details</a>
+      </div>
+    </section>
+  </div>
+</dialog>

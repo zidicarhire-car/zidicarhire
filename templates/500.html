@@ -1,0 +1,31 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Something went wrong | ZidiCarHire</title>
+  <link rel="icon" href="{% static 'img/zidicarhire-favicon.svg' %}" type="image/svg+xml">
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="/"><img class="brand-logo" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire" width="160" height="40"></a>
+    </div>
+  </header>
+  <main id="main">
+    <section class="page error-page">
+      <div class="wrap narrow">
+        <p class="plate plate-ref" aria-hidden="true">500</p>
+        <h1>Something went wrong on our side</h1>
+        <p class="lead">Sorry about that. Wait a minute and try again. If you were paying, don't pay twice: check your M-Pesa messages first, then use <a href="/bookings/find/">Find my booking</a> to see whether your booking went through.</p>
+        <p class="error-actions"><a class="btn btn-primary" href="/">Go to the home page</a></p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

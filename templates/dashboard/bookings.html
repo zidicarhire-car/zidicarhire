@@ -1,0 +1,54 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Bookings{% endblock %}
+{% block content %}
+<header class="dash-head">
+  <h1>Bookings {% if filter_city %}in {{ filter_city.name }}{% elif staff_location %}in {{ staff_location.name }}{% endif %}</h1>
+  <p class="live-note"><span class="live-dot" aria-hidden="true"></span> Updates live.</p>
+</header>
+
+<form class="filter-bar" method="get" role="search" aria-label="Search and filter bookings">
+  <label class="fb-search">Search
+    <input type="search" name="q" value="{{ filters.q|default:'' }}" placeholder="Booking number, name, phone or M-Pesa code">
+  </label>
+  <label>Status
+    <select name="status">
+      <option value="">All statuses</option>
+      {% for value, label in statuses %}<option value="{{ value }}"{% if filters.status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>Car
+    <select name="car">
+      <option value="">All cars</option>
+      {% for car in cars %}<option value="{{ car.pk }}"{% if filters.car == car.pk|stringformat:"s" %} selected{% endif %}>{{ car.name }}{% if is_owner %} ({{ car.location.name }}){% endif %}</option>{% endfor %}
+    </select>
+  </label>
+  {% if is_owner %}
+  <label>City
+    <select name="city">
+      <option value="">All of Kenya</option>
+      {% for loc in all_locations %}<option value="{{ loc.slug }}"{% if filter_city == loc %} selected{% endif %}>{{ loc.name }}</option>{% endfor %}
+    </select>
+  </label>
+  {% endif %}
+  <label>Hire dates from
+    <input type="date" name="from" value="{{ filters.from|default:'' }}">
+  </label>
+  <label>to
+    <input type="date" name="to" value="{{ filters.to|default:'' }}">
+  </label>
+  <label>Sort
+    <select name="sort">
+      {% for value, label in sorts %}<option value="{{ value }}"{% if sort == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </label>
+  <div class="fb-actions">
+    <button class="btn btn-primary btn-sm" type="submit">Show bookings</button>
+    <a class="btn btn-ghost btn-sm" href="{% url 'dashboard:bookings' %}">Clear filters</a>
+    <a class="btn btn-ghost btn-sm" href="?{{ query }}{% if query %}&amp;{% endif %}export=csv">Download CSV</a>
+  </div>
+</form>
+
+<div data-live>
+  {% include "dashboard/_booking_table.html" %}
+</div>
+{% endblock %}
