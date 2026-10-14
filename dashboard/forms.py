@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 
 from fleet.models import Car, Location, OneWayRoute, PickupPoint
 
@@ -9,13 +10,14 @@ class CarForm(forms.ModelForm):
 
     class Meta:
         model = Car
-        fields = ['name', 'location', 'category', 'transmission', 'fuel', 'seats', 'doors', 'luggage', 'engine_size',
-                  'air_con', 'price_per_day', 'weekly_rate', 'monthly_rate', 'units', 'description', 'features',
-                  'is_active']
+        fields = ['name', 'location', 'price_per_day', 'min_booking_fee', 'weekly_rate', 'monthly_rate',
+                  'category', 'transmission', 'fuel', 'seats', 'doors', 'luggage', 'engine_size',
+                  'air_con', 'units', 'description', 'features', 'is_active']
         labels = {
             'location': 'Branch',
             'luggage': 'Large bags',
-            'price_per_day': 'Price per day (KES)',
+            'price_per_day': 'Hire price per day (KES)',
+            'min_booking_fee': 'Minimum booking fee (KES, optional)',
             'weekly_rate': 'Weekly price (KES, optional)',
             'monthly_rate': 'Monthly price (KES, optional)',
             'units': 'Number of this car available',
@@ -33,6 +35,13 @@ class CarForm(forms.ModelForm):
             # Branch staff can only add or move cars within their own branch.
             field.queryset = Location.objects.filter(pk=staff_location.pk)
             field.help_text = 'Cars you add are listed at your branch.'
+        self.fields['price_per_day'].help_text = 'What customers pay for each day. Shown on the website as "KES … per day".'
+        self.fields['price_per_day'].widget.attrs.update({'inputmode': 'numeric', 'min': 1, 'placeholder': 'e.g. 3500'})
+        self.fields['min_booking_fee'].help_text = (
+            f'The least a customer pays online to book this car; they pay the rest at pick-up. '
+            f'Leave blank for the standard KES {settings.BOOKING_MIN_FEE:,}.')
+        self.fields['min_booking_fee'].widget.attrs.update(
+            {'inputmode': 'numeric', 'min': 1, 'placeholder': f'{settings.BOOKING_MIN_FEE}'})
         if not self.instance.pk and default_location is not None:
             field.initial = default_location.pk
         if self.instance.pk:
@@ -49,6 +58,12 @@ class CarForm(forms.ModelForm):
                     self.add_error(field, f'The {label} price should be less than {days} days at the daily price '
                                           f'(KES {daily * days:,}), or leave it empty.')
         return data
+
+    def clean_min_booking_fee(self):
+        fee = self.cleaned_data.get('min_booking_fee')
+        if fee is not None and fee < 1:
+            raise forms.ValidationError('Enter a booking fee of at least KES 1, or leave it blank.')
+        return fee
 
     def clean_price_per_day(self):
         price = self.cleaned_data['price_per_day']

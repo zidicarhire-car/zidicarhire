@@ -149,9 +149,33 @@ class Quote:
             self.rate_type,
         )
 
+    @property
+    def min_pay(self):
+        """Smallest amount that books the car: the car's booking fee, or the whole total if that is less."""
+        return min(self.car.booking_fee, self.total)
+
+    def pay_now(self, value):
+        """
+        The amount the customer chose to pay when booking, checked against this quote.
+        Blank means the full total. Raises QuoteError (field 'pay_now') when it is out of range.
+        """
+        raw = str(value if value is not None else '').replace(',', '').replace('KES', '').strip()
+        if not raw:
+            return self.total
+        try:
+            amount = int(raw)
+        except ValueError:
+            raise QuoteError('Enter the amount to pay now in whole shillings, like 1000.', field='pay_now')
+        if amount < self.min_pay:
+            raise QuoteError(f'The smallest amount that books this car is {kes(self.min_pay)}.', field='pay_now')
+        if amount > self.total:
+            raise QuoteError(f'That is more than the total of {kes(self.total)}.', field='pay_now')
+        return amount
+
     def as_dict(self):
         return {
             'total': self.total, 'days': self.days, 'breakdown': self.lines(), 'one_way': self.is_one_way,
+            'min_pay': self.min_pay,
             'pickup': when(self.start, self.start_time),
             'return': when(self.end, self.end_time),
         }

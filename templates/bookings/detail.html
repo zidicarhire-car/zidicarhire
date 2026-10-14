@@ -34,6 +34,9 @@
       {% for line in booking.price_lines %}
       <div{% if line.total %} class="receipt-total"{% endif %}><dt>{{ line.label }}</dt><dd>KES {{ line.amount|intcomma }}</dd></div>
       {% endfor %}
+      {% if booking.is_paid %}<div><dt>Paid</dt><dd>KES {{ booking.amount_paid|intcomma }}</dd></div>
+      {% if booking.balance > 0 %}<div class="receipt-total"><dt>Balance due at pick-up</dt><dd>KES {{ booking.balance|intcomma }}</dd></div>{% endif %}
+      {% elif booking.due_now < booking.amount %}<div><dt>Booking fee to pay now</dt><dd>KES {{ booking.due_now|intcomma }}</dd></div>{% endif %}
       <div><dt>Status</dt><dd><span class="status status-{{ booking.status }}">{{ booking.get_status_display }}</span></dd></div>
       {% if booking.mpesa_receipt %}<div><dt>M-Pesa receipt</dt><dd>{{ booking.mpesa_receipt }}</dd></div>{% endif %}
     </dl>

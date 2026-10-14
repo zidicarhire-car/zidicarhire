@@ -41,11 +41,11 @@ def start_payment(booking):
     Sends the M-Pesa STK prompt and records the attempt as a Payment.
     Raises payhero.PayHeroError if PayHero refuses.
     """
-    attempt = Payment.objects.create(booking=booking, reference=booking.ref, amount=booking.amount,
+    attempt = Payment.objects.create(booking=booking, reference=booking.ref, amount=booking.due_now,
                                      phone=booking.phone)
     try:
         data = payhero.stk_push(
-            amount=booking.amount,
+            amount=booking.due_now,
             phone=booking.phone,
             reference=booking.ref,
             customer_name=booking.customer_name,
@@ -66,7 +66,7 @@ def start_payment(booking):
     booking.save(update_fields=[
         'checkout_request_id', 'payhero_reference', 'status', 'result_desc', 'payment_requested_at', 'updated_at',
     ])
-    log_event(booking, Kind.PROMPT, f'Prompt for {kes(booking.amount)} sent to {booking.masked_phone}')
+    log_event(booking, Kind.PROMPT, f'Prompt for {kes(booking.due_now)} sent to {booking.masked_phone}')
     return booking
 
 
@@ -99,7 +99,7 @@ def mark_paid(booking_id, receipt='', desc='', amount_paid=None, user=None):
         booking.mpesa_receipt = (receipt or '')[:40]
         booking.result_desc = (desc or '')[:255]
         booking.paid_at = timezone.now()
-        booking.amount_paid = booking.amount if amount_paid is None else amount_paid
+        booking.amount_paid = booking.due_now if amount_paid is None else amount_paid
         booking.save()
         log_event(booking, Kind.PAID, f'{kes(booking.amount_paid)} paid, M-Pesa receipt {booking.mpesa_receipt or "-"}'
                   + (f'. {desc}' if user is not None and desc else ''), user)
@@ -218,6 +218,36 @@ def mark_paid_manually(booking, user, code):
     if booking.status not in (Booking.Status.PENDING, Booking.Status.FAILED):
         raise ActionError(f'A booking that is "{booking.get_status_display()}" cannot be marked paid.')
     booking, _ = mark_paid(booking.pk, receipt=code, desc=f'Marked paid by {user.get_username()}', user=user)
+    return booking
+
+
+def record_balance_payment(booking, user, amount, code=''):
+    """Staff record money received after booking (usually the balance at pick-up): cash, or M-Pesa with its code."""
+    if not booking.is_paid:
+        raise ActionError('Only a paid booking has a balance. Use "Mark as paid" for an unpaid one.')
+    if booking.balance <= 0:
+        raise ActionError('Nothing is owed on this booking.')
+    try:
+        amount = int(str(amount or '').replace(',', '').strip())
+    except ValueError:
+        raise ActionError('Enter the amount received in whole shillings, like 5000.')
+    if amount <= 0:
+        raise ActionError('Enter the amount received in whole shillings, like 5000.')
+    if amount > booking.balance:
+        raise ActionError(f'The customer only owes {kes(booking.balance)}. Enter that amount or less.')
+    code = (code or '').strip().upper().replace(' ', '')
+    if code and not MPESA_CODE_RE.match(code):
+        raise ActionError('Enter the M-Pesa code from the till statement, like SJK1ABC2DE, or leave it blank for cash.')
+    with transaction.atomic():
+        booking = _locked(booking)
+        if amount > booking.balance:
+            raise ActionError(f'The customer only owes {kes(booking.balance)}. Enter that amount or less.')
+        booking.amount_paid += amount
+        booking.save(update_fields=['amount_paid', 'updated_at'])
+        method = f'M-Pesa {code}' if code else 'cash'
+        left = booking.balance
+        log_event(booking, Kind.BALANCE, f'{kes(amount)} received ({method}). '
+                  + (f'{kes(left)} still owed.' if left > 0 else 'Fully paid.'), user)
     return booking
 
 

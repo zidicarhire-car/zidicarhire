@@ -131,6 +131,8 @@ FAKE_PAYMENTS = env_bool('FAKE_PAYMENTS', False)
 # ---------- Booking rules ----------
 # Unpaid bookings hold the car for this long, then release it.
 BOOKING_HOLD_MINUTES = env_int('BOOKING_HOLD_MINUTES', 10, minimum=1)
+# Smallest amount a customer can pay to book (each car can set a higher one). The rest is paid at pick-up.
+BOOKING_MIN_FEE = env_int('BOOKING_MIN_FEE', 1000, minimum=1)
 MIN_RENTAL_DAYS = env_int('MIN_RENTAL_DAYS', 1, minimum=1)
 MAX_RENTAL_DAYS = max(env_int('MAX_RENTAL_DAYS', 60, minimum=1), MIN_RENTAL_DAYS)
 BUSINESS_OPEN_TIME = env_time('BUSINESS_OPEN_TIME', '07:00')

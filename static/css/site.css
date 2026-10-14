@@ -159,6 +159,11 @@
 .bd-facts div { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-2) 0; border-bottom: 1px solid var(--border); }
 .bd-facts dt { color: var(--text-muted); }
 .bd-facts dd { margin: 0; font-weight: var(--fw-semibold); text-align: right; }
+.bd-paynow { margin: var(--space-3) 0 var(--space-2); }
+.bd-paynow .field-hint { margin: 0 0 var(--space-2); }
+.bd-paynow label { margin: var(--space-3) 0 var(--space-1); }
+.bd-paynow-left { margin: var(--space-1) 0 0; font-size: var(--fs-small); font-weight: var(--fw-semibold); }
+.bd-paynow-left:empty { display: none; }
 .bd-actions { margin-top: var(--space-4); }
 .bd-actions-split { display: flex; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
 .bd-actions-split .btn:last-child { flex: 1; }

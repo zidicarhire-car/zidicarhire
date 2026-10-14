@@ -17,6 +17,7 @@
           <strong><a href="{% url 'dashboard:car_edit' car.pk %}">{{ car.name }}</a></strong>
           <span>{{ car.location.name }} branch &middot; {{ car.get_category_display }}, {{ car.seats }} seats</span>
           <span class="plate plate-sm">KES {{ car.price_per_day|intcomma }}/day</span>
+          <span>Book from KES {{ car.booking_fee|intcomma }}{% if not car.min_booking_fee %} (standard){% endif %}</span>
           {% if car.weekly_rate or car.monthly_rate %}<span>{% if car.weekly_rate %}KES {{ car.weekly_rate|intcomma }}/week{% endif %}{% if car.weekly_rate and car.monthly_rate %} &middot; {% endif %}{% if car.monthly_rate %}KES {{ car.monthly_rate|intcomma }}/month{% endif %}</span>{% endif %}
           <span>{{ car.units }} unit{{ car.units|pluralize }} &middot; {{ car.upcoming }} upcoming booking{{ car.upcoming|pluralize }}{% if not cover %} &middot; no photos yet{% endif %}</span>
           {% if not car.is_active %}<span class="status status-cancelled">Hidden from website</span>{% endif %}

@@ -26,6 +26,7 @@
     <input type="hidden" name="action" value="relocate"><button class="btn btn-ghost btn-sm" type="submit">Car arrived in {{ booking.return_location.name }}</button>
   </form>
   {% endif %}
+  {% if allowed.balance %}<button type="button" class="btn btn-mpesa btn-sm" data-open-dialog="dlg-balance">Record balance payment (KES {{ booking.balance|intcomma }} owed)</button>{% endif %}
   {% if allowed.mark_paid %}<button type="button" class="btn btn-ghost btn-sm" data-open-dialog="dlg-paid">Mark paid manually</button>{% endif %}
   {% if allowed.dates %}<button type="button" class="btn btn-ghost btn-sm" data-open-dialog="dlg-dates">Change dates</button>{% endif %}
   {% if allowed.resend %}
@@ -66,6 +67,7 @@
       {% for line in booking.price_lines %}
       <div{% if line.total %} class="facts-total"{% endif %}><dt>{{ line.label }}</dt><dd>KES {{ line.amount|intcomma }}</dd></div>
       {% endfor %}
+      {% if booking.due_now < booking.amount %}<div><dt>Booking fee chosen</dt><dd>KES {{ booking.due_now|intcomma }}</dd></div>{% endif %}
       <div><dt>Paid</dt><dd>KES {{ booking.amount_paid|intcomma }}{% if booking.mpesa_receipt %} ({{ booking.mpesa_receipt }}){% endif %}</dd></div>
       {% if booking.balance > 0 %}<div class="facts-warn"><dt>Customer still owes</dt><dd>KES {{ booking.balance|intcomma }}</dd></div>
       {% elif booking.balance < 0 %}<div class="facts-warn"><dt>Refund due to customer</dt><dd>KES {{ booking.balance_abs|intcomma }}</dd></div>{% endif %}
@@ -131,12 +133,30 @@
   <form method="post">{% csrf_token %}
     <input type="hidden" name="action" value="mark_paid">
     <h2 id="dlg-paid-title">Mark {{ booking.ref }} as paid</h2>
-    <p>Only do this after you see the KES {{ booking.amount|intcomma }} payment on your till statement.</p>
+    <p>Only do this after you see the KES {{ booking.due_now|intcomma }} payment on your till statement.{% if booking.due_now < booking.amount %} That is the booking fee the customer chose; the other KES {{ booking.balance_at_pickup|intcomma }} is paid at pick-up.{% endif %}</p>
     <label for="code">M-Pesa code</label>
     <input id="code" name="code" required pattern="[A-Za-z0-9]{8,12}" maxlength="12" autocapitalize="characters" placeholder="SJK1ABC2DE">
     <div class="dialog-actions">
       <button type="button" class="btn btn-ghost" data-close-dialog>Go back</button>
       <button type="submit" class="btn btn-primary">Mark as paid</button>
+    </div>
+  </form>
+</dialog>
+{% endif %}
+
+{% if allowed.balance %}
+<dialog class="modal dash-dialog" id="dlg-balance" aria-labelledby="dlg-balance-title">
+  <form method="post">{% csrf_token %}
+    <input type="hidden" name="action" value="balance">
+    <h2 id="dlg-balance-title">Record a payment for {{ booking.ref }}</h2>
+    <p>{{ booking.customer_name }} has paid KES {{ booking.amount_paid|intcomma }} of KES {{ booking.amount|intcomma }} and still owes <strong>KES {{ booking.balance|intcomma }}</strong>.</p>
+    <label for="bal-amount">Amount received (KES)</label>
+    <input id="bal-amount" name="amount" type="text" inputmode="numeric" pattern="[0-9,]+" required value="{{ booking.balance }}">
+    <label for="bal-code">M-Pesa code <span class="optional">(leave blank for cash)</span></label>
+    <input id="bal-code" name="code" pattern="[A-Za-z0-9]{8,12}" maxlength="12" autocapitalize="characters" placeholder="SJK1ABC2DE">
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-ghost" data-close-dialog>Go back</button>
+      <button type="submit" class="btn btn-mpesa">Record payment</button>
     </div>
   </form>
 </dialog>

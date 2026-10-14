@@ -66,6 +66,8 @@ class Booking(models.Model):
     extras_amount = models.PositiveIntegerField(default=0, help_text='Extras in KES')
     amount = models.PositiveIntegerField(help_text='Total in KES')
     amount_paid = models.PositiveIntegerField(default=0, help_text='KES received by M-Pesa (or marked paid by staff)')
+    pay_now = models.PositiveIntegerField(
+        default=0, help_text='KES the customer chose to pay when booking (the booking fee). 0 = the full total')
     car_relocated = models.BooleanField(
         default=False, help_text='For one-way hires: the car has arrived and was moved to the return branch'
     )
@@ -126,6 +128,16 @@ class Booking(models.Model):
     def balance_abs(self):
         return abs(self.balance)
 
+    @property
+    def due_now(self):
+        """What the M-Pesa prompt asks for: the booking fee the customer chose, or the full total."""
+        return min(self.pay_now, self.amount) if self.pay_now else self.amount
+
+    @property
+    def balance_at_pickup(self):
+        """Still to pay at pick-up: after payment the real balance, before it what the booking fee leaves."""
+        return max(self.balance, 0) if self.is_paid else self.amount - self.due_now
+
     def price_lines(self):
         from .pricing import price_lines
 
@@ -143,6 +155,9 @@ class Booking(models.Model):
             'status': self.status,
             'status_label': self.get_status_display(),
             'amount': self.amount,
+            'pay_now': self.due_now,
+            'amount_paid': self.amount_paid,
+            'balance': self.balance_at_pickup,
             'days': self.days,
             'car': self.car.name,
             'pickup_date': self.pickup_date.isoformat(),
@@ -182,6 +197,7 @@ class BookingEvent(models.Model):
         CREATED = 'created', 'Booking made'
         PROMPT = 'prompt', 'M-Pesa prompt sent'
         PAID = 'paid', 'Paid'
+        BALANCE = 'balance', 'Balance paid'
         FAILED = 'failed', 'Payment failed'
         PICKED_UP = 'picked_up', 'Picked up'
         RETURNED = 'returned', 'Returned'

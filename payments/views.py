@@ -66,9 +66,9 @@ def payhero_callback(request):
     if success:
         amount = result.get('Amount')
         try:
-            if amount is not None and float(amount) < booking.amount:
-                logger.warning('Underpayment on %s: got %s, expected %s', booking.ref, amount, booking.amount)
-                mark_failed(booking.pk, f'We received KES {amount} but the total is KES {booking.amount:,}. '
+            if amount is not None and float(amount) < booking.due_now:
+                logger.warning('Underpayment on %s: got %s, expected %s', booking.ref, amount, booking.due_now)
+                mark_failed(booking.pk, f'We received KES {amount} but expected KES {booking.due_now:,}. '
                                         'Chat with us and we will sort it out.')
                 return JsonResponse({'ok': True})
         except (TypeError, ValueError):

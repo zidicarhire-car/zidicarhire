@@ -118,6 +118,7 @@ def create_booking(request):
             price = quote(car, start, end, data.get('pickup_point'), data.get('return_location'),
                           extras=data.get('extras'), pickup_time=data.get('pickup_time'),
                           return_time=data.get('return_time'))
+            pay_now = price.pay_now(data.get('pay_now'))
         except QuoteError as exc:
             return _error(exc.message, field=exc.field)
         if not car.is_available(start, end):
@@ -128,7 +129,7 @@ def create_booking(request):
             pickup_date=start, pickup_time=price.start_time, return_date=end, return_time=price.end_time,
             days=price.days, daily_rate=price.daily_rate, rate_type=price.rate_type,
             pickup_fee=price.pickup_fee, one_way_fee=price.one_way_fee, extras_amount=price.extras,
-            amount=price.total, payment_requested_at=timezone.now(),
+            amount=price.total, pay_now=pay_now, payment_requested_at=timezone.now(),
         )
         BookingExtra.objects.bulk_create([
             BookingExtra(booking=booking, extra=extra, name=extra.name, price=extra.price, per_day=extra.per_day,
@@ -136,7 +137,8 @@ def create_booking(request):
             for extra, amount in price.extra_items
         ])
         log_event(booking, BookingEvent.Kind.CREATED,
-                  f'Booked on the website: {price.days} days, {kes(price.total)}')
+                  f'Booked on the website: {price.days} days, {kes(price.total)}'
+                  + (f'; paying {kes(pay_now)} now, {kes(price.total - pay_now)} at pick-up' if pay_now < price.total else ''))
     tokens.remember(request, booking)
 
     try:

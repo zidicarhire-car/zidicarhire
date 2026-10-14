@@ -45,7 +45,8 @@ def booking_details(booking):
         + (f'Notes: {booking.notes}\n' if booking.notes else '')
         + f'Price:\n{lines}\n'
         f'Amount paid: KES {booking.amount_paid or booking.amount:,}\n'
-        f'M-Pesa receipt: {booking.mpesa_receipt or "-"}\n'
+        + (f'Balance due at pick-up: KES {booking.balance:,}\n' if booking.balance > 0 else '')
+        + f'M-Pesa receipt: {booking.mpesa_receipt or "-"}\n'
     )
 
 

@@ -263,3 +263,7 @@ body.dash { display: grid; grid-template-columns: minmax(0, 1fr); min-height: 10
 .sg-bar { height: 16px; background: var(--plate); border: 1px solid var(--plate-ink); border-radius: 2px; }
 .sg-box { width: 88px; height: 64px; background: var(--surface); border: 1px solid var(--border); display: grid; place-items: center; font-size: var(--fs-xs); color: var(--text-muted); text-align: center; }
 .sg-demo-card { max-width: 340px; }
+.owes, .table small.owes { color: var(--warn-text); font-weight: var(--fw-bold); }
+/* Car form: the two prices staff set most often stand out */
+.field-price_per_day, .field-min_booking_fee { background: color-mix(in srgb, var(--plate) 14%, var(--surface)); border: 1px solid color-mix(in srgb, var(--plate) 55%, var(--border)); border-radius: var(--radius-sm); padding: var(--space-3); }
+.field-price_per_day input { font-size: 1.25rem; font-weight: var(--fw-bold); }

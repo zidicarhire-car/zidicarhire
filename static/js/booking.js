@@ -14,6 +14,8 @@
   const detailsForm = document.getElementById('details-form');
   const continueBtn = dialog.querySelector('[data-next="details"]');
   const payBtn = dialog.querySelector('[data-action="pay"]');
+  const payBox = dialog.querySelector('[data-paynow]');
+  const payInput = document.getElementById('pay-now');
   const body = dialog.querySelector('.bd-body');
   const PROGRESS = ['dates', 'details', 'pay', 'done'];
   const DATE_FIELDS = new Set(['pickup_date', 'return_date', 'pickup_time', 'return_time', 'pickup_point',
@@ -216,7 +218,7 @@
     fill('return', `${quote.return}, ${returnText}`);
     fill('phone-entered', detailsForm.elements.phone.value.trim());
     renderBreakdown(quote.breakdown);
-    payBtn.textContent = `Pay ${kes(quote.total)} with M-Pesa`;
+    setupPayNow();
     setError('pay', '');
     showStep('pay');
   });
@@ -227,7 +229,63 @@
   }));
 
   /* ---------- step 3: pay ---------- */
+  /* The customer picks how much to pay now: from the car's booking fee up to the full total.
+     The server checks the amount again, so this only guides them. */
+  const digits = (v) => String(v || '').replace(/[^\d]/g, '');
+
+  function payNowError(amount) {
+    if (!amount) return `Enter an amount from ${kes(quote.min_pay)} to ${kes(quote.total)}.`;
+    if (amount < quote.min_pay) return `The smallest amount that books this car is ${kes(quote.min_pay)}.`;
+    if (amount > quote.total) return `That is more than the total of ${kes(quote.total)}.`;
+    return '';
+  }
+
+  function showPayError(message) {
+    document.getElementById('err-pay_now').textContent = message || '';
+    if (message) payInput.setAttribute('aria-invalid', 'true'); else payInput.removeAttribute('aria-invalid');
+  }
+
+  function payNowAmount() {
+    return payBox.hidden ? quote.total : Number(digits(payInput.value));
+  }
+
+  function updatePayNow({ validate = false } = {}) {
+    const amount = payNowAmount();
+    const error = payNowError(amount);
+    if (validate || !error) showPayError(validate ? error : '');
+    const ok = !error;
+    payBtn.textContent = ok ? `Pay ${kes(amount)} with M-Pesa` : 'Pay with M-Pesa';
+    fill('pay-left', ok && amount < quote.total ? `${kes(quote.total - amount)} to pay when you pick up the car.`
+      : (ok ? 'Nothing left to pay at pick-up.' : ''));
+    const half = Math.max(quote.min_pay, Math.round(quote.total / 2 / 100) * 100);
+    const picks = { min: quote.min_pay, half, full: quote.total };
+    payBox.querySelectorAll('[data-pay]').forEach((chip) => {
+      chip.setAttribute('aria-pressed', String(picks[chip.dataset.pay] === amount));
+    });
+    payBox.querySelector('[data-pay="half"]').hidden = half <= quote.min_pay || half >= quote.total;
+    return ok ? amount : null;
+  }
+
+  function setupPayNow() {
+    const flexible = quote.min_pay < quote.total;
+    payBox.hidden = !flexible;
+    fill('pay-min', kes(quote.min_pay));
+    const current = Number(digits(payInput.value));
+    if (flexible && payNowError(current)) payInput.value = String(quote.min_pay);
+    showPayError('');
+    updatePayNow();
+  }
+
+  payInput.addEventListener('input', () => updatePayNow({ validate: payInput.getAttribute('aria-invalid') === 'true' }));
+  payInput.addEventListener('blur', () => { if (payInput.value) updatePayNow({ validate: true }); });
+  payBox.querySelectorAll('[data-pay]').forEach((chip) => chip.addEventListener('click', () => {
+    const half = Math.max(quote.min_pay, Math.round(quote.total / 2 / 100) * 100);
+    payInput.value = String({ min: quote.min_pay, half, full: quote.total }[chip.dataset.pay]);
+    updatePayNow({ validate: true });
+  }));
+
   function routeError(field, message) {
+    if (field === 'pay_now') { showStep('pay'); showPayError(message); payInput.focus(); return; }
     if (DATE_FIELDS.has(field)) { showStep('dates'); setError('dates', message); }
     else if (DETAIL_FIELDS.includes(field)) { showStep('details'); showFieldError(field, message); detailsForm.elements[field].focus(); }
     else setError('pay', message);
@@ -235,6 +293,8 @@
 
   payBtn.addEventListener('click', async () => {
     const f = datesForm.elements;
+    const payNow = updatePayNow({ validate: true });
+    if (payNow === null) { payInput.focus(); return; }
     const label = payBtn.textContent;
     payBtn.disabled = true;
     payBtn.textContent = 'Sending the M-Pesa prompt…';
@@ -249,6 +309,7 @@
           pickup_time: f.pickup_time.value, return_time: f.return_time.value,
           pickup_point: f.pickup_point ? f.pickup_point.value : '', return_location: f.return_location.value,
           extras: chosenExtras(),
+          pay_now: payNow,
         },
       });
       startWaiting(res.booking);
@@ -288,7 +349,7 @@
   function startWaiting(b) {
     stopWatching();
     booking = b;
-    fill('total', kes(b.amount));
+    fill('pay-amount', kes(b.pay_now ?? b.amount));
     fill('phone', b.phone);
     fill('wait-note', 'Waiting for your payment…');
     const resendBtn = dialog.querySelector('[data-step="waiting"] [data-action="resend"]');
@@ -342,7 +403,9 @@
     fill('car', b.car);
     fill('ref', b.ref);
     fill('receipt', b.receipt || 'on its way');
-    fill('total', kes(b.amount));
+    fill('paid', kes(b.amount_paid || b.pay_now || b.amount));
+    fill('balance', kes(b.balance || 0));
+    dialog.querySelector('[data-balance-row]').hidden = !(b.balance > 0);
     fill('pickup-done', `${fmtDay(b.pickup_date)} ${b.pickup_time}${b.pickup_point ? `, ${b.pickup_point}` : ''}`);
     fill('return-done', `${fmtDay(b.return_date)} ${b.return_time}${b.return_city ? `, ${b.return_city}` : ''}`);
     dialog.querySelectorAll('[data-link]').forEach((a) => {

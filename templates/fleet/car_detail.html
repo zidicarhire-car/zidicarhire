@@ -80,7 +80,7 @@
           data-car-id="{{ car.pk }}" data-name="{{ car.name }}" data-city="{{ car.location.name }}" data-price="{{ car.price_per_day }}">
           Choose dates and book
         </button>
-        <p class="fine">Pay with M-Pesa. Your booking is confirmed the moment you pay.</p>
+        <p class="fine">Book with as little as <strong>KES {{ car.booking_fee|intcomma }}</strong> by M-Pesa and pay the rest when you pick up the car. Your booking is confirmed the moment you pay.</p>
 
         <h2 class="car-h2">Prices</h2>
         <table class="price-table">

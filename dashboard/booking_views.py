@@ -150,6 +150,7 @@ def _allowed(booking):
         'return': s in (Status.PAID, Status.PICKED_UP),
         'cancel': s in (Status.PENDING, Status.PAID, Status.FAILED),
         'mark_paid': s in (Status.PENDING, Status.FAILED),
+        'balance': booking.is_paid and booking.balance > 0,
         'dates': s not in (Status.COMPLETED, Status.CANCELLED),
         'resend': booking.is_paid and bool(booking.email),
         'receipt': booking.is_paid,
@@ -171,6 +172,7 @@ ACTION_DONE = {
     'return': 'Marked as returned.',
     'cancel': 'Booking cancelled. Remember to refund any M-Pesa payment by hand.',
     'mark_paid': 'Marked as paid.',
+    'balance': 'Payment recorded.',
     'change_dates': 'Dates changed. Settle any price difference with the customer.',
     'resend': 'Confirmation email sent with the receipt attached.',
     'note': 'Note added.',
@@ -199,6 +201,8 @@ def booking_detail(request, ref):
                 services.cancel_booking(booking, user, post.get('reason'))
             elif action == 'mark_paid':
                 services.mark_paid_manually(booking, user, post.get('code'))
+            elif action == 'balance':
+                services.record_balance_payment(booking, user, post.get('amount'), post.get('code'))
             elif action == 'resend':
                 services.resend_confirmation(booking, user)
             elif action == 'note':

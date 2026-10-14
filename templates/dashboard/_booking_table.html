@@ -11,7 +11,7 @@
         <td data-label="Booking"><a class="mono-ref" href="{% url 'dashboard:booking_detail' b.ref %}"><strong>{{ b.ref }}</strong></a><small>{{ b.created_at|date:"j M, H:i" }}</small></td>
         <td data-label="Customer">{{ b.customer_name }}<small><a href="tel:{{ b.local_phone }}">{{ b.local_phone }}</a></small></td>
         <td data-label="Car and dates">{{ b.car.name }}<small>{{ b.pickup_date|date:"D j M" }} {{ b.pickup_time|time:"H:i" }} to {{ b.return_date|date:"D j M" }} ({{ b.days }}d){% if b.pickup_location %}<br>{{ b.pickup_location.name }}{% if b.pickup_point %}: {{ b.pickup_point.name }}{% endif %}{% endif %}{% if b.is_one_way %}<br><span class="one-way">{% if b.awaiting_relocation %}Returning{% else %}One-way{% endif %} to {{ b.return_location.name }}</span>{% endif %}</small></td>
-        <td data-label="Amount">KES {{ b.amount|intcomma }}{% if b.mpesa_receipt %}<small>{{ b.mpesa_receipt }}</small>{% endif %}</td>
+        <td data-label="Amount">KES {{ b.amount|intcomma }}{% if b.mpesa_receipt %}<small>{{ b.mpesa_receipt }}</small>{% endif %}{% if b.balance > 0 %}<small class="owes">Owes KES {{ b.balance|intcomma }}</small>{% endif %}</td>
         <td data-label="Status"><span class="status status-{{ b.status }}">{{ b.get_status_display }}</span>{% if b.status == 'failed' and b.result_desc %}<small>{{ b.result_desc|truncatechars:80 }}</small>{% endif %}</td>
       </tr>
       {% empty %}

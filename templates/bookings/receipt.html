@@ -47,8 +47,9 @@
           <div{% if line.total %} class="receipt-total"{% endif %}><dt>{{ line.label }}</dt><dd>KES {{ line.amount|intcomma }}</dd></div>
           {% endfor %}
           <div><dt>Amount paid</dt><dd>KES {{ booking.amount_paid|default:booking.amount|intcomma }}</dd></div>
+          {% if booking.balance > 0 %}<div class="receipt-total"><dt>Balance due at pick-up</dt><dd>KES {{ booking.balance|intcomma }}</dd></div>{% endif %}
           <div><dt>Payment method</dt><dd>M-Pesa</dd></div>
-          <div><dt>Status</dt><dd><span class="status status-paid">PAID</span></dd></div>
+          <div><dt>Status</dt><dd><span class="status status-paid">{% if booking.balance > 0 %}Booking fee paid{% else %}Paid in full{% endif %}</span></dd></div>
         </dl>
       </div>
       <footer class="pr-foot">

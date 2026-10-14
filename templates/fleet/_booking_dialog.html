@@ -138,6 +138,20 @@
         <div><dt>M-Pesa number</dt><dd data-fill="phone-entered"></dd></div>
       </dl>
       <div class="bd-summary-box"><dl class="bd-breakdown" data-breakdown></dl></div>
+      <fieldset class="bd-paynow" data-paynow>
+        <legend>How much do you want to pay now?</legend>
+        <p class="field-hint" id="hint-pay_now">Pay at least <strong data-fill="pay-min"></strong> to book. Pay the rest when you pick up the car.</p>
+        <div class="quick-picks" role="group" aria-label="Quick amounts">
+          <button type="button" class="chip" data-pay="min" aria-pressed="false">Booking fee</button>
+          <button type="button" class="chip" data-pay="half" aria-pressed="false">Half</button>
+          <button type="button" class="chip" data-pay="full" aria-pressed="false">Full amount</button>
+        </div>
+        <label for="pay-now">Amount to pay now (KES)
+          <input id="pay-now" name="pay_now" type="text" inputmode="numeric" autocomplete="off" aria-describedby="hint-pay_now err-pay_now">
+        </label>
+        <span class="field-error" id="err-pay_now" role="alert"></span>
+        <p class="bd-paynow-left" data-fill="pay-left" aria-live="polite"></p>
+      </fieldset>
       <p class="form-error" data-error="pay" role="alert"></p>
       <button type="button" class="btn btn-mpesa btn-block btn-pay" data-action="pay">Pay with M-Pesa</button>
       <p class="fine">We'll send a payment prompt to your phone. The car is held for you while you pay.</p>
@@ -147,7 +161,7 @@
     <section class="bd-step bd-center" data-step="waiting" data-progress-step="pay" hidden aria-labelledby="bd-wait-title">
       <div class="phone-pulse" aria-hidden="true"></div>
       <h3 id="bd-wait-title" class="bd-step-title">Check your phone and enter your M-Pesa PIN</h3>
-      <p>We sent a prompt for <strong data-fill="total"></strong> to <strong data-fill="phone"></strong>{% if business.till_name %}. It will show <strong>{{ business.till_name }}</strong>{% if business.till_number %} (till {{ business.till_number }}){% endif %}{% endif %}.</p>
+      <p>We sent a prompt for <strong data-fill="pay-amount"></strong> to <strong data-fill="phone"></strong>{% if business.till_name %}. It will show <strong>{{ business.till_name }}</strong>{% if business.till_number %} (till {{ business.till_number }}){% endif %}{% endif %}.</p>
       <p class="countdown" aria-hidden="true">The prompt expires in <strong data-fill="countdown"></strong></p>
       <p class="fine" aria-live="polite" data-fill="wait-note">Waiting for your payment&hellip;</p>
       <button type="button" class="btn btn-ghost" data-action="resend" hidden>Send the prompt again</button>
@@ -173,7 +187,8 @@
         <div><dt>Car</dt><dd data-fill="car"></dd></div>
         <div><dt>Pick-up</dt><dd data-fill="pickup-done"></dd></div>
         <div><dt>Return</dt><dd data-fill="return-done"></dd></div>
-        <div><dt>Paid</dt><dd data-fill="total"></dd></div>
+        <div><dt>Paid</dt><dd data-fill="paid"></dd></div>
+        <div data-balance-row hidden><dt>Balance at pick-up</dt><dd data-fill="balance"></dd></div>
       </dl>
       <p class="fine">Keep your booking number. We'll call you to confirm pick-up. Bring your ID and driving licence.</p>
       <div class="bd-done-actions">

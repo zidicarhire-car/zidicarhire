@@ -161,16 +161,18 @@ def build_pdf(booking):
     y = _label_value(c, MARGIN, y - 4, 'Amount paid', kes(paid), content_w)
     if paid != booking.amount:
         diff = booking.amount - paid
-        label = 'Balance to pay' if diff > 0 else 'To be refunded'
+        label = 'Balance due at pick-up' if diff > 0 else 'To be refunded'
         y = _label_value(c, MARGIN, y, label, kes(abs(diff)), content_w)
     y = _label_value(c, MARGIN, y, 'Payment method', 'M-Pesa', content_w)
 
     # ---- status stamp ----
+    stamp = 'BOOKING FEE PAID' if paid < booking.amount else 'PAID'
+    stamp_w = c.stringWidth(stamp, 'Helvetica-Bold', 12) + 12 * mm
     c.setFillColor(GREEN)
-    c.roundRect(MARGIN, y - 22, 34 * mm, 24, 4, stroke=0, fill=1)
+    c.roundRect(MARGIN, y - 22, max(34 * mm, stamp_w), 24, 4, stroke=0, fill=1)
     c.setFillColor(colors.white)
     c.setFont('Helvetica-Bold', 12)
-    c.drawCentredString(MARGIN + 17 * mm, y - 14, 'PAID')
+    c.drawCentredString(MARGIN + max(34 * mm, stamp_w) / 2, y - 14, stamp)
 
     # ---- footer ----
     c.setStrokeColor(LINE)

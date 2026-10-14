@@ -203,11 +203,14 @@ class Car(models.Model):
     luggage = models.PositiveSmallIntegerField(default=2, help_text='Number of large bags that fit')
     engine_size = models.CharField(max_length=20, blank=True, help_text='e.g. 1500 cc or 2.8 L')
     air_con = models.BooleanField(default=True, verbose_name='Air conditioning')
-    price_per_day = models.PositiveIntegerField(help_text='Price per day in KES')
+    price_per_day = models.PositiveIntegerField(help_text='Hire price per day in KES')
     weekly_rate = models.PositiveIntegerField(
         null=True, blank=True, help_text='Optional: price for 7 days in KES, used for hires of 7 days or more')
     monthly_rate = models.PositiveIntegerField(
         null=True, blank=True, help_text='Optional: price for 30 days in KES, used for hires of 30 days or more')
+    min_booking_fee = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text='Optional: the least a customer can pay to book this car, in KES. Blank = the default from .env')
     units = models.PositiveSmallIntegerField(default=1, help_text='How many of this car you have for hire')
     description = models.TextField(blank=True)
     features = models.JSONField(default=list, blank=True)
@@ -237,6 +240,11 @@ class Car(models.Model):
         """The cover photo, or the first photo. Uses prefetched photos when available."""
         photos = list(self.photos.all())
         return next((p for p in photos if p.is_cover), photos[0] if photos else None)
+
+    @property
+    def booking_fee(self):
+        """Smallest amount that books this car; the rest is paid at pick-up."""
+        return self.min_booking_fee or settings.BOOKING_MIN_FEE
 
     @property
     def weekly_daily_rate(self):
