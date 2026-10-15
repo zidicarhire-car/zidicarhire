@@ -111,6 +111,14 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+# STATIC_VERSIONED=true (on the server): collectstatic names each file after its content (theme.3f2a1c.css),
+# so visitors' browsers never keep an old stylesheet or script after a deploy. collectstatic must then run on
+# every deploy, or pages fail with "Missing staticfiles manifest entry".
+if env_bool('STATIC_VERSIONED', False):
+    STORAGES = {
+        'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+        'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'},
+    }
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
