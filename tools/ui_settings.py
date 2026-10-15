@@ -19,3 +19,4 @@ CACHES = {'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}}
 EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 ADMIN_NOTIFY_EMAILS = []
 BUSINESS = {**BUSINESS, 'whatsapp': BUSINESS.get('whatsapp') or '254700000000'}   # so the WhatsApp buttons show
+ROOT_URLCONF = 'tools.ui_urls'   # adds /__ui/404/ and /__ui/500/

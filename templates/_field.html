@@ -1,0 +1,23 @@
+{% load ui %}{# One form field, Bootstrap style: {% include "_field.html" with field=form.name %} #}
+{% if field|floats %}
+<div class="form-floating mb-3 field-{{ field.name }}">
+  {{ field|bs }}
+  <label for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <span class="optional">(optional)</span>{% endif %}</label>
+  {% if field.errors %}<div class="invalid-feedback" id="{{ field.auto_id }}-error">{{ field.errors|join:" " }}</div>{% endif %}
+  {% if field.help_text %}<div class="form-text" id="{{ field.auto_id }}-help">{{ field.help_text }}</div>{% endif %}
+</div>
+{% elif field.widget_type == 'checkbox' %}
+<div class="form-check form-switch mb-3 field-{{ field.name }}">
+  {{ field|bs }}
+  <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+  {% if field.errors %}<div class="invalid-feedback d-block" id="{{ field.auto_id }}-error">{{ field.errors|join:" " }}</div>{% endif %}
+  {% if field.help_text %}<div class="form-text" id="{{ field.auto_id }}-help">{{ field.help_text }}</div>{% endif %}
+</div>
+{% else %}
+<fieldset class="mb-3 field-{{ field.name }}">
+  <legend class="form-label">{{ field.label }}</legend>
+  <div class="checklist">{{ field|bs }}</div>
+  {% if field.errors %}<div class="invalid-feedback d-block" id="{{ field.auto_id }}-error">{{ field.errors|join:" " }}</div>{% endif %}
+  {% if field.help_text %}<div class="form-text" id="{{ field.auto_id }}-help">{{ field.help_text }}</div>{% endif %}
+</fieldset>
+{% endif %}

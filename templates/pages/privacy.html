@@ -4,30 +4,36 @@
 {% block head %}<link rel="canonical" href="{{ site_url }}{% url 'pages:privacy' %}">{% endblock %}
 
 {% block content %}
-<section class="page legal">
-  <div class="wrap narrow">
+<section class="page-hero">
+  <div class="container-xl">
     <h1>Privacy policy</h1>
-    <p class="owner-edit-block" role="note"><mark class="owner-edit">Owner to edit:</mark> This draft describes what the website actually collects, but it is not legal advice. Check it against the Kenya Data Protection Act, 2019, add your registration details with the Office of the Data Protection Commissioner if you have them, and keep it up to date. The file is <code>templates/pages/privacy.html</code>.</p>
+  </div>
+</section>
+<section class="page legal">
+  <div class="container-xl">
+    <div class="page-narrow prose">
+      <p class="owner-edit-block" role="note"><mark class="owner-edit">Owner to edit:</mark> This draft describes what the website actually collects, but it is not legal advice. Check it against the Kenya Data Protection Act, 2019, add your registration details with the Office of the Data Protection Commissioner if you have them, and keep it up to date. The file is <code>templates/pages/privacy.html</code>.</p>
 
-    <h2>What we collect</h2>
-    <ul>
-      <li><strong>When you book:</strong> your name, M-Pesa phone number, email (if you give it), national ID or passport number, driving licence number and any pick-up notes.</li>
-      <li><strong>When you pay:</strong> the M-Pesa receipt code and the result of the payment, which we receive from our payment provider PayHero. We never see your M-Pesa PIN.</li>
-      <li><strong>When you chat or send a message:</strong> your name, the contact details you give and what you write.</li>
-      <li><strong>On this device:</strong> your browser remembers your last city and the name, phone and email you typed, so you don't have to type them again. You can clear this in your browser settings.</li>
-    </ul>
+      <h2>What we collect</h2>
+      <ul>
+        <li><strong>When you book:</strong> your name, M-Pesa phone number, email (if you give it), national ID or passport number, driving licence number and any pick-up notes.</li>
+        <li><strong>When you pay:</strong> the M-Pesa receipt code and the result of the payment, which we receive from our payment provider PayHero. We never see your M-Pesa PIN.</li>
+        <li><strong>When you chat or send a message:</strong> your name, the contact details you give and what you write.</li>
+        <li><strong>On this device:</strong> your browser remembers your last city and the name, phone and email you typed, so you don't have to type them again. You can clear this in your browser settings.</li>
+      </ul>
 
-    <h2>Why we use it</h2>
-    <p>To confirm and manage your hire, check who is collecting the car, send your receipt, contact you about your booking and keep records we are required to keep.</p>
+      <h2>Why we use it</h2>
+      <p>To confirm and manage your hire, check who is collecting the car, send your receipt, contact you about your booking and keep records we are required to keep.</p>
 
-    <h2>Who we share it with</h2>
-    <p>PayHero and Safaricom (to process M-Pesa payments), our email provider (to send receipts) and our hosting provider. <mark class="owner-edit">Owner to edit:</mark> add insurers or anyone else you share details with, for example after an accident.</p>
+      <h2>Who we share it with</h2>
+      <p>PayHero and Safaricom (to process M-Pesa payments), our email provider (to send receipts) and our hosting provider. <mark class="owner-edit">Owner to edit:</mark> add insurers or anyone else you share details with, for example after an accident.</p>
 
-    <h2>How long we keep it</h2>
-    <p><mark class="owner-edit">Owner to edit:</mark> how long you keep booking records, ID numbers and chats.</p>
+      <h2>How long we keep it</h2>
+      <p><mark class="owner-edit">Owner to edit:</mark> how long you keep booking records, ID numbers and chats.</p>
 
-    <h2>Your rights</h2>
-    <p>You can ask to see, correct or delete the information we hold about you. Contact us at <a href="mailto:{{ business.email }}">{{ business.email }}</a> or <a href="tel:{{ business.phone }}">{{ business.phone }}</a>.</p>
+      <h2>Your rights</h2>
+      <p>You can ask to see, correct or delete the information we hold about you. Contact us at <a href="mailto:{{ business.email }}">{{ business.email }}</a> or <a href="tel:{{ business.phone }}">{{ business.phone }}</a>.</p>
+    </div>
   </div>
 </section>
 {% endblock %}

@@ -4,40 +4,73 @@
 {% block head %}<link rel="canonical" href="{{ site_url }}{% url 'pages:contact' %}">{% endblock %}
 
 {% block content %}
+<section class="page-hero">
+  <div class="container-xl">
+    <h1>Contact us</h1>
+    <p class="lead">The quickest way to reach us is the chat on this page or WhatsApp. You can also call or send a message below.</p>
+  </div>
+</section>
+
 <section class="page">
-  <div class="wrap page-cols">
-    <div>
-      <h1>Contact us</h1>
-      <p class="lead">The quickest way to reach us is the chat on this page or WhatsApp. You can also call or send a message below.</p>
-      <dl class="contact-list">
-        <div><dt>Phone</dt><dd><a href="tel:{{ business.phone }}">{{ business.phone }}</a></dd></div>
-        {% if business.whatsapp %}<div><dt>WhatsApp</dt><dd><a href="https://wa.me/{{ business.whatsapp }}" target="_blank" rel="noopener">Message us on WhatsApp</a></dd></div>{% endif %}
-        <div><dt>Email</dt><dd><a href="mailto:{{ business.email }}">{{ business.email }}</a></dd></div>
-        {% if business.address %}<div><dt>Office</dt><dd>{{ business.address }}</dd></div>{% endif %}
-      </dl>
-      {% if branches %}<p>Each branch has its own phone number: see <a href="{% url 'fleet:home' %}#branches">our branches</a>.</p>{% endif %}
+  <div class="container-xl">
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <ul class="contact-methods">
+          <li><a class="contact-method" href="tel:{{ business.phone }}"><i class="bi bi-telephone-fill" aria-hidden="true"></i><span><span class="info-label">Call us</span>{{ business.phone }}</span></a></li>
+          {% if business.whatsapp %}<li><a class="contact-method" href="https://wa.me/{{ business.whatsapp }}" target="_blank" rel="noopener"><i class="bi bi-whatsapp" aria-hidden="true"></i><span><span class="info-label">WhatsApp</span>Message us on WhatsApp</span></a></li>{% endif %}
+          <li><button type="button" class="contact-method" data-open-chat><i class="bi bi-chat-dots-fill" aria-hidden="true"></i><span><span class="info-label">Live chat</span>Chat with us now</span></button></li>
+          <li><a class="contact-method" href="mailto:{{ business.email }}"><i class="bi bi-envelope-fill" aria-hidden="true"></i><span><span class="info-label">Email</span>{{ business.email }}</span></a></li>
+          {% if business.address %}<li><span class="contact-method"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i><span><span class="info-label">Office</span>{{ business.address }}</span></span></li>{% endif %}
+        </ul>
+      </div>
+
+      <div class="col-lg-7">
+        <div class="card form-card">
+          <div class="card-body">
+            <h2 class="h4">Send us a message</h2>
+            {% if messages %}{% for m in messages %}<div class="alert alert-{{ m.tags }}" role="status">{{ m }}</div>{% endfor %}{% endif %}
+            <form method="post" novalidate>
+              {% csrf_token %}
+              {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+              {% include "_field.html" with field=form.name %}
+              <div class="row g-0 gx-sm-3">
+                <div class="col-sm-6">{% include "_field.html" with field=form.phone %}</div>
+                <div class="col-sm-6">{% include "_field.html" with field=form.email %}</div>
+              </div>
+              {% include "_field.html" with field=form.location %}
+              {% include "_field.html" with field=form.message %}
+              <div class="hp" aria-hidden="true"><label>{{ form.website.label }}{{ form.website }}</label></div>
+              <p class="fine">Give a phone number or an email address so we can reply.</p>
+              <button class="btn btn-primary btn-lg" type="submit"><i class="bi bi-send" aria-hidden="true"></i>Send message</button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div>
-      {% if messages %}{% for m in messages %}<p class="alert alert-{{ m.tags }}" role="status">{{ m }}</p>{% endfor %}{% endif %}
-      <form method="post" class="panel-form" novalidate>
-        {% csrf_token %}
-        <h2 class="form-title">Send us a message</h2>
-        {% if form.non_field_errors %}<p class="form-error" role="alert">{{ form.non_field_errors|join:" " }}</p>{% endif %}
-        {% for field in form %}
-        {% if field.name == 'website' %}
-        <div class="hp" aria-hidden="true"><label>{{ field.label }}{{ field }}</label></div>
-        {% else %}
-        <label>{{ field.label }}{% if not field.field.required %} <span class="optional">(optional)</span>{% endif %}
-          {{ field }}
-          {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
-        </label>
-        {% endif %}
-        {% endfor %}
-        <p class="fine">Give a phone number or an email address so we can reply.</p>
-        <button class="btn btn-primary" type="submit">Send message</button>
-      </form>
-    </div>
+    {% if branches %}
+    <h2 class="contact-branches-title">Our branches</h2>
+    <ul class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 contact-branches">
+      {% for branch in branches %}
+      <li class="col">
+        <div class="card h-100 branch-info">
+          <div class="card-body">
+            <h3 class="h5"><i class="bi bi-buildings" aria-hidden="true"></i>{{ branch.name }}</h3>
+            <ul class="info-list">
+              <li><i class="bi bi-geo-alt" aria-hidden="true"></i><span>{% if branch.address %}{{ branch.address }}{% else %}{{ branch.city }}{% endif %}</span></li>
+              {% if branch.opening_hours %}<li><i class="bi bi-clock" aria-hidden="true"></i><span>{{ branch.opening_hours }}</span></li>{% endif %}
+              <li><i class="bi bi-telephone" aria-hidden="true"></i><a href="tel:{{ branch.contact_phone }}">{{ branch.contact_phone }}</a></li>
+            </ul>
+            <div class="branch-actions">
+              {% if branch.maps_url %}<a class="btn btn-ghost btn-sm" href="{{ branch.maps_url }}" target="_blank" rel="noopener"><i class="bi bi-map" aria-hidden="true"></i>Map</a>{% endif %}
+              <a class="btn btn-ghost btn-sm" href="{{ branch.get_absolute_url }}"><i class="bi bi-car-front" aria-hidden="true"></i>Cars in {{ branch.name }}</a>
+            </div>
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
   </div>
 </section>
 {% endblock %}

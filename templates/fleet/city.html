@@ -11,10 +11,16 @@
 {% endblock %}
 
 {% block content %}
-<section class="hero">
-  <div class="wrap">
-    <p class="hero-kicker"><a href="{% url 'fleet:home' %}#branches">All branches</a></p>
-    <h1 class="hero-title">Car hire in {{ location.name }}</h1>
+<section class="hero" aria-labelledby="city-title">
+  <div class="container-xl">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb breadcrumb-on-brand">
+        <li class="breadcrumb-item"><a href="{% url 'fleet:home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'fleet:home' %}#branches">Locations</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ location.name }}</li>
+      </ol>
+    </nav>
+    <h1 class="hero-title" id="city-title">Car hire in {{ location.name }}</h1>
     <p class="hero-sub">{{ location.page_intro|linebreaksbr }}</p>
     {% include "fleet/_search.html" %}
   </div>
@@ -22,37 +28,39 @@
 
 {% include "fleet/_cars.html" %}
 
-<section class="branch-detail" id="branch">
-  <div class="wrap branch-detail-grid">
-    <div>
-      <h2>Our {{ location.name }} branch</h2>
-      <dl class="receipt">
-        <div><dt>Address</dt><dd>{% if location.address %}{{ location.address }}{% else %}{{ location.city }}{% if location.county and location.county != location.city %}, {{ location.county }} County{% endif %}{% endif %}</dd></div>
-        {% if location.opening_hours %}<div><dt>Opening hours</dt><dd>{{ location.opening_hours }}</dd></div>{% endif %}
-        <div><dt>Phone</dt><dd><a href="tel:{{ location.contact_phone }}">{{ location.contact_phone }}</a></dd></div>
-        {% if location.whatsapp_link %}<div><dt>WhatsApp</dt><dd><a href="{{ location.whatsapp_link }}" target="_blank" rel="noopener">{{ location.whatsapp }}</a></dd></div>{% endif %}
-      </dl>
-      {% if location.maps_url %}<a class="btn btn-ghost" href="{{ location.maps_url }}" target="_blank" rel="noopener">Directions on Google Maps</a>{% endif %}
-    </div>
-    <div>
-      <h2>Where to collect your car</h2>
-      {% if pickup_points %}
-      <ul class="points">
-        {% for point in pickup_points %}
-        <li><span>{{ point.name }}</span><strong>{% if point.fee %}+KES {{ point.fee|intcomma }}{% else %}Free{% endif %}</strong></li>
-        {% endfor %}
-      </ul>
-      {% else %}
-      <p class="muted">Collect your car from the branch office.</p>
-      {% endif %}
-      {% if routes %}
-      <h3>One-way hire from {{ location.name }}</h3>
-      <ul class="points">
-        {% for route in routes %}
-        <li><span>Return to {{ route.to_location.name }}</span><strong>+KES {{ route.fee|intcomma }}</strong></li>
-        {% endfor %}
-      </ul>
-      {% endif %}
+<section class="section branch-detail" id="branch" aria-labelledby="branch-title">
+  <div class="container-xl">
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <div class="card h-100 branch-info">
+          <div class="card-body">
+            <h2 class="h4" id="branch-title"><i class="bi bi-buildings" aria-hidden="true"></i>Our {{ location.name }} branch</h2>
+            <ul class="info-list">
+              <li><i class="bi bi-geo-alt" aria-hidden="true"></i><span><span class="info-label">Address</span>{% if location.address %}{{ location.address }}{% else %}{{ location.city }}{% if location.county and location.county != location.city %}, {{ location.county }} County{% endif %}{% endif %}</span></li>
+              {% if location.opening_hours %}<li><i class="bi bi-clock" aria-hidden="true"></i><span><span class="info-label">Opening hours</span>{{ location.opening_hours }}</span></li>{% endif %}
+              <li><i class="bi bi-telephone" aria-hidden="true"></i><span><span class="info-label">Phone</span><a href="tel:{{ location.contact_phone }}">{{ location.contact_phone }}</a></span></li>
+              {% if location.whatsapp_link %}<li><i class="bi bi-whatsapp" aria-hidden="true"></i><span><span class="info-label">WhatsApp</span><a href="{{ location.whatsapp_link }}" target="_blank" rel="noopener">{{ location.whatsapp }}</a></span></li>{% endif %}
+            </ul>
+            {% if location.maps_url %}<a class="btn btn-ghost" href="{{ location.maps_url }}" target="_blank" rel="noopener"><i class="bi bi-map" aria-hidden="true"></i>Directions on Google Maps</a>{% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <h2 class="h4">Where to collect your car</h2>
+        {% if pickup_points %}
+        <ul class="list-group mb-4">
+          {% for point in pickup_points %}<li class="list-group-item d-flex justify-content-between gap-3"><span>{{ point.name }}</span><strong>{% if point.fee %}+KES {{ point.fee|intcomma }}{% else %}Free{% endif %}</strong></li>{% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-body-secondary">Collect your car from the branch office.</p>
+        {% endif %}
+        {% if routes %}
+        <h3 class="h5">One-way hire from {{ location.name }}</h3>
+        <ul class="list-group">
+          {% for route in routes %}<li class="list-group-item d-flex justify-content-between gap-3"><span><i class="bi bi-signpost-split" aria-hidden="true"></i> Return to {{ route.to_location.name }}</span><strong>+KES {{ route.fee|intcomma }}</strong></li>{% endfor %}
+        </ul>
+        {% endif %}
+      </div>
     </div>
   </div>
 </section>

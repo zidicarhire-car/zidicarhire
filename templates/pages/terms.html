@@ -4,34 +4,40 @@
 {% block head %}<link rel="canonical" href="{{ site_url }}{% url 'pages:terms' %}">{% endblock %}
 
 {% block content %}
-<section class="page legal">
-  <div class="wrap narrow">
+<section class="page-hero">
+  <div class="container-xl">
     <h1>Terms of hire</h1>
-    <p class="owner-edit-block" role="note"><mark class="owner-edit">Owner to edit:</mark> This is template text, not legal advice. Replace each section with your own terms and have a lawyer check them before relying on them. The file is <code>templates/pages/terms.html</code>.</p>
+  </div>
+</section>
+<section class="page legal">
+  <div class="container-xl">
+    <div class="page-narrow prose">
+      <p class="owner-edit-block" role="note"><mark class="owner-edit">Owner to edit:</mark> This is template text, not legal advice. Replace each section with your own terms and have a lawyer check them before relying on them. The file is <code>templates/pages/terms.html</code>.</p>
 
-    <h2>1. Booking and payment</h2>
-    <p>A booking is confirmed when the full amount shown has been paid by M-Pesa to {{ business.name }}{% if business.till_number %} (till {{ business.till_number }}){% endif %}. The price includes the hire, any extras chosen, any pick-up or delivery fee and any one-way fee. Every started 24 hours counts as a day.</p>
+      <h2>1. Booking and payment</h2>
+      <p>A booking is confirmed when the full amount shown has been paid by M-Pesa to {{ business.name }}{% if business.till_number %} (till {{ business.till_number }}){% endif %}. The price includes the hire, any extras chosen, any pick-up or delivery fee and any one-way fee. Every started 24 hours counts as a day.</p>
 
-    <h2>2. Who can drive</h2>
-    <p><mark class="owner-edit">Owner to edit:</mark> minimum age, years with a full licence, extra drivers, foreign licences.</p>
+      <h2>2. Who can drive</h2>
+      <p><mark class="owner-edit">Owner to edit:</mark> minimum age, years with a full licence, extra drivers, foreign licences.</p>
 
-    <h2>3. Collecting and returning the car</h2>
-    <p>The driver must show the national ID or passport and driving licence given when booking. <mark class="owner-edit">Owner to edit:</mark> late returns, early returns, cleaning, where keys are left out of hours.</p>
+      <h2>3. Collecting and returning the car</h2>
+      <p>The driver must show the national ID or passport and driving licence given when booking. <mark class="owner-edit">Owner to edit:</mark> late returns, early returns, cleaning, where keys are left out of hours.</p>
 
-    <h2>4. Deposit, fuel and mileage</h2>
-    <p><mark class="owner-edit">Owner to edit:</mark> deposit amount and refund time, fuel policy, mileage limits.</p>
+      <h2>4. Deposit, fuel and mileage</h2>
+      <p><mark class="owner-edit">Owner to edit:</mark> deposit amount and refund time, fuel policy, mileage limits.</p>
 
-    <h2>5. Insurance, accidents and damage</h2>
-    <p><mark class="owner-edit">Owner to edit:</mark> what insurance covers, the excess, what to do after an accident, police abstracts, tyres and windscreens.</p>
+      <h2>5. Insurance, accidents and damage</h2>
+      <p><mark class="owner-edit">Owner to edit:</mark> what insurance covers, the excess, what to do after an accident, police abstracts, tyres and windscreens.</p>
 
-    <h2>6. Where the car can go</h2>
-    <p><mark class="owner-edit">Owner to edit:</mark> allowed areas, off-road use, cross-border travel.</p>
+      <h2>6. Where the car can go</h2>
+      <p><mark class="owner-edit">Owner to edit:</mark> allowed areas, off-road use, cross-border travel.</p>
 
-    <h2>7. Changes, cancellations and refunds</h2>
-    <p>Contact us with your booking number to change or cancel a booking. Refunds are paid back by M-Pesa. <mark class="owner-edit">Owner to edit:</mark> notice periods and how much is refunded.</p>
+      <h2>7. Changes, cancellations and refunds</h2>
+      <p>Contact us with your booking number to change or cancel a booking. Refunds are paid back by M-Pesa. <mark class="owner-edit">Owner to edit:</mark> notice periods and how much is refunded.</p>
 
-    <h2>8. Contact</h2>
-    <p>{{ business.name }}{% if business.address %}, {{ business.address }}{% endif %}. Phone <a href="tel:{{ business.phone }}">{{ business.phone }}</a>, email <a href="mailto:{{ business.email }}">{{ business.email }}</a>.</p>
+      <h2>8. Contact</h2>
+      <p>{{ business.name }}{% if business.address %}, {{ business.address }}{% endif %}. Phone <a href="tel:{{ business.phone }}">{{ business.phone }}</a>, email <a href="mailto:{{ business.email }}">{{ business.email }}</a>.</p>
+    </div>
   </div>
 </section>
 {% endblock %}

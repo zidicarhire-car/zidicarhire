@@ -1,9 +1,9 @@
 {% load humanize %}
-<section class="fleet" id="cars">
-  <div class="wrap">
+<section class="section fleet" id="cars" aria-labelledby="city-cars-title">
+  <div class="container-xl">
     {% if location %}
-    <div class="fleet-head">
-      <h2>Cars in {{ location.name }} for {{ start|date:"D j M" }} to {{ end|date:"D j M" }}</h2>
+    <div class="section-head">
+      <h2 id="city-cars-title">Cars in {{ location.name }} for {{ start|date:"D j M" }} to {{ end|date:"D j M" }}</h2>
       <p>{{ days }} day{{ days|pluralize }}. Prices are for the car hire.{% if return_route %} Returning to {{ return_route.to_location.name }} adds a one-way fee of KES {{ return_route.fee|intcomma }}.{% endif %} Airport and delivery pick-ups are added when you book.</p>
     </div>
 
@@ -15,7 +15,9 @@
     </ul>
     {% endif %}
     {% else %}
+    <h2 class="visually-hidden" id="city-cars-title">Cars</h2>
     <div class="empty">
+      <span class="empty-icon" aria-hidden="true"><i class="bi bi-car-front"></i></span>
       <h3>We're getting our branches ready</h3>
       <p>Chat with us and we'll find you a car.</p>
       <button type="button" class="btn btn-primary" data-open-chat>Chat with us</button>

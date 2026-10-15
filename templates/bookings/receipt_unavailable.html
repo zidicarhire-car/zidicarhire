@@ -3,18 +3,23 @@
 {% block head %}<meta name="robots" content="noindex">{% endblock %}
 
 {% block content %}
-<section class="receipt-page">
-  <div class="wrap narrow">
-    {% if reason == 'unpaid' %}
-    <h1>There's no receipt for this booking yet</h1>
-    <p>Receipts are ready once a booking is paid. Booking <strong>{{ booking.ref }}</strong> is
-      <span class="status status-{{ booking.status }}">{{ booking.get_status_display }}</span>.</p>
-    <p>If you paid by M-Pesa and still see this, chat with us or call <a href="tel:{{ business.phone }}">{{ business.phone }}</a> and quote your booking number and M-Pesa code.</p>
-    {% else %}
-    <h1>This receipt link isn't valid</h1>
-    <p>The link may have been copied incompletely. Open the link in your confirmation email again, or find your booking with its number and your phone number.</p>
-    {% endif %}
-    <p><a class="btn btn-primary" href="{% url 'bookings:find' %}">Find my booking</a></p>
+<section class="page page-center">
+  <div class="container-xl">
+    <div class="card find-card">
+      <div class="card-body">
+        <span class="page-icon" aria-hidden="true"><i class="bi bi-receipt"></i></span>
+        {% if reason == 'unpaid' %}
+        <h1>There's no receipt for this booking yet</h1>
+        <p>Receipts are ready once a booking is paid. Booking <strong>{{ booking.ref }}</strong> is
+          <span class="status status-{{ booking.status }}">{{ booking.get_status_display }}</span>.</p>
+        <p>If you paid and still see this, chat with us or call <a href="tel:{{ business.phone }}">{{ business.phone }}</a> and quote your booking number and the code in your payment message.</p>
+        {% else %}
+        <h1>This receipt link isn't valid</h1>
+        <p>The link may have been copied incompletely. Open the link in your confirmation email again, or find your booking with its number and your phone number.</p>
+        {% endif %}
+        <a class="btn btn-primary btn-lg w-100" href="{% url 'bookings:find' %}"><i class="bi bi-search" aria-hidden="true"></i>Find my booking</a>
+      </div>
+    </div>
   </div>
 </section>
 {% endblock %}

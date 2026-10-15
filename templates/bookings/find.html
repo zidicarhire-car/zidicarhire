@@ -3,23 +3,30 @@
 {% block meta_description %}Check your {{ business.name }} car hire booking and download your receipt with your booking number and phone number.{% endblock %}
 
 {% block content %}
-<section class="receipt-page">
-  <div class="wrap narrow">
-    <h1>Find my booking</h1>
-    <p>Enter your booking number and the M-Pesa phone number you paid with to see your booking and download your receipt.</p>
-    <form method="post" class="panel-form" novalidate>
-      {% csrf_token %}
-      <label>Booking number
-        <input name="ref" value="{{ ref }}" placeholder="ZCH1A2B3C4D" autocomplete="off" autocapitalize="characters" required maxlength="20" aria-describedby="find-hint">
-        <span class="field-hint" id="find-hint">It starts with ZCH and is in your confirmation email and SMS.</span>
-      </label>
-      <label>M-Pesa phone number
-        <input name="phone" type="tel" inputmode="tel" value="{{ phone }}" placeholder="0712 345 678" autocomplete="tel" required>
-      </label>
-      {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
-      <button class="btn btn-primary" type="submit">Find my booking</button>
-    </form>
-    <p class="fine">Can't find it? <button type="button" class="linklike" data-open-chat>Chat with us</button> or call <a href="tel:{{ business.phone }}">{{ business.phone }}</a>.</p>
+<section class="page page-center">
+  <div class="container-xl">
+    <div class="card find-card">
+      <div class="card-body">
+        <span class="page-icon" aria-hidden="true"><i class="bi bi-search"></i></span>
+        <h1>Find my booking</h1>
+        <p class="lead">Enter your booking number and the phone number you paid with to see your booking and download your receipt.</p>
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <div class="form-floating">
+            <input class="form-control text-uppercase{% if error %} is-invalid{% endif %}" id="find-ref" name="ref" value="{{ ref }}" placeholder="ZCH1A2B3C4D" autocomplete="off" autocapitalize="characters" required maxlength="20" aria-describedby="find-hint{% if error %} find-error{% endif %}">
+            <label for="find-ref">Booking number</label>
+          </div>
+          <p class="form-text mb-3" id="find-hint">It starts with ZCH and is in your confirmation email and SMS.</p>
+          <div class="form-floating mb-3">
+            <input class="form-control{% if error %} is-invalid{% endif %}" id="find-phone" name="phone" type="tel" inputmode="tel" value="{{ phone }}" placeholder="0712 345 678" autocomplete="tel" required{% if error %} aria-describedby="find-error"{% endif %}>
+            <label for="find-phone">Phone number you paid with</label>
+          </div>
+          {% if error %}<div class="alert alert-danger" role="alert" id="find-error">{{ error }}</div>{% endif %}
+          <button class="btn btn-primary btn-lg w-100" type="submit"><i class="bi bi-search" aria-hidden="true"></i>Find my booking</button>
+        </form>
+        <p class="fine find-help">Can't find it? <button type="button" class="linklike" data-open-chat>Chat with us</button> or call <a href="tel:{{ business.phone }}">{{ business.phone }}</a>.</p>
+      </div>
+    </div>
   </div>
 </section>
 {% endblock %}

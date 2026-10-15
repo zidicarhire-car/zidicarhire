@@ -4,59 +4,69 @@
 {% block head %}<meta name="robots" content="noindex">{% endblock %}
 
 {% block content %}
-<section class="receipt-page">
-  <div class="wrap narrow">
-    <div class="no-print receipt-tools">
-      <button type="button" class="btn btn-primary" onclick="window.print()">Print this receipt</button>
-      <a class="btn btn-ghost" href="{{ links.receipt_url }}">Download receipt (PDF)</a>
-    </div>
-
-    <article class="printable-receipt" aria-labelledby="receipt-title">
-      <header class="pr-head">
-        <div>
-          <img src="{% static 'img/zidicarhire-mark.svg' %}" alt="" width="120" height="50" class="pr-mark">
-          <p class="pr-biz"><strong>{{ business.name }}</strong>
-            {% if business.address %}<br>{{ business.address }}{% endif %}
-            {% if business.phone %}<br>Phone {{ business.phone }}{% endif %}
-            {% if business.email %}<br>{{ business.email }}{% endif %}
-            {% if business.kra_pin %}<br>KRA PIN {{ business.kra_pin }}{% endif %}
-            {% if business.till_number %}<br>M-Pesa till {{ business.till_number }}{% endif %}
-          </p>
-        </div>
-        <div class="pr-meta">
-          <h1 id="receipt-title">Receipt</h1>
-          <dl>
-            <div><dt>Booking number</dt><dd><span class="plate plate-sm">{{ booking.ref }}</span></dd></div>
-            <div><dt>Date paid</dt><dd>{{ booking.paid_at|date:"j M Y, H:i"|default:"-" }}</dd></div>
-            <div><dt>M-Pesa receipt</dt><dd>{{ booking.mpesa_receipt|default:"-" }}</dd></div>
-          </dl>
-        </div>
-      </header>
-
-      <div class="pr-cols">
-        <dl class="receipt">
-          <div><dt>Customer</dt><dd>{{ booking.customer_name }}</dd></div>
-          <div><dt>Phone</dt><dd>{{ booking.masked_phone }}</dd></div>
-          <div><dt>Car</dt><dd>{{ booking.car.name }}</dd></div>
-          <div><dt>Pick-up</dt><dd>{{ booking.pickup_date|date:"D j M Y" }}, {{ booking.pickup_time|time:"H:i" }}<br>{% if booking.pickup_point %}{{ booking.pickup_point.name }}, {% endif %}{{ booking.pickup_location.name }}</dd></div>
-          <div><dt>Return</dt><dd>{{ booking.return_date|date:"D j M Y" }}, {{ booking.return_time|time:"H:i" }}<br>{{ booking.return_location.name|default:booking.pickup_location.name }}</dd></div>
-          <div><dt>Days</dt><dd>{{ booking.days }}</dd></div>
-        </dl>
-        <dl class="receipt">
-          {% for line in booking.price_lines %}
-          <div{% if line.total %} class="receipt-total"{% endif %}><dt>{{ line.label }}</dt><dd>KES {{ line.amount|intcomma }}</dd></div>
-          {% endfor %}
-          <div><dt>Amount paid</dt><dd>KES {{ booking.amount_paid|default:booking.amount|intcomma }}</dd></div>
-          {% if booking.balance > 0 %}<div class="receipt-total"><dt>Balance due at pick-up</dt><dd>KES {{ booking.balance|intcomma }}</dd></div>{% endif %}
-          <div><dt>Payment method</dt><dd>M-Pesa</dd></div>
-          <div><dt>Status</dt><dd><span class="status status-paid">{% if booking.balance > 0 %}Booking fee paid{% else %}Paid in full{% endif %}</span></dd></div>
-        </dl>
+<section class="page receipt-page">
+  <div class="container-xl">
+    <div class="page-narrow">
+      <div class="no-print receipt-tools">
+        <button type="button" class="btn btn-primary" onclick="window.print()"><i class="bi bi-printer" aria-hidden="true"></i>Print this receipt</button>
+        <a class="btn btn-ghost" href="{{ links.receipt_url }}"><i class="bi bi-download" aria-hidden="true"></i>Download receipt (PDF)</a>
       </div>
-      <footer class="pr-foot">
-        <p><strong>Thank you for hiring with {{ business.name }}.</strong></p>
-        <p class="fine">Terms of hire: {{ site_url }}/terms/. Questions? Call {{ business.phone }} and quote {{ booking.ref }}.</p>
-      </footer>
-    </article>
+
+      <article class="card printable-receipt" aria-labelledby="receipt-title">
+        <div class="card-body">
+          <header class="pr-head">
+            <div>
+              <img src="{% static 'img/zidicarhire-mark.svg' %}" alt="" width="120" height="50" class="pr-mark">
+              <p class="pr-biz"><strong>{{ business.name }}</strong>
+                {% if business.address %}<br>{{ business.address }}{% endif %}
+                {% if business.phone %}<br>Phone {{ business.phone }}{% endif %}
+                {% if business.email %}<br>{{ business.email }}{% endif %}
+                {% if business.kra_pin %}<br>KRA PIN {{ business.kra_pin }}{% endif %}
+                {% if business.till_number %}<br>M-Pesa till {{ business.till_number }}{% endif %}
+              </p>
+            </div>
+            <div class="pr-meta">
+              <h1 id="receipt-title">Receipt</h1>
+              <dl>
+                <div><dt>Booking number</dt><dd><span class="plate plate-sm">{{ booking.ref }}</span></dd></div>
+                <div><dt>Date paid</dt><dd>{{ booking.paid_at|date:"j M Y, H:i"|default:"-" }}</dd></div>
+                <div><dt>M-Pesa receipt</dt><dd>{{ booking.mpesa_receipt|default:"-" }}</dd></div>
+              </dl>
+            </div>
+          </header>
+
+          <div class="pr-cols">
+            <section aria-labelledby="pr-hire">
+              <h2 class="pr-h2" id="pr-hire">Hire</h2>
+              <dl class="detail-list">
+                <div><dt>Customer</dt><dd>{{ booking.customer_name }}</dd></div>
+                <div><dt>Phone</dt><dd>{{ booking.masked_phone }}</dd></div>
+                <div><dt>Car</dt><dd>{{ booking.car.name }}</dd></div>
+                <div><dt>Pick-up</dt><dd>{{ booking.pickup_date|date:"D j M Y" }}, {{ booking.pickup_time|time:"H:i" }}<br>{% if booking.pickup_point %}{{ booking.pickup_point.name }}, {% endif %}{{ booking.pickup_location.name }}</dd></div>
+                <div><dt>Return</dt><dd>{{ booking.return_date|date:"D j M Y" }}, {{ booking.return_time|time:"H:i" }}<br>{{ booking.return_location.name|default:booking.pickup_location.name }}</dd></div>
+                <div><dt>Days</dt><dd>{{ booking.days }}</dd></div>
+              </dl>
+            </section>
+            <section aria-labelledby="pr-pay">
+              <h2 class="pr-h2" id="pr-pay">Payment</h2>
+              <dl class="detail-list">
+                {% for line in booking.price_lines %}
+                <div{% if line.total %} class="detail-total"{% endif %}><dt>{{ line.label }}</dt><dd>KES {{ line.amount|intcomma }}</dd></div>
+                {% endfor %}
+                <div><dt>Amount paid</dt><dd>KES {{ booking.amount_paid|default:booking.amount|intcomma }}</dd></div>
+                {% if booking.balance > 0 %}<div class="detail-total"><dt>Balance due at pick-up</dt><dd>KES {{ booking.balance|intcomma }}</dd></div>{% endif %}
+                <div><dt>Payment method</dt><dd>M-Pesa</dd></div>
+                <div><dt>Status</dt><dd><span class="status status-paid">{% if booking.balance > 0 %}Booking fee paid{% else %}Paid in full{% endif %}</span></dd></div>
+              </dl>
+            </section>
+          </div>
+          <footer class="pr-foot">
+            <p><strong>Thank you for hiring with {{ business.name }}.</strong></p>
+            <p class="fine">Terms of hire: {{ site_url }}/terms/. Questions? Call {{ business.phone }} and quote {{ booking.ref }}.</p>
+          </footer>
+        </div>
+      </article>
+    </div>
   </div>
 </section>
 {% endblock %}

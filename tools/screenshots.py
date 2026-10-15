@@ -302,7 +302,8 @@ def public_screens(ctx):
         ('about', '/about/', None, (375, 1440)),
         ('faq', '/faq/', None, (375, 1440)),
         ('terms', '/terms/', None, (375,)),
-        ('404', '/no-such-page/', None, None),
+        ('404', '/__ui/404/', None, None),
+        ('500', '/__ui/500/', None, (375, 1440)),
     ]
 
 
@@ -340,6 +341,12 @@ def capture(run, screens, width, theme, staff, wanted):
             if action:
                 action(page)
             run.snap(page, f'{name}-{width}-{theme}', full=action is None)
+            if name == 'receipt' and width == 1440 and theme == 'light':   # the print stylesheet: one A4 page
+                pdf = page.pdf(format='A4', print_background=True)
+                (OUT / 'receipt-print.pdf').write_bytes(pdf)
+                pages = pdf.count(b'/Type /Page') - pdf.count(b'/Type /Pages')
+                if pages != 1:
+                    run.fail(f'receipt prints on {pages} A4 pages, not 1')
         except Exception as exc:  # keep going: report every broken screen at the end
             run.fail(f'{name}-{width}-{theme}: {type(exc).__name__}: {str(exc).splitlines()[0]}')
     ctx.close()

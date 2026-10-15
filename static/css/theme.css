@@ -332,7 +332,8 @@ input:disabled, select:disabled, textarea:disabled { opacity: .55; cursor: not-a
 .input-group-text { background-color: var(--surface-2); border-color: var(--control-border); color: var(--text-muted); }
 
 label { font-weight: var(--fw-semibold); font-size: .95rem; }
-form label:not(.form-check-label):not(.btn), .field { display: grid; gap: var(--space-1); margin-bottom: var(--space-4); align-content: start; }
+/* Older forms that wrap the input inside its <label>; Bootstrap labels (.form-label, floating, check) are left alone */
+form label:not(.form-check-label):not(.btn):not(.form-label):not(.visually-hidden):not(.form-floating > label), .field { display: grid; gap: var(--space-1); margin-bottom: var(--space-4); align-content: start; }
 .field-hint, .form-text { color: var(--text-muted); font-size: var(--fs-small); font-weight: var(--fw-regular); }
 .field-error, .form-error { color: var(--danger); font-size: var(--fs-small); font-weight: var(--fw-medium); }
 .field-error:empty, .form-error:empty { display: none; }

@@ -1,8 +1,9 @@
 {% load static %}<!doctype html>
+{# Rendered without the usual context (no database, no settings), so links and names are written out. #}
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex">
   <title>Something went wrong | ZidiCarHire</title>
   <link rel="icon" href="{% static 'img/zidicarhire-favicon.svg' %}" type="image/svg+xml">
@@ -11,17 +12,25 @@
 </head>
 <body>
   <header class="site-header">
-    <div class="wrap header-inner">
-      <a class="brand" href="/"><img class="brand-logo" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire" width="160" height="40"></a>
-    </div>
+    <nav class="navbar" aria-label="Main">
+      <div class="container-xl">
+        <a class="navbar-brand brand" href="/"><img class="brand-logo" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire" width="160" height="40"></a>
+      </div>
+    </nav>
   </header>
   <main id="main">
-    <section class="page error-page">
-      <div class="wrap narrow">
-        <p class="plate plate-ref" aria-hidden="true">500</p>
-        <h1>Something went wrong on our side</h1>
-        <p class="lead">Sorry about that. Wait a minute and try again. If you were paying, don't pay twice: check your M-Pesa messages first, then use <a href="/bookings/find/">Find my booking</a> to see whether your booking went through.</p>
-        <p class="error-actions"><a class="btn btn-primary" href="/">Go to the home page</a></p>
+    <section class="page page-center error-page">
+      <div class="container-xl">
+        <div class="error-box">
+          <span class="page-icon page-icon-lg" aria-hidden="true"><i class="bi bi-tools"></i></span>
+          <p class="plate plate-lg" aria-hidden="true">500</p>
+          <h1>Something went wrong on our side</h1>
+          <p class="lead">Sorry about that. Wait a minute and try again. If you were paying, don't pay twice: check your M-Pesa messages first, then use <a href="/bookings/find/">Find my booking</a> to see whether your booking went through.</p>
+          <div class="page-actions">
+            <a class="btn btn-primary" href="/"><i class="bi bi-house" aria-hidden="true"></i>Go to the home page</a>
+            <a class="btn btn-ghost" href="/contact/"><i class="bi bi-envelope" aria-hidden="true"></i>Contact us</a>
+          </div>
+        </div>
       </div>
     </section>
   </main>

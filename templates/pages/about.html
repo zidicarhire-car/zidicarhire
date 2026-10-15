@@ -4,21 +4,29 @@
 {% block head %}<link rel="canonical" href="{{ site_url }}{% url 'pages:about' %}">{% endblock %}
 
 {% block content %}
-<section class="page">
-  <div class="wrap narrow">
+<section class="page-hero">
+  <div class="container-xl">
     <h1>About {{ business.name }}</h1>
-    <p class="lead">We hire out cars across Kenya, from branches in {% for b in branches_list %}{% if not forloop.first %}{% if forloop.last %} and {% else %}, {% endif %}{% endif %}{{ b.name }}{% endfor %}. You book online, pay with M-Pesa and get your confirmation straight away.</p>
+    <p class="lead">We hire out cars across Kenya, from branches in {% for b in branches_list %}{% if not forloop.first %}{% if forloop.last %} and {% else %}, {% endif %}{% endif %}{{ b.name }}{% endfor %}. You book online, pay on your phone and get your confirmation straight away.</p>
+  </div>
+</section>
+<section class="page">
+  <div class="container-xl">
+    <div class="page-narrow prose">
+      <p class="owner-edit-block"><mark class="owner-edit">Owner to edit:</mark> Write two or three short paragraphs about the business: when it started, who runs it, the kind of cars you keep, and what customers can expect when they collect a car. Plain words work best. This text is in <code>templates/pages/about.html</code>.</p>
 
-    <p class="owner-edit-block"><mark class="owner-edit">Owner to edit:</mark> Write two or three short paragraphs about the business: when it started, who runs it, the kind of cars you keep, and what customers can expect when they collect a car. Plain words work best. This text is in <code>templates/pages/about.html</code>.</p>
-
-    <h2>How we work</h2>
-    <ul class="tick-list">
-      <li>Prices are shown before you book, including any airport, delivery or one-way fee.</li>
-      <li>You pay by M-Pesa to our till and get a receipt by email.</li>
-      <li>You can collect from a branch, the airport or your hotel.</li>
-      <li>Our team answers on the website chat, WhatsApp and phone.</li>
-    </ul>
-    <p><a class="btn btn-primary" href="{% url 'fleet:cars' %}">See available cars</a> <a class="btn btn-ghost" href="{% url 'pages:contact' %}">Contact us</a></p>
+      <h2>How we work</h2>
+      <ul class="tick-list">
+        <li><i class="bi bi-check2" aria-hidden="true"></i>Prices are shown before you book, including any airport, delivery or one-way fee.</li>
+        <li><i class="bi bi-check2" aria-hidden="true"></i>You pay by M-Pesa to our till and get a receipt by email.</li>
+        <li><i class="bi bi-check2" aria-hidden="true"></i>You can collect from a branch, the airport or your hotel.</li>
+        <li><i class="bi bi-check2" aria-hidden="true"></i>Our team answers on the website chat, WhatsApp and phone.</li>
+      </ul>
+      <div class="page-actions">
+        <a class="btn btn-primary" href="{% url 'fleet:cars' %}"><i class="bi bi-car-front" aria-hidden="true"></i>See available cars</a>
+        <a class="btn btn-ghost" href="{% url 'pages:contact' %}"><i class="bi bi-envelope" aria-hidden="true"></i>Contact us</a>
+      </div>
+    </div>
   </div>
 </section>
 {% endblock %}
