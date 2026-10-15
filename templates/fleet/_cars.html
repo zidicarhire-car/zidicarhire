@@ -10,7 +10,7 @@
     {% if suggestions or not cars %}{% include "fleet/_no_cars.html" %}{% endif %}
 
     {% if cars %}
-    <ul class="car-grid" id="car-grid" data-from="{{ start|date:'Y-m-d' }}" data-to="{{ end|date:'Y-m-d' }}" data-city="{{ location.slug }}">
+    <ul class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 g-md-4 car-grid" id="car-grid" data-from="{{ start|date:'Y-m-d' }}" data-to="{{ end|date:'Y-m-d' }}" data-city="{{ location.slug }}">
       {% for car in cars %}{% include "fleet/_car_card.html" %}{% endfor %}
     </ul>
     {% endif %}

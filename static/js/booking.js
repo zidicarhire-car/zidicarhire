@@ -467,10 +467,16 @@
   /* ---------- live availability on the car list ---------- */
   // Looked up each time: the car list is replaced when filters change.
   const carGrid = () => document.getElementById('car-grid');
+  /* A booked car's card is dimmed and its button disabled (the card explains why). */
+  function setFree(li, free) {
+    li.classList.toggle('is-booked', !free);
+    const btn = li.querySelector('.book-btn');
+    if (btn) btn.disabled = !free;
+  }
   function markBooked(id, onlyIfFull) {
     if (!id || onlyIfFull) { refreshAvailability(); return; }
-    const li = carGrid()?.querySelector(`[data-car-id="${id}"]`);
-    if (li) li.classList.add('is-booked');
+    const li = carGrid()?.querySelector(`li.car[data-car-id="${id}"]`);
+    if (li) setFree(li, false);
   }
   async function refreshAvailability() {
     const grid = carGrid();
@@ -480,7 +486,7 @@
       grid.querySelectorAll('li.car').forEach((li) => {
         const free = res.available[li.dataset.carId];
         if (free === undefined) return;
-        li.classList.toggle('is-booked', !free);
+        setFree(li, free);
       });
     } catch (e) { /* try again next round */ }
   }

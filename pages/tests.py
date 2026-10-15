@@ -98,7 +98,8 @@ class CarListingTests(TestCase):
 
     def test_home_shows_featured_cars_why_faq_and_seo(self):
         res = self.client.get('/', {'city': 'nairobi'})
-        for text in ('Why book with us', 'How do I pay?', 'Need a car this week?', 'og:image', 'og:title',
-                     'rel="apple-touch-icon"', 'zidicarhire-logo-white.svg', 'alt="ZidiCarHire"'):
+        for text in ('Car hire across Kenya.', 'Why book with us', 'Instant confirmation', 'Our branches',
+                     'How it works', 'Is there a security deposit?', 'Owner to confirm', 'Ready when you are.',
+                     'og:image', 'og:title', 'rel="apple-touch-icon"', 'zidicarhire-logo-white.svg', 'alt="ZidiCarHire"'):
             self.assertContains(res, text)
         self.assertEqual(len(res.context['featured']), 3)

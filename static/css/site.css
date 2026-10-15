@@ -73,57 +73,136 @@ body.has-tabbar { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bot
 body.modal-open .tabbar { display: none; }
 
 /* ===================== Hero and search ===================== */
-.hero { background: var(--brand); color: var(--on-brand); padding: var(--space-7) 0 var(--space-8); }
-.hero-title { font-size: var(--fs-display); font-stretch: var(--wdth-display); font-weight: var(--fw-black); letter-spacing: -.02em; line-height: 1; max-width: 13ch; margin-bottom: var(--space-4); }
-.hero-sub { max-width: 52ch; font-size: var(--fs-lead); color: var(--on-brand-muted); margin-bottom: var(--space-6); }
+.hero { position: relative; isolation: isolate; overflow: hidden; background: var(--brand); color: var(--on-brand); padding: clamp(2.25rem, 5vw, 4.5rem) 0; }
+.hero-roads { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; pointer-events: none; }
+.hero-roads path { fill: none; }
+.hero-roads .road { stroke: rgba(255, 255, 255, .045); stroke-width: 120; }
+.hero-roads .road.road-far { stroke-width: 70; }
+.hero-roads .road-line { stroke: var(--plate); stroke-opacity: .3; stroke-width: 4; stroke-dasharray: 26 22; stroke-linecap: round; }
+.hero-roads .road-line.road-far { stroke-opacity: .18; stroke-width: 3; }
+.hero-title { font-size: var(--fs-display); font-stretch: var(--wdth-display); font-weight: var(--fw-black); letter-spacing: -.02em; line-height: 1; max-width: 12ch; margin-bottom: var(--space-4); }
+.hero-sub { max-width: 54ch; font-size: var(--fs-lead); color: var(--on-brand-muted); margin-bottom: var(--space-6); }
 .hero-kicker { margin-bottom: var(--space-3); font-size: var(--fs-small); }
 .hero-kicker a { color: var(--on-brand-muted); }
-.hero-compact { padding: var(--space-6) 0 var(--space-7); }
+.hero-compact { padding: var(--space-6) 0; }
 .hero-title-small { font-size: clamp(1.8rem, 1.2rem + 3vw, 3rem); max-width: none; }
 
-.search {
-  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); align-items: end;
-  background: var(--surface); color: var(--text); padding: var(--space-4); border-radius: var(--radius-lg); border: 3px solid var(--plate);
-}
-.search label { margin: 0; font-size: var(--fs-small); color: var(--text-muted); }
-@media (min-width: 480px) { .search { grid-template-columns: repeat(2, minmax(0, 1fr)); } .search .btn { grid-column: 1 / -1; } }
-@media (min-width: 1024px) { .search { grid-template-columns: repeat(3, minmax(0, 1fr)); } .search .btn { grid-column: auto; } }
-@media (min-width: 1280px) { .search { grid-template-columns: repeat(5, minmax(0, 1fr)) auto; } }
-@media (min-width: 1024px) { .search-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .search-4 .btn { grid-column: 1 / -1; } }
-@media (min-width: 1280px) { .search-4 { grid-template-columns: repeat(4, minmax(0, 1fr)) auto; } .search-4 .btn { grid-column: auto; } }
+.search-card { position: relative; background: var(--surface); color: var(--text); border-radius: var(--radius-lg); box-shadow: var(--shadow-2); padding: var(--space-4); }
+@media (min-width: 768px) { .search-card { padding: var(--space-5); } }
+.search-card .form-label { margin-bottom: .35rem; font-size: var(--fs-small); }
+.search-card .form-control, .search-card .form-select, .search-card .input-group-text, .search-btn { min-height: 48px; }
+.search-days { display: flex; align-items: center; gap: .4rem; margin: var(--space-3) 0 0; font-size: var(--fs-small); color: var(--text-muted); }
 
-/* ===================== Car cards and grids ===================== */
-.fleet { padding-block: var(--section); }
-.fleet-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: var(--space-2) var(--space-5); margin-bottom: var(--space-5); }
-.fleet-head p { color: var(--text-muted); margin: 0; }
-.car-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(290px, 100%), 1fr)); gap: var(--space-5); }
-.car { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; }
-.car-photo { position: relative; display: block; aspect-ratio: 16 / 10; background: var(--placeholder); }
-.car-photo img { width: 100%; height: 100%; object-fit: cover; }
-.car-category { position: absolute; left: var(--space-3); top: var(--space-3); background: var(--brand); color: var(--on-brand); font-size: var(--fs-xs); font-weight: var(--fw-semibold); padding: .2rem .6rem; border-radius: var(--radius-pill); }
-.car-body { padding: var(--space-4) var(--space-4) var(--space-5); display: flex; flex-direction: column; flex: 1; }
-.car-body h3 { font-size: 1.25rem; margin-bottom: var(--space-1); }
-.car-body h3 a { text-decoration: none; }
-.car-body h3 a:hover { text-decoration: underline; }
-.car-city { display: flex; align-items: center; gap: .3rem; font-size: var(--fs-small); font-weight: var(--fw-semibold); margin-bottom: var(--space-2); }
-.specs { list-style: none; padding: 0; margin: 0 0 var(--space-3); display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); font-size: var(--fs-small); color: var(--text-muted); }
-.specs li + li::before { content: ""; display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--control-border); margin-right: var(--space-4); vertical-align: middle; }
-.car-desc { font-size: .95rem; color: var(--text-muted); }
-.car-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-3); flex-wrap: wrap; padding-top: var(--space-2); }
-.price { display: grid; gap: .1rem; }
-.price .plate { font-size: 1.25rem; justify-self: start; }
-.price .per { font-size: var(--fs-xs); color: var(--text-muted); }
-.price .total { font-size: var(--fs-small); font-weight: var(--fw-semibold); }
-.book-btn .when-booked { display: none; }
-.car.is-booked .car-photo img { filter: grayscale(1); opacity: .6; }
-.car.is-booked .when-free { display: none; }
+/* ===================== Sections ===================== */
+.section-head { max-width: 62ch; margin-bottom: var(--space-5); }
+.section-head h2 { margin-bottom: var(--space-2); }
+.section-head p { margin-bottom: 0; color: var(--text-muted); }
+.section-head p + p { margin-top: var(--space-4); }
+.section-head-split { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--space-3) var(--space-5); max-width: none; }
+.section-head-split > div { max-width: 62ch; }
+.section-more { margin: var(--space-5) 0 0; text-align: center; }
+
+.features { background: var(--surface); border-bottom: 1px solid var(--border); padding-block: clamp(2rem, 4vw, 3rem); }
+.usp-list { list-style: none; padding: 0; margin-bottom: 0; }
+.usp { display: grid; align-content: start; gap: .3rem; }
+.usp-icon { display: grid; place-items: center; width: 56px; height: 56px; margin-bottom: var(--space-2); font-size: 1.5rem; }
+.usp h3 { margin: 0; font-size: 1.0625rem; font-stretch: 110%; }
+.usp p { margin: 0; font-size: .95rem; color: var(--text-muted); }
+
+/* Branches: a swipeable row on phones, a grid from 992px */
+.branch-row {
+  list-style: none; display: grid; grid-auto-flow: column; grid-auto-columns: min(80%, 300px); gap: var(--space-3);
+  margin: 0 calc(var(--bs-gutter-x) * -.5); padding: var(--space-1) calc(var(--bs-gutter-x) * .5) var(--space-3);
+  overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: calc(var(--bs-gutter-x) * .5);
+}
+.branch-row > li { scroll-snap-align: start; }
+@media (min-width: 992px) {
+  .branch-row { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); margin-inline: 0; padding-inline: 0; overflow: visible; }
+}
+@media (min-width: 1200px) { .branch-row { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.branch-card { box-shadow: var(--shadow-1); transition: border-color var(--dur) var(--ease); }
+.branch-card:hover { border-color: var(--text-muted); }
+.branch-card .card-body { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); }
+.branch-icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: var(--space-1); border-radius: var(--radius); background: var(--bs-primary-bg-subtle); font-size: 1.3rem; }
+.branch-name { margin: 0; font-size: 1.25rem; }
+.branch-line { display: flex; gap: var(--space-2); margin: 0; font-size: .925rem; color: var(--text-muted); }
+.branch-line .bi { flex: none; margin-top: .2rem; }
+.branch-link { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: auto; padding-top: var(--space-2); color: var(--text); font-weight: var(--fw-bold); text-decoration: none; }
+.branch-link .bi { transition: transform var(--dur) var(--ease); }
+.branch-card:hover .branch-link .bi { transform: translateX(3px); }
+
+/* Browse by type */
+.type-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+@media (min-width: 768px) { .type-list { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } }
+.type-card {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--space-3); align-items: center; min-height: 72px; height: 100%;
+  padding: var(--space-3); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-pill); color: var(--text); text-decoration: none;
+}
+.type-card:hover { border-color: var(--text); color: var(--text); }
+.type-icon { grid-row: span 2; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: var(--bs-primary-bg-subtle); font-size: 1.35rem; }
+.type-name { font-weight: var(--fw-bold); line-height: 1.2; }
+.type-count { font-size: var(--fs-small); color: var(--text-muted); }
+
+/* How it works: a vertical road on phones, three across from 768px */
+.how { background: var(--surface); border-block: 1px solid var(--border); }
+.how-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-5); }
+.how-step { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-4); }
+.how-step .plate-num { justify-self: start; }
+.how-step:not(:last-child)::after { content: ""; position: absolute; left: calc(1.2rem - 1px); top: 2.7rem; bottom: calc(-1 * var(--space-5) + .5rem); border-left: 2px dashed var(--control-border); }
+.how-text h3 { display: flex; align-items: center; gap: var(--space-2); margin: .3rem 0 var(--space-2); font-size: 1.15rem; }
+.how-text h3 .bi { color: var(--text-muted); }
+.how-text p { margin: 0; max-width: 40ch; color: var(--text-muted); }
+@media (min-width: 768px) {
+  .how-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); }
+  .how-step { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+  .how-step:not(:last-child)::after { left: 3.6rem; right: calc(-1 * var(--space-6) + 1rem); top: calc(1.1rem - 1px); bottom: auto; border-left: 0; border-top: 2px dashed var(--control-border); }
+}
+
+.faq-layout { display: grid; gap: var(--space-4); }
+@media (min-width: 992px) { .faq-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--space-7); align-items: start; } }
+
+.cta-band { background: var(--brand); color: var(--on-brand); padding-block: clamp(2.5rem, 6vw, 4rem); }
+.cta-inner { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-4); }
+.cta-inner h2 { margin: 0; font-size: clamp(1.75rem, 1.2rem + 2.5vw, 2.75rem); font-stretch: var(--wdth-display); font-weight: var(--fw-black); }
+
+/* ===================== Car cards ===================== */
+.car-grid { list-style: none; padding: 0; margin-bottom: 0; }
+.car-card { overflow: hidden; box-shadow: var(--shadow-1); }
+.car-media { position: relative; }
+.car-photo { display: block; background: var(--placeholder); }
+.car-photo img { object-fit: cover; }
+.car-badges { position: absolute; top: var(--space-3); left: var(--space-3); right: var(--space-3); display: flex; flex-wrap: wrap; gap: var(--space-1); pointer-events: none; }
+.car-badges > span, .car-booked-badge { display: inline-flex; align-items: center; gap: .25rem; padding: .4em .65em; border-radius: var(--radius-pill); font-size: .75rem; font-weight: var(--fw-bold); }
+.car-category { background: var(--brand); color: var(--on-brand); }
+.car-city { background: rgba(255, 255, 255, .94); color: #1C2340; }
+.car-booked-badge { display: none; position: absolute; left: var(--space-3); bottom: var(--space-3); background: rgba(10, 13, 30, .86); color: #FFFFFF; }
+.car.is-booked .car-booked-badge { display: inline-flex; }
+.car.is-booked .car-photo img { filter: grayscale(1); opacity: .55; }
+.car-card .card-body { display: flex; flex-direction: column; padding: var(--space-4) var(--space-4) var(--space-2); }
+.car-name { margin: 0 0 var(--space-2); font-size: 1.2rem; }
+.car-name a { color: inherit; text-decoration: none; }
+.car-name a:hover { text-decoration: underline; }
+.car-specs { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin: 0 0 var(--space-3); padding: 0; font-size: .9rem; color: var(--text-muted); }
+.car-specs li { display: inline-flex; align-items: center; gap: .35rem; }
+.car-price { display: flex; align-items: baseline; gap: var(--space-1); margin: auto 0 0; }
+.car-price .plate { font-size: 1.3rem; }
+.car-price .per { font-size: .95rem; color: var(--text-muted); }
+.car-total { margin: var(--space-1) 0 0; font-size: var(--fs-small); color: var(--text-muted); }
+.car-card .card-footer { padding: var(--space-3) var(--space-4) var(--space-4); background: none; border-top: 0; }
+.car-note { margin: var(--space-2) 0 0; font-size: var(--fs-small); color: var(--text-muted); }
+.car:not(.is-booked) .car-note { display: none; }
+.when-booked { display: none; }
 .car.is-booked .when-booked { display: inline; }
+.car.is-booked .when-free { display: none; }
+.book-btn:disabled { --bs-btn-disabled-bg: var(--surface-2); --bs-btn-disabled-color: var(--text-muted); --bs-btn-disabled-border-color: var(--border); --bs-btn-disabled-opacity: 1; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .car-card { transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+  .car-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(16, 20, 45, .14); }
+}
 .no-cars { margin-bottom: var(--space-5); }
 .nearby { list-style: none; padding: 0; margin: 0 0 var(--space-4); display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3) var(--space-5); }
 .nearby li { display: grid; gap: var(--space-1); justify-items: center; }
 .nearby small { color: var(--text-muted); }
-.no-cars-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); }
-.more-link { text-align: center; margin-top: var(--space-5); }
 .car-grid-small { grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); }
 .mini-car a { display: grid; text-decoration: none; }
 .mini-car img { aspect-ratio: 16 / 10; width: 100%; height: auto; object-fit: cover; background: var(--placeholder); }
@@ -146,37 +225,13 @@ body.modal-open .tabbar { display: none; }
 .results-count { color: var(--text-muted); margin: 0 0 var(--space-4); }
 .results[aria-busy="true"] .car-grid:not(:has(.skeleton)) { opacity: .55; }
 
-/* ===================== Home sections ===================== */
-.branches, .how, .why, .faq-home { padding-block: var(--section); border-top: 1px solid var(--border); }
-.branch-grid { list-style: none; margin: var(--space-5) 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr)); gap: var(--space-5); }
-.branch { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); }
-.branch h3 { font-size: 1.3rem; font-stretch: 110%; margin: 0; }
-.branch dl { margin: 0 0 var(--space-2); display: grid; gap: var(--space-2); font-size: .95rem; }
-.branch dt { color: var(--text-muted); font-size: var(--fs-xs); font-weight: var(--fw-semibold); }
-.branch dd { margin: 0; }
-.branch .btn { margin-top: auto; align-self: flex-start; }
+/* ===================== City page branch details ===================== */
 .branch-detail { padding-block: var(--space-7); border-top: 1px solid var(--border); }
 .branch-detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: var(--space-6) var(--space-7); }
 .branch-detail .receipt { margin-top: var(--space-2); }
 .points { list-style: none; padding: 0; margin: var(--space-2) 0 var(--space-5); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
 .points li { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--border); }
 .points li:last-child { border-bottom: 0; }
-
-.steps { list-style: none; counter-reset: step; padding: 0; margin: var(--space-5) 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: var(--space-5); }
-.steps li { counter-increment: step; position: relative; padding-top: 3.25rem; }
-.steps li::before {
-  content: counter(step); position: absolute; top: 0; left: 0; display: grid; place-items: center; width: 2.4rem; height: 2.2rem;
-  background: var(--plate); color: var(--plate-ink); border: 2px solid var(--plate-ink); border-radius: var(--radius-sm);
-  font-weight: var(--fw-black); font-stretch: var(--wdth-narrow); font-size: 1.3rem;
-}
-.steps p { color: var(--text-muted); }
-.why-grid { list-style: none; margin: var(--space-5) 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: var(--space-5); }
-.why-grid li { border-top: 3px solid var(--plate); padding-top: var(--space-4); }
-.why-grid p { color: var(--text-muted); margin: 0; }
-.faq-list { margin: var(--space-4) 0; }
-.cta-band { background: var(--brand); color: var(--on-brand); padding-block: var(--space-7); }
-.cta-inner { text-align: center; }
-.cta-inner p { color: var(--on-brand-muted); margin-inline: auto; max-width: var(--measure); }
 
 /* ===================== Booking dialog (also a .dlg) ===================== */
 .booking-dialog { width: min(760px, 100% - 2rem); }

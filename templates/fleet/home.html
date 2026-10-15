@@ -7,67 +7,120 @@
 {% endblock %}
 
 {% block content %}
-<section class="hero">
-  <div class="wrap">
-    <h1 class="hero-title">Car hire across Kenya. Pay with M-Pesa.</h1>
-    <p class="hero-sub">{% if locations %}Branches in {% for loc in locations %}{% if not forloop.first %}{% if forloop.last %} and {% else %}, {% endif %}{% endif %}{{ loc.name }}{% endfor %}. {% endif %}Choose your city and dates, pick a car, and approve the M-Pesa prompt on your phone. You're booked the moment you pay.</p>
+<section class="hero" aria-labelledby="hero-title">
+  <svg class="hero-roads" viewBox="0 0 1200 600" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
+    <path class="road" d="M1240 40C1010 120 880 260 820 420S700 640 560 700"/>
+    <path class="road-line" d="M1240 40C1010 120 880 260 820 420S700 640 560 700"/>
+    <path class="road road-far" d="M1240 330C1100 360 1010 430 960 520S900 650 860 700"/>
+    <path class="road-line road-far" d="M1240 330C1100 360 1010 430 960 520S900 650 860 700"/>
+  </svg>
+  <div class="container-xl">
+    <h1 class="hero-title" id="hero-title">Car hire across Kenya.</h1>
+    <p class="hero-sub">{% if locations %}Branches in {% for loc in locations %}{% if not forloop.first %}{% if forloop.last %} and {% else %}, {% endif %}{% endif %}{{ loc.name }}{% endfor %}. {% endif %}Choose your city and dates, pick a car, and pay securely on your phone. You're booked the moment you pay.</p>
     {% include "fleet/_search.html" %}
   </div>
 </section>
 
-<section class="fleet" id="cars">
-  <div class="wrap">
-    {% if location %}
-    <div class="fleet-head">
-      <h2>Cars in {{ location.name }}</h2>
-      <p>Prices for {{ start|date:"D j M" }} to {{ end|date:"D j M" }} ({{ days }} day{{ days|pluralize }}). Airport and delivery pick-ups are added when you book.</p>
-    </div>
-    {% if suggestions or not cars %}{% include "fleet/_no_cars.html" %}{% endif %}
-    {% if featured %}
-    <ul class="car-grid" id="car-grid" data-from="{{ start|date:'Y-m-d' }}" data-to="{{ end|date:'Y-m-d' }}" data-city="{{ location.slug }}">
-      {% for car in featured %}{% include "fleet/_car_card.html" %}{% endfor %}
-    </ul>
-    {% if cars|length > featured|length %}
-    <p class="more-link"><a class="btn btn-ghost" href="{% url 'fleet:cars' %}?city={{ location.slug }}&amp;from={{ start|date:'Y-m-d' }}&amp;to={{ end|date:'Y-m-d' }}">See all {{ cars|length }} cars in {{ location.name }}</a></p>
-    {% endif %}
-    {% endif %}
-    {% else %}
-    <div class="empty"><h3>We're getting our branches ready</h3><p>Chat with us and we'll find you a car.</p>
-      <button type="button" class="btn btn-primary" data-open-chat>Chat with us</button></div>
-    {% endif %}
-  </div>
-</section>
-
-{% include "fleet/_how.html" %}
-
-<section class="why" id="why">
-  <div class="wrap">
-    <h2>Why book with us</h2>
-    <ul class="why-grid">
-      <li><h3>Confirmed in seconds</h3><p>Approve the M-Pesa prompt and your car is booked. Your receipt comes by email and you can download it any time.</p></li>
-      <li><h3>Collect where it suits you</h3><p>Pick up at our branch, the airport or your hotel. Any pick-up fee is shown before you pay.</p></li>
-      <li><h3>The price you see is the price you pay</h3><p>Every fee you choose is in the total before you pay. Hires of a week or more often cost less per day.</p></li>
-      <li><h3>Branches across Kenya</h3><p>Hire in {% for loc in locations %}{% if not forloop.first %}{% if forloop.last %} or {% else %}, {% endif %}{% endif %}{{ loc.name }}{% empty %}our branch{% endfor %}, and return to another city on set routes.</p></li>
-      <li><h3>Talk to a real person</h3><p>Use the chat on this page{% if business.whatsapp %} or WhatsApp us{% endif %}. We usually reply within a few minutes.</p></li>
+<section class="features" aria-labelledby="features-title">
+  <div class="container-xl">
+    <h2 class="visually-hidden" id="features-title">Why book with us</h2>
+    <ul class="row row-cols-2 row-cols-lg-4 g-3 g-md-4 usp-list">
+      <li class="col usp">
+        <span class="usp-icon bg-plate rounded-3" aria-hidden="true"><i class="bi bi-lightning-charge"></i></span>
+        <h3>Instant confirmation</h3>
+        <p>Booked the moment you pay.</p>
+      </li>
+      <li class="col usp">
+        <span class="usp-icon bg-plate rounded-3" aria-hidden="true"><i class="bi bi-geo-alt"></i></span>
+        <h3>5 cities</h3>
+        <p>Nairobi, Mombasa, Kisumu, Nakuru and Eldoret.</p>
+      </li>
+      <li class="col usp">
+        <span class="usp-icon bg-plate rounded-3" aria-hidden="true"><i class="bi bi-phone"></i></span>
+        <h3>Pay on your phone</h3>
+        <p>No cash, no paperwork queues.</p>
+      </li>
+      <li class="col usp">
+        <span class="usp-icon bg-plate rounded-3" aria-hidden="true"><i class="bi bi-headset"></i></span>
+        <h3>Real people on chat</h3>
+        <p>Ask us anything before you book.</p>
+      </li>
     </ul>
   </div>
 </section>
 
 {% if locations %}{% include "fleet/_branches.html" %}{% endif %}
 
-<section class="faq-home" id="faq">
-  <div class="wrap narrow">
-    <h2>Questions</h2>
-    {% include "pages/_faq_list.html" with home_only=True %}
-    <p><a href="{% url 'pages:faq' %}">See all questions</a></p>
+<section class="section fleet" id="cars" aria-labelledby="cars-title">
+  <div class="container-xl">
+    {% if location %}
+    <div class="section-head section-head-split">
+      <div>
+        <h2 id="cars-title">Cars in {{ location.name }}</h2>
+        <p>Prices for {{ start|date:"D j M" }} to {{ end|date:"D j M" }} ({{ days }} day{{ days|pluralize }}). Airport and delivery pick-ups are added when you book.</p>
+      </div>
+      <a class="btn btn-ghost d-none d-md-inline-flex" href="{% url 'fleet:cars' %}?city={{ location.slug }}&amp;from={{ start|date:'Y-m-d' }}&amp;to={{ end|date:'Y-m-d' }}">View all cars<i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+    </div>
+    {% if suggestions or not cars %}{% include "fleet/_no_cars.html" %}{% endif %}
+    {% if featured %}
+    <ul class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 g-md-4 car-grid" id="car-grid" data-from="{{ start|date:'Y-m-d' }}" data-to="{{ end|date:'Y-m-d' }}" data-city="{{ location.slug }}">
+      {% for car in featured %}{% include "fleet/_car_card.html" %}{% endfor %}
+    </ul>
+    <p class="section-more"><a class="btn btn-primary" href="{% url 'fleet:cars' %}?city={{ location.slug }}&amp;from={{ start|date:'Y-m-d' }}&amp;to={{ end|date:'Y-m-d' }}">View all {{ cars|length }} car{{ cars|length|pluralize }} in {{ location.name }}<i class="bi bi-arrow-right" aria-hidden="true"></i></a></p>
+    {% endif %}
+    {% else %}
+    <h2 id="cars-title" class="visually-hidden">Cars</h2>
+    <div class="empty">
+      <span class="empty-icon" aria-hidden="true"><i class="bi bi-car-front"></i></span>
+      <h3>We're getting our branches ready</h3>
+      <p>Chat with us and we'll find you a car.</p>
+      <button type="button" class="btn btn-primary" data-open-chat>Chat with us</button>
+    </div>
+    {% endif %}
   </div>
 </section>
 
-<section class="cta-band">
-  <div class="wrap cta-inner">
-    <h2>Need a car this week?</h2>
-    <p>See which cars are free for your dates and book in a couple of minutes.</p>
-    <a class="btn btn-plate" href="{% url 'fleet:cars' %}{% if location %}?city={{ location.slug }}{% endif %}">See available cars</a>
+{% regroup cars|dictsort:"category" by category as car_types %}
+{% if car_types|length > 1 %}
+<section class="section categories" aria-labelledby="types-title">
+  <div class="container-xl">
+    <div class="section-head">
+      <h2 id="types-title">Browse by type</h2>
+    </div>
+    <ul class="type-list">
+      {% for value, label in categories %}{% for group in car_types %}{% if group.grouper == value %}
+      <li>
+        <a class="type-card" href="{% url 'fleet:cars' %}?city={{ location.slug }}&amp;category={{ value }}&amp;from={{ start|date:'Y-m-d' }}&amp;to={{ end|date:'Y-m-d' }}">
+          <span class="type-icon" aria-hidden="true"><i class="bi {% if value == 'compact' %}bi-car-front{% elif value == 'saloon' %}bi-car-front-fill{% elif value == 'suv' %}bi-truck-front{% elif value == '4x4' %}bi-signpost-2{% elif value == 'van' %}bi-bus-front{% elif value == 'pickup' %}bi-truck{% else %}bi-stars{% endif %}"></i></span>
+          <span class="type-name">{{ label }}</span>
+          <span class="type-count">{{ group.list|length }} car{{ group.list|length|pluralize }}</span>
+        </a>
+      </li>
+      {% endif %}{% endfor %}{% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}
+
+{% include "fleet/_how.html" %}
+
+<section class="section faq-home" id="faq" aria-labelledby="faq-title">
+  <div class="container-xl">
+    <div class="faq-layout">
+      <div class="section-head">
+        <h2 id="faq-title">Questions</h2>
+        <p>Can't find your answer? Ask us on the chat.</p>
+        <p><a class="btn btn-ghost" href="{% url 'pages:faq' %}">See all questions<i class="bi bi-arrow-right" aria-hidden="true"></i></a></p>
+      </div>
+      {% include "fleet/_home_faq.html" %}
+    </div>
+  </div>
+</section>
+
+<section class="cta-band" aria-labelledby="cta-title">
+  <div class="container-xl cta-inner">
+    <h2 id="cta-title">Ready when you are.</h2>
+    <a class="btn btn-plate btn-lg" href="{% url 'fleet:cars' %}{% if location %}?city={{ location.slug }}{% endif %}"><i class="bi bi-search" aria-hidden="true"></i>Find a car</a>
   </div>
 </section>
 

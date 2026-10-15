@@ -1,38 +1,40 @@
-{% load static humanize %}
-<li class="car{% if not car.available %} is-booked{% endif %}" data-car-id="{{ car.pk }}">
-  <a class="car-photo" href="{{ car.get_absolute_url }}?from={{ start|date:'Y-m-d' }}&amp;to={{ end|date:'Y-m-d' }}" tabindex="-1" aria-hidden="true">
-    {% with cover=car.cover %}
-    {% if cover %}
-      <img src="{{ cover.thumbnail.url }}" srcset="{{ cover.thumbnail.url }} 600w, {{ cover.image.url }} 1600w"
-           sizes="(max-width: 640px) 100vw, 380px" alt="" loading="lazy" width="600" height="375">
-    {% else %}
-      <img src="{% static 'img/car-placeholder.svg' %}" alt="" loading="lazy" width="600" height="375">
-    {% endif %}
-    {% endwith %}
-    <span class="car-category">{{ car.get_category_display }}</span>
-  </a>
-  <div class="car-body">
-    <h3><a href="{{ car.get_absolute_url }}?from={{ start|date:'Y-m-d' }}&amp;to={{ end|date:'Y-m-d' }}">{{ car.name }}</a></h3>
-    <p class="car-city">
-      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9.5" r="2.5" fill="currentColor"/></svg>
-      {{ car.location.name }}
-    </p>
-    <ul class="specs">
-      <li>{{ car.seats }} seats</li>
-      <li>{{ car.get_transmission_display }}</li>
-      <li>{{ car.get_fuel_display }}</li>
-    </ul>
-    {% if car.description %}<p class="car-desc">{{ car.description|truncatechars:110 }}</p>{% endif %}
-    <div class="car-foot">
-      <div class="price">
-        <span class="plate">KES {{ car.price_per_day|intcomma }}</span>
-        <span class="per">per day</span>
-        <span class="total">KES {{ car.total|intcomma }} for {{ days }} day{{ days|pluralize }}{% if car.rate_type != 'daily' %} at the {{ car.rate_type }} rate{% endif %}</span>
+{% load static humanize %}{# One car, used on the home, city and car list pages. booking.js toggles .is-booked and the button. #}
+<li class="col car{% if not car.available %} is-booked{% endif %}" data-car-id="{{ car.pk }}">
+  <article class="card car-card h-100" aria-labelledby="car-{{ car.pk }}-name">
+    <div class="car-media">
+      <a class="car-photo ratio ratio-16x10" href="{{ car.get_absolute_url }}?from={{ start|date:'Y-m-d' }}&amp;to={{ end|date:'Y-m-d' }}" tabindex="-1" aria-hidden="true">
+        {% with cover=car.cover %}
+        {% if cover %}
+        <img src="{{ cover.thumbnail.url }}" srcset="{{ cover.thumbnail.url }} 600w, {{ cover.image.url }} 1600w"
+             sizes="(max-width: 575px) 100vw, (max-width: 1199px) 50vw, 400px" alt="" loading="lazy" width="600" height="375">
+        {% else %}
+        <img src="{% static 'img/car-placeholder.svg' %}" alt="" loading="lazy" width="600" height="375">
+        {% endif %}
+        {% endwith %}
+      </a>
+      <div class="car-badges">
+        <span class="car-category">{{ car.get_category_display }}</span>
+        <span class="car-city"><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ car.location.name }}</span>
       </div>
-      <button type="button" class="btn btn-primary book-btn"
-        data-car-id="{{ car.pk }}" data-name="{{ car.name }}" data-city="{{ car.location.name }}" data-price="{{ car.price_per_day }}">
-        <span class="when-free">Book this car</span><span class="when-booked">Booked then. Pick other dates</span>
-      </button>
+      <span class="badge car-booked-badge">Booked for these dates</span>
     </div>
-  </div>
+    <div class="card-body">
+      <h3 class="car-name" id="car-{{ car.pk }}-name"><a href="{{ car.get_absolute_url }}?from={{ start|date:'Y-m-d' }}&amp;to={{ end|date:'Y-m-d' }}">{{ car.name }}</a></h3>
+      <ul class="car-specs" aria-label="Specifications">
+        <li><i class="bi bi-people" aria-hidden="true"></i>{{ car.seats }} seats</li>
+        <li><i class="bi bi-gear" aria-hidden="true"></i>{{ car.get_transmission_display }}</li>
+        <li><i class="bi bi-fuel-pump" aria-hidden="true"></i>{{ car.get_fuel_display }}</li>
+        {% if car.luggage %}<li><i class="bi bi-suitcase" aria-hidden="true"></i>{{ car.luggage }} bag{{ car.luggage|pluralize }}</li>{% endif %}
+      </ul>
+      <p class="car-price"><span class="plate">KES {{ car.price_per_day|intcomma }}</span> <span class="per">/ day</span></p>
+      <p class="car-total">KES {{ car.total|intcomma }} for {{ days }} day{{ days|pluralize }}{% if car.rate_type != 'daily' %} at the {{ car.rate_type }} rate{% endif %}</p>
+    </div>
+    <div class="card-footer">
+      <button type="button" class="btn btn-primary w-100 book-btn"{% if not car.available %} disabled{% endif %} aria-describedby="car-{{ car.pk }}-note"
+        data-car-id="{{ car.pk }}" data-name="{{ car.name }}" data-city="{{ car.location.name }}" data-price="{{ car.price_per_day }}">
+        <span class="when-free">Book now</span><span class="when-booked">Not free on these dates</span>
+      </button>
+      <p class="car-note" id="car-{{ car.pk }}-note"><span class="when-booked">Someone has booked it. <a href="{{ car.get_absolute_url }}">See when it's free</a></span></p>
+    </div>
+  </article>
 </li>

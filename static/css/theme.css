@@ -581,6 +581,11 @@ body:has(dialog[open]) { overflow: hidden; }
 .empty p { color: var(--text-muted); max-width: 46ch; }
 .empty-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); }
 
+.empty-icon { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: var(--surface-2); color: var(--text-muted); font-size: 1.75rem; }
+
+/* 16:10 photos (Bootstrap only ships 1x1, 4x3, 16x9, 21x9) */
+.ratio-16x10 { --bs-aspect-ratio: 62.5%; }
+
 /* Label / value lists */
 .facts { margin: 0; display: grid; font-size: .95rem; }
 .facts > div { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-2) 0; border-bottom: 1px solid var(--border); }

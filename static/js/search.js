@@ -1,25 +1,36 @@
-/* Search bar: remembers the visitor's city and only offers one-way returns the branch has set up. */
+/* Search card: remembers the visitor's city, keeps the return date after the pick-up date and shows the day count. */
 (function () {
-  const { esc, kes, store } = window.ZCH;
+  const { store } = window.ZCH;
   const form = document.getElementById('search');
   if (!form) return;
 
   const KEY = 'zch_city';
   const citySelect = form.elements.city;
-  const returnSelect = form.elements.return_to;
-  let routes = {};
-  try { routes = JSON.parse(document.getElementById('routes-data').textContent); } catch (e) { /* no routes */ }
+  const from = form.elements.from;
+  const to = form.elements.to;
+  const daysOut = form.querySelector('[data-days]');
+  const DAY_MS = 86400000;
+  const parse = (v) => { const [y, m, d] = v.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+  const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
 
-  function fillReturns() {
-    const keep = returnSelect.value;
-    const list = routes[citySelect.value] || [];
-    returnSelect.innerHTML = '<option value="">Same city</option>' + list.map((r) => (
-      `<option value="${esc(r.slug)}">${esc(r.name)} (one-way, +${kes(r.fee)})</option>`
-    )).join('');
-    returnSelect.value = list.some((r) => r.slug === keep) ? keep : '';
+  function showDays() {
+    if (!from.value || !to.value) { daysOut.textContent = 'Choose your pick-up and return dates'; return; }
+    const days = Math.round((parse(to.value) - parse(from.value)) / DAY_MS);
+    daysOut.textContent = days > 0 ? `${days} day${days === 1 ? '' : 's'}` : 'Choose a return date after the pick-up date';
   }
 
-  citySelect.addEventListener('change', () => { store.set(KEY, citySelect.value); fillReturns(); });
+  from.addEventListener('change', () => {
+    if (from.value) {
+      const next = iso(parse(from.value) + DAY_MS);
+      to.min = next;
+      if (!to.value || to.value < next) to.value = next;
+    }
+    showDays();
+  });
+  to.addEventListener('change', showDays);
+  if (from.value) to.min = iso(parse(from.value) + DAY_MS);
+
+  citySelect.addEventListener('change', () => store.set(KEY, citySelect.value));
   form.addEventListener('submit', () => store.set(KEY, citySelect.value));
 
   // The home page shows Nairobi unless a city is in the address. Send returning visitors to their last city.
