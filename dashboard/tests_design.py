@@ -96,6 +96,6 @@ class StyleguidePageTests(TestCase):
         self.assertEqual(res.status_code, 200)
         for text in ('--brand', '--plate', '--mpesa-fill', 'btn-mpesa', 'btn-plate', 'aria-busy="true"', 'offcanvas-bottom',
                      'data-bs-toggle="modal"', 'role="tablist"', 'data-bs-toggle="tab"', 'status-picked_up', 'alert-danger',
-                     'accordion-button', 'sk-line', 'class="empty"', 'data-theme-toggle', 'Pass'):
+                     'accordion-button', 'placeholder-glow', 'class="empty"', 'data-theme-toggle', 'Pass'):
             self.assertContains(res, text)
         self.assertNotContains(res, 'Fail</span>')

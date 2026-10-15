@@ -105,6 +105,26 @@ OVERFLOW_JS = """() => {
 }"""
 
 
+A11Y_JS = """() => {
+  const bad = [];
+  const label = (el) => {
+    const by = el.getAttribute('aria-labelledby');
+    const named = by && by.split(' ').map((id) => document.getElementById(id)?.textContent || '').join(' ');
+    return (el.getAttribute('aria-label') || named || el.textContent || el.title || '').trim();
+  };
+  for (const el of document.querySelectorAll('button, a[href], [role="button"]')) {
+    if (!el.checkVisibility({ visibilityProperty: true }) || el.closest('[aria-hidden="true"]')) continue;
+    if (!label(el) && !el.querySelector('img[alt]:not([alt=""])')) bad.push(`${el.tagName.toLowerCase()} with no name: ${el.outerHTML.slice(0, 90)}`);
+  }
+  for (const el of document.querySelectorAll('input:not([type=hidden]), select, textarea')) {
+    if (!el.checkVisibility({ visibilityProperty: true })) continue;
+    if (!(el.labels && el.labels.length) && !el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby')) bad.push(`field with no label: ${el.name || el.id}`);
+  }
+  for (const img of document.querySelectorAll('img:not([alt])')) bad.push(`img with no alt: ${img.src.slice(-50)}`);
+  return [...new Set(bad)].slice(0, 8);
+}"""
+
+
 class Run:
     def __init__(self, pw, shots):
         self.browser = pw.chromium.launch()
@@ -135,6 +155,9 @@ class Run:
         bad = page.evaluate(OVERFLOW_JS)
         if bad:
             self.problems.append(f'{name}: scrolls sideways\n    ' + '\n    '.join(bad))
+        missing = page.evaluate(A11Y_JS)
+        if missing:
+            self.problems.append(f'{name}: accessibility\n    ' + '\n    '.join(missing))
         if self.shots:
             page.screenshot(path=str(OUT / f'{name}.png'), full_page=full)
             self.taken += 1

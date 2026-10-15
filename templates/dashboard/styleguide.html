@@ -6,7 +6,7 @@
 <div class="dash-head">
   <div>
     <h1>Style guide</h1>
-    <p class="muted" style="margin:0">Every design token and component, in one place. Switch your device to dark mode to check the dark colours.</p>
+    <p class="text-body-secondary" style="margin:0">Every design token and component, in one place. Switch your device to dark mode to check the dark colours.</p>
   </div>
 </div>
 
@@ -29,7 +29,7 @@
 {# ---------------------------------------------------------------- Colours #}
 <section class="sg-section" id="colours" aria-labelledby="sg-colours">
   <h2 id="sg-colours">Colours</h2>
-  <p class="prose muted">Indigo is the brand. Plate yellow with black is the number-plate motif (prices, booking refs, step numbers). M-Pesa green is only for payment actions and paid status.</p>
+  <p class="prose text-body-secondary">Indigo is the brand. Plate yellow with black is the number-plate motif (prices, booking refs, step numbers). M-Pesa green is only for payment actions and paid status.</p>
   {% for title, tokens in color_groups %}
   <h3>{{ title }}</h3>
   <ul class="sg-swatches" role="list" style="list-style:none;padding:0;margin:0 0 var(--space-5)">
@@ -46,8 +46,8 @@
 {# ---------------------------------------------------------------- Contrast #}
 <section class="sg-section" id="contrast" aria-labelledby="sg-contrast">
   <h2 id="sg-contrast">Contrast (WCAG AA)</h2>
-  <p class="prose muted">4.5:1 for body text, 3:1 for large text and UI parts such as outlines and focus rings. The tests check every pair below, so a colour change that breaks one fails the tests.</p>
-  <div class="table-wrap">
+  <p class="prose text-body-secondary">4.5:1 for body text, 3:1 for large text and UI parts such as outlines and focus rings. The tests check every pair below, so a colour change that breaks one fails the tests.</p>
+  <div class="card table-card"><div class="table-responsive">
     <table class="table sg-pairs">
       <thead><tr><th scope="col">Pair</th><th scope="col">Sample</th><th scope="col" class="num">Needs</th><th scope="col" class="num">Light</th><th scope="col" class="num">Dark</th></tr></thead>
       <tbody>
@@ -62,13 +62,13 @@
         {% endfor %}
       </tbody>
     </table>
-  </div>
+  </div></div>
 </section>
 
 {# ---------------------------------------------------------------- Type #}
 <section class="sg-section" id="type" aria-labelledby="sg-type">
   <h2 id="sg-type">Type</h2>
-  <p class="prose muted">Archivo variable. Headings are wide (115–125%), number plates narrow (70%). Sizes are fluid with clamp(); body text never goes under 16px. Paragraphs stop at about 65 characters.</p>
+  <p class="prose text-body-secondary">Archivo variable. Headings are wide (115–125%), number plates narrow (70%). Sizes are fluid with clamp(); body text never goes under 16px. Paragraphs stop at about 65 characters.</p>
   <div class="sg-type panel">
     <p class="display">Display</p><p class="fine">--fs-display, for the home page headline only</p>
     <p style="font-size:var(--fs-h1);font-stretch:118%;font-weight:var(--fw-bold);line-height:var(--lh-tight)">Heading 1 · --fs-h1</p>
@@ -110,7 +110,7 @@
 {# ---------------------------------------------------------------- Buttons #}
 <section class="sg-section" id="buttons" aria-labelledby="sg-buttons">
   <h2 id="sg-buttons">Buttons</h2>
-  <p class="prose muted">Labels say exactly what happens ("Pay KES 10,500 with M-Pesa"). Loading keeps the width and shows a spinner. Small buttons grow to 44px on touch screens.</p>
+  <p class="prose text-body-secondary">Labels say exactly what happens ("Pay KES 10,500 with M-Pesa"). Loading keeps the width and shows a spinner. Small buttons grow to 44px on touch screens.</p>
   <div class="sg-row">
     <button type="button" class="btn btn-primary">Primary</button>
     <button type="button" class="btn btn-plate">Book a car</button>
@@ -133,34 +133,38 @@
     <button type="button" class="btn btn-primary btn-sm">Small</button>
     <button type="button" class="btn btn-primary">Medium</button>
     <button type="button" class="btn btn-primary btn-lg">Large</button>
-    <button type="button" class="icon-btn" aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+    <button type="button" class="icon-btn" aria-label="Close"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
   </div>
-  <div style="max-width:360px"><button type="button" class="btn btn-plate btn-block btn-lg">Full width</button></div>
+  <div style="max-width:360px"><button type="button" class="btn btn-plate w-100 btn-lg">Full width</button></div>
 </section>
 
 {# ---------------------------------------------------------------- Forms #}
 <section class="sg-section" id="forms" aria-labelledby="sg-forms">
   <h2 id="sg-forms">Forms</h2>
+  <p class="prose text-body-secondary">Floating labels, one column on phones. Errors show under the field and the first wrong field gets the focus.</p>
   <form class="sg-grid" onsubmit="return false" novalidate>
     <div>
-      <label>Full name<input type="text" autocomplete="name" placeholder="e.g. Achieng Otieno"></label>
-      <label>M-Pesa phone number<input type="tel" inputmode="tel" autocomplete="tel" value="0712 345 678"><span class="field-hint">The number that gets the payment prompt.</span></label>
-      <label>Email<input type="email" inputmode="email" aria-invalid="true" aria-describedby="sg-email-err" value="achieng@"><span class="field-error" id="sg-email-err">Enter a full email address, like name@example.com.</span></label>
-      <label>Disabled<input type="text" value="Can't change this" disabled></label>
+      <div class="form-floating mb-3"><input class="form-control" id="sg-name" autocomplete="name" placeholder="Full name"><label for="sg-name">Full name</label></div>
+      <div class="form-floating"><input class="form-control" id="sg-phone" type="tel" inputmode="tel" value="0712 345 678" placeholder="Phone" aria-describedby="sg-phone-hint"><label for="sg-phone">Phone number to pay from</label></div>
+      <p class="form-text mb-3" id="sg-phone-hint">The number that gets the payment prompt.</p>
+      <div class="form-floating mb-3"><input class="form-control is-invalid" id="sg-email" type="email" inputmode="email" value="achieng@" placeholder="Email" aria-invalid="true" aria-describedby="sg-email-err"><label for="sg-email">Email</label><div class="invalid-feedback" id="sg-email-err">Enter a full email address, like name@example.com.</div></div>
+      <div class="form-floating mb-3"><input class="form-control" id="sg-disabled" value="Can't change this" placeholder="Disabled" disabled><label for="sg-disabled">Disabled</label></div>
     </div>
     <div>
-      <label>Car type<select><option>Any type</option><option>Saloon</option><option>SUV</option><option>4x4</option></select></label>
-      <label>Message<textarea rows="3" placeholder="Tell us what you need"></textarea></label>
-      <fieldset>
-        <legend>Extras</legend>
-        <label class="check"><input type="checkbox" checked> Child seat <small>KES 500 per day</small></label>
-        <label class="check"><input type="checkbox"> Extra driver</label>
-        <label class="check"><input type="checkbox" disabled> Not available</label>
+      <div class="form-floating mb-3"><select class="form-select" id="sg-type"><option>Any type</option><option>Saloon</option><option>SUV</option><option>4x4</option></select><label for="sg-type">Car type</label></div>
+      <div class="input-group mb-3"><span class="input-group-text"><i class="bi bi-geo-alt" aria-hidden="true"></i></span><select class="form-select" aria-label="City"><option>Nairobi</option><option>Mombasa</option></select></div>
+      <fieldset class="mb-3">
+        <legend class="form-label">Extras</legend>
+        <div class="form-check"><input class="form-check-input" type="checkbox" id="sg-x1" checked><label class="form-check-label" for="sg-x1">Child seat</label></div>
+        <div class="form-check"><input class="form-check-input" type="checkbox" id="sg-x2"><label class="form-check-label" for="sg-x2">Extra driver</label></div>
+        <div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="sg-x3" checked><label class="form-check-label" for="sg-x3">Shown on website</label></div>
       </fieldset>
       <fieldset>
-        <legend>Transmission</legend>
-        <label class="check"><input type="radio" name="sg-t" checked> Any</label>
-        <label class="check"><input type="radio" name="sg-t"> Automatic</label>
+        <legend class="form-label">Gearbox</legend>
+        <div class="btn-group" role="group">
+          <input type="radio" class="btn-check" name="sg-t" id="sg-t1" checked><label class="btn btn-ghost" for="sg-t1">Any</label>
+          <input type="radio" class="btn-check" name="sg-t" id="sg-t2"><label class="btn btn-ghost" for="sg-t2">Automatic</label>
+        </div>
       </fieldset>
     </div>
   </form>
@@ -176,8 +180,8 @@
     <button type="button" class="chip" disabled>Unavailable</button>
   </div>
   <div class="chip-group sg-row" aria-label="Active filters">
-    <button type="button" class="chip chip-remove" aria-label="Remove filter: SUV">SUV</button>
-    <button type="button" class="chip chip-remove" aria-label="Remove filter: 7 seats">7 seats</button>
+    <button type="button" class="chip" aria-label="Remove filter: SUV">SUV<i class="bi bi-x" aria-hidden="true"></i></button>
+    <button type="button" class="chip" aria-label="Remove filter: 7 seats">7 seats<i class="bi bi-x" aria-hidden="true"></i></button>
   </div>
 </section>
 
@@ -200,7 +204,7 @@
     </ul>
     <div class="panel">
       <h2>Panel</h2>
-      <p class="muted">Panels hold forms and lists in the dashboard and on Find my booking.</p>
+      <p class="text-body-secondary">Panels hold forms and lists in the dashboard and on Find my booking.</p>
       <dl class="facts">
         <div><dt>Pick-up</dt><dd>Fri 14 Nov, 10:00</dd></div>
         <div><dt>Return</dt><dd>Mon 17 Nov, 10:00</dd></div>
@@ -235,7 +239,7 @@
       <div class="alert alert-danger"><strong>Payment didn't go through</strong>The M-Pesa prompt was cancelled. Check your phone and try again.</div>
     </div>
     <div>
-      <p class="muted">Toasts confirm that something worked, then disappear after a few seconds.</p>
+      <p class="text-body-secondary">Toasts confirm that something worked, then disappear after a few seconds.</p>
       <div class="sg-row">
         <button type="button" class="btn btn-ghost" data-toast="success">Show success toast</button>
         <button type="button" class="btn btn-ghost" data-toast="error">Show error toast</button>
@@ -248,7 +252,7 @@
 {# ---------------------------------------------------------------- Modal and tabs #}
 <section class="sg-section" id="overlays" aria-labelledby="sg-overlays">
   <h2 id="sg-overlays">Modal, bottom sheet and tabs</h2>
-  <p class="prose muted">Bootstrap modal: rounded-4, centred on desktop, full screen on phones. Esc or the close button closes it.</p>
+  <p class="prose text-body-secondary">Bootstrap modal: rounded-4, centred on desktop, full screen on phones. Esc or the close button closes it.</p>
   <div class="sg-row">
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sg-bs-modal">Open Bootstrap modal</button>
     <button type="button" class="btn btn-ghost" data-bs-toggle="offcanvas" data-bs-target="#sg-sheet" aria-controls="sg-sheet">Open bottom sheet</button>
@@ -305,32 +309,34 @@
 {# ---------------------------------------------------------------- Tables #}
 <section class="sg-section" id="tables" aria-labelledby="sg-tables">
   <h2 id="sg-tables">Tables</h2>
-  <p class="prose muted">Wide tables scroll inside their own box, never the page.</p>
-  <div class="table-wrap">
-    <table class="table">
+  <p class="prose text-body-secondary">Wide tables scroll inside their own box, never the page.</p>
+  <div class="card table-card"><div class="table-responsive">
+    <table class="table table-hover">
       <thead><tr><th scope="col">Booking</th><th scope="col">Customer</th><th scope="col">Car</th><th scope="col">Dates</th><th scope="col" class="num">Amount</th><th scope="col">Status</th></tr></thead>
       <tbody>
         <tr><td class="mono-ref">ZCH2CF12805</td><td>Achieng Otieno<small>0712 345 678</small></td><td>Toyota Prado</td><td>14–17 Nov</td><td class="num">KES 28,500</td><td><span class="status status-paid">Paid</span></td></tr>
         <tr><td class="mono-ref">ZCH8AB31F02</td><td>Brian Kamau<small>0722 000 111</small></td><td>Mazda Demio</td><td>15–16 Nov</td><td class="num">KES 3,500</td><td><span class="status status-pending">Waiting for payment</span></td></tr>
       </tbody>
     </table>
-  </div>
+  </div></div>
 </section>
 
 {# ---------------------------------------------------------------- Loading and empty #}
 <section class="sg-section" id="loading" aria-labelledby="sg-loading">
   <h2 id="sg-loading">Loading and empty states</h2>
   <div class="sg-grid">
-    <ul class="car-grid" style="grid-template-columns:1fr" role="list">
-      <li class="car skeleton" aria-hidden="true"><div class="sk-photo"></div><div class="car-body"><div class="sk-line"></div><div class="sk-line sk-short"></div><div class="sk-line"></div></div></li>
-    </ul>
+    <div class="card car-card placeholder-glow" aria-hidden="true">
+      <div class="ratio ratio-16x10"><span class="placeholder w-100 h-100"></span></div>
+      <div class="card-body"><span class="placeholder col-7 mb-3"></span><span class="placeholder col-10 mb-3"></span><span class="placeholder col-4"></span></div>
+    </div>
     <div class="empty">
+      <span class="empty-icon" aria-hidden="true"><i class="bi bi-car-front"></i></span>
       <h3>No cars match these filters</h3>
       <p>Try other dates, or remove a filter to see more cars.</p>
       <div class="empty-actions"><button type="button" class="btn btn-primary">Clear filters</button><a class="btn btn-ghost" href="#loading">See all cars</a></div>
     </div>
   </div>
-  <p style="margin-top:var(--space-4)"><span class="spinner" aria-hidden="true"></span> <span class="muted">Inline spinner</span></p>
+  <p style="margin-top:var(--space-4)"><span class="spinner-border spinner-border-sm" aria-hidden="true"></span> <span class="text-body-secondary">Inline spinner</span></p>
 </section>
 {% endblock %}
 

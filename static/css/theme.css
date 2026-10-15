@@ -267,9 +267,7 @@ small, .small { font-size: var(--fs-small); }
 strong, b { font-weight: var(--fw-bold); }
 ul, ol { padding-left: 1.25rem; }
 .prose, .prose p, .prose li { max-width: var(--measure); }
-.muted { color: var(--text-muted); }
 .fine { font-size: var(--fs-small); color: var(--text-muted); }
-.tabular { font-variant-numeric: tabular-nums; }
 .optional { color: var(--text-muted); font-weight: var(--fw-regular); }
 
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
@@ -282,41 +280,24 @@ ul, ol { padding-left: 1.25rem; }
 .skip-link:focus { transform: none; }
 
 /* On indigo, the focus ring turns plate yellow so it stays visible. */
-.site-header, .site-footer, .hero, .cta-band, .dash-side, .bg-brand { --focus: var(--plate); --bs-focus-ring-color: rgba(246, 194, 28, .55); }
+.site-header, .site-footer, .hero, .page-hero, .cta-band, .dash-side, .dash-top, .bg-brand { --focus: var(--plate); --bs-focus-ring-color: rgba(246, 194, 28, .55); }
 /* ...but white boxes inside them (search card, panels, dialogs, chat) go back to the normal ring. */
-.search, .card, .panel, .dlg, .chat-panel, .offcanvas, .modal, .dropdown-menu { --focus: var(--focus-surface); --bs-focus-ring-color: var(--ring-surface); }
+.search-card, .card, .panel, .chat-panel, .offcanvas, .modal, .dropdown-menu { --focus: var(--focus-surface); --bs-focus-ring-color: var(--ring-surface); }
 
 /* Show one of two images depending on the theme (e.g. dark logo on light, white logo on dark). */
 [data-bs-theme="dark"] .only-light, [data-bs-theme="light"] .only-dark { display: none !important; }
 
-.wrap { width: min(var(--content-max), 100% - 2 * var(--gutter)); margin-inline: auto; }
 /* Bootstrap containers: 16px side gutter on phones, 24px from tablets up */
 .container, .container-xl, .container-fluid { --bs-gutter-x: 2rem; }
 @media (min-width: 768px) { .container, .container-xl, .container-fluid { --bs-gutter-x: 3rem; } }
-.narrow { width: min(720px, 100% - 2 * var(--gutter)); }
-.stack > * + * { margin-top: var(--space-4); }
-.cluster { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
 .section { padding-block: var(--section); }
-.scroll-x { overflow-x: auto; overscroll-behavior-x: contain; max-width: 100%; }
 
 /* ===================================================================== Forms
-   Plain inputs are styled here until each page moves to Bootstrap's .form-control (later steps). */
+   Every form uses Bootstrap's form-control / form-select / form-check; this adds the brand look. */
 input, select, textarea, button { font: inherit; }
-input, select, textarea { font-size: max(1rem, 16px); font-weight: var(--fw-regular); }
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not(.form-control):not(.form-check-input),
-select:not(.form-select), textarea:not(.form-control) {
-  width: 100%; min-height: var(--tap); padding: .6rem .8rem;
-  color: var(--text); background-color: var(--surface); border: 1.5px solid var(--control-border); border-radius: var(--radius);
-  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
-}
-input[type="file"] { width: 100%; font-size: var(--fs-small); }
-textarea { min-height: 6rem; resize: vertical; line-height: var(--lh-body); }
-select:not(.form-select) { appearance: none; padding-right: 2.4rem; background-image: var(--chevron); background-repeat: no-repeat; background-position: right .85rem center; cursor: pointer; }
-input:hover, select:hover, textarea:hover { border-color: var(--text-muted); }
-input:focus, select:focus, textarea:focus { outline: none; border-color: var(--focus); box-shadow: var(--ring); }
-input:disabled, select:disabled, textarea:disabled { opacity: .55; cursor: not-allowed; background-color: var(--surface-2); }
+input, select, textarea { font-size: max(1rem, 16px); }   /* 16px or more, so iPhones don't zoom in */
+textarea { resize: vertical; line-height: var(--lh-body); }
 ::placeholder { color: var(--text-muted); opacity: .8; }
-[aria-invalid="true"] { border-color: var(--danger) !important; }
 
 .form-control, .form-select {
   min-height: var(--tap); font-size: max(1rem, 16px); color: var(--text); background-color: var(--surface);
@@ -325,25 +306,19 @@ input:disabled, select:disabled, textarea:disabled { opacity: .55; cursor: not-a
 .form-control:focus, .form-select:focus { border-color: var(--focus); box-shadow: var(--ring); background-color: var(--surface); color: var(--text); }
 .form-select { --bs-form-select-bg-img: var(--chevron); }
 .form-floating { --bs-body-bg: var(--surface); }   /* the floated label's backing matches the field, not the page */
-.form-floating > label { color: var(--text-muted); }
+.form-floating > label { max-width: 100%; color: var(--text-muted); }   /* long labels end in … instead of widening the page */
 .form-check-input { border-color: var(--control-border); }
 .form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
 .form-check-input:focus { box-shadow: var(--ring); border-color: var(--focus); }
 .input-group-text { background-color: var(--surface-2); border-color: var(--control-border); color: var(--text-muted); }
 
 label { font-weight: var(--fw-semibold); font-size: .95rem; }
-/* Older forms that wrap the input inside its <label>; Bootstrap labels (.form-label, floating, check) are left alone */
-form label:not(.form-check-label):not(.btn):not(.form-label):not(.visually-hidden):not(.form-floating > label), .field { display: grid; gap: var(--space-1); margin-bottom: var(--space-4); align-content: start; }
-.field-hint, .form-text { color: var(--text-muted); font-size: var(--fs-small); font-weight: var(--fw-regular); }
-.field-error, .form-error { color: var(--danger); font-size: var(--fs-small); font-weight: var(--fw-medium); }
-.field-error:empty, .form-error:empty { display: none; }
+.form-text { color: var(--text-muted); font-size: var(--fs-small); font-weight: var(--fw-regular); }
+.form-error { color: var(--danger); font-size: var(--fs-small); font-weight: var(--fw-medium); }
+.form-error:empty { display: none; }
 .form-error { margin: var(--space-1) 0 var(--space-3); }
-.field-error::before, .form-error:not(:empty)::before { content: "! "; font-weight: var(--fw-black); }
-fieldset { border: 1px solid var(--border); border-radius: var(--radius); padding: var(--space-3) var(--space-4) var(--space-2); margin: 0 0 var(--space-4); min-width: 0; }
-legend { float: none; width: auto; font-size: .95rem; font-weight: var(--fw-semibold); padding: 0 var(--space-1); margin-bottom: 0; }
-.check { display: flex !important; align-items: center; gap: var(--space-3); min-height: var(--tap); margin: 0; font-weight: var(--fw-medium); cursor: pointer; }
-.check input { width: 1.25rem; height: 1.25rem; margin: 0; flex: none; accent-color: var(--primary); cursor: pointer; }
-.check small { display: block; color: var(--text-muted); font-weight: var(--fw-regular); }
+fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+legend { float: none; width: auto; margin-bottom: .35rem; padding: 0; font-size: .95rem; font-weight: var(--fw-semibold); }
 
 /* ===================================================================== Bootstrap components, brand look */
 .btn {
@@ -360,7 +335,6 @@ legend { float: none; width: auto; font-size: .95rem; font-weight: var(--fw-semi
 .btn-sm { --bs-btn-padding-x: .75rem; --bs-btn-padding-y: .3rem; --bs-btn-font-size: var(--fs-small); --bs-btn-border-radius: var(--radius); min-height: 36px; }
 .btn-lg { --bs-btn-padding-x: 1.5rem; --bs-btn-padding-y: .7rem; --bs-btn-font-size: 1.0625rem; --bs-btn-border-radius: var(--radius); min-height: 54px; }
 @media (pointer: coarse) { .btn-sm { min-height: var(--tap); } }
-.btn-block { display: flex; width: 100%; }
 
 .btn-primary {
   --bs-btn-color: var(--on-primary); --bs-btn-bg: var(--primary); --bs-btn-border-color: var(--primary);
@@ -409,7 +383,6 @@ legend { float: none; width: auto; font-size: .95rem; font-weight: var(--fw-semi
   border: 2.5px solid var(--bs-btn-color); border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.spinner { display: inline-block; width: 1.25em; height: 1.25em; border: 2.5px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -.2em; }
 
 .card { --bs-card-bg: var(--surface); --bs-card-border-color: var(--border); --bs-card-border-radius: var(--radius-lg); --bs-card-inner-border-radius: calc(var(--radius-lg) - 1px); --bs-card-cap-bg: var(--surface-2); --bs-card-color: var(--text); }
 .modal { --bs-modal-bg: var(--surface); --bs-modal-color: var(--text); --bs-modal-border-color: var(--border); --bs-modal-border-radius: var(--radius-lg); --bs-modal-inner-border-radius: calc(var(--radius-lg) - 1px); --bs-modal-box-shadow: var(--shadow-2); }
@@ -423,8 +396,6 @@ legend { float: none; width: auto; font-size: .95rem; font-weight: var(--fw-semi
 .table small { display: block; color: var(--text-muted); font-size: var(--fs-xs); margin-top: .15rem; }
 .table a { color: inherit; }
 .table .num { text-align: right; font-variant-numeric: tabular-nums; }
-.table-wrap { overflow-x: auto; overscroll-behavior-x: contain; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
-.table-wrap .table > tbody > tr:last-child > * { border-bottom: 0; }
 .alert { --bs-alert-border-radius: var(--radius); --bs-alert-padding-x: var(--space-4); --bs-alert-padding-y: var(--space-3); --bs-alert-margin-bottom: 0; display: grid; gap: var(--space-1); border-left-width: 4px; }
 .alert > :last-child { margin-bottom: 0; }
 .alert ul { margin: var(--space-1) 0; padding-left: 1.2rem; }
@@ -471,7 +442,6 @@ legend { float: none; width: auto; font-size: .95rem; font-weight: var(--fw-semi
 /* ===================================================================== Brand utilities */
 .bg-plate, .text-bg-plate { background-color: var(--plate) !important; color: var(--plate-ink) !important; }
 .text-plate { color: var(--plate) !important; }
-.border-plate { border-color: var(--plate) !important; }
 .bg-brand { background-color: var(--brand) !important; color: var(--on-brand); }
 
 /* The number plate: prices, booking numbers, step numbers */
@@ -484,7 +454,6 @@ legend { float: none; width: auto; font-size: .95rem; font-weight: var(--fw-semi
 .plate-sm { font-size: var(--fs-small); }
 .plate-lg { font-size: 1.6rem; }
 .plate-xl { font-size: clamp(2rem, 1.6rem + 2vw, 2.6rem); }
-.plate-ref { font-size: 1.6rem; margin: var(--space-2) 0 var(--space-4); }
 .plate-num {
   display: inline-grid; place-items: center; flex: none; min-width: 2.4rem; height: 2.2rem; padding: 0 .3rem;
   background: var(--plate); color: var(--plate-ink); border: 2px solid var(--plate-ink); border-radius: var(--radius-sm);
@@ -522,7 +491,6 @@ legend { float: none; width: auto; font-size: .95rem; font-weight: var(--fw-semi
 .chip:hover { border-color: var(--text); color: var(--text); }
 .chip[aria-pressed="true"], .chip[aria-current="true"], .chip[aria-current="page"] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
 .chip:disabled { opacity: .5; cursor: not-allowed; }
-.chip-remove::after { content: "\00d7"; font-size: 1.2em; line-height: 1; margin-left: var(--space-1); }
 @media (pointer: coarse) { .chip { min-height: var(--tap); } }
 .chip-group { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 
@@ -548,36 +516,8 @@ legend { float: none; width: auto; font-size: .95rem; font-weight: var(--fw-semi
 .tag { display: inline-block; padding: .15rem .6rem; border-radius: var(--radius-pill); background: var(--brand); color: var(--on-brand); font-size: var(--fs-xs); font-weight: var(--fw-semibold); white-space: nowrap; }
 .tag-quiet { background: var(--neutral-bg); color: var(--neutral-text); }
 
-/* Pop-up dialogs built on <dialog class="dlg"> (become Bootstrap modals in the booking/dashboard steps) */
-.dlg {
-  width: min(560px, 100% - 2rem); max-height: calc(100dvh - 2rem); padding: 0; border: 0; border-radius: var(--radius-lg);
-  background: var(--surface); color: var(--text); box-shadow: var(--shadow-2); overflow: hidden;
-}
-.dlg[open] { display: flex; flex-direction: column; animation: dlg-in var(--dur) var(--ease); }
-.dlg::backdrop { background: var(--scrim); }
-.dlg-head { position: relative; flex: none; padding: var(--space-4) calc(var(--tap) + var(--space-4)) var(--space-3) var(--space-5); border-bottom: 1px solid var(--border); }
-.dlg-head h2 { font-size: var(--fs-h3); margin: 0; }
-.dlg-close { position: absolute; top: var(--space-2); right: var(--space-2); }
-.dlg-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: var(--space-4) var(--space-5) var(--space-5); }
-.dlg-foot {
-  flex: none; display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: flex-end; align-items: center;
-  padding: var(--space-3) var(--space-5) max(var(--space-3), env(safe-area-inset-bottom)); border-top: 1px solid var(--border); background: var(--surface);
-}
-@keyframes dlg-in { from { opacity: 0; transform: translateY(12px) scale(.985); } }
-@media (max-width: 767.98px) {
-  .dlg-sheet { width: 100%; max-width: 100%; margin: auto 0 0; max-height: 92dvh; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
-  .dlg-sheet[open] { animation: sheet-in calc(var(--dur) * 1.4) var(--ease); }
-  .dlg-sheet.dlg-full { height: 100dvh; max-height: 100dvh; border-radius: 0; }
-}
-@keyframes sheet-in { from { transform: translateY(40px); opacity: 0; } }
-body:has(dialog[open]) { overflow: hidden; }
 
-/* Loading skeletons (cars.js) and empty states */
-.sk-line, .sk-photo, .sk-block { background: var(--placeholder); border-radius: 4px; animation: shimmer 1.2s ease-in-out infinite; }
-.sk-line { height: .9rem; margin-bottom: var(--space-3); }
-.sk-short { width: 55%; }
-.sk-photo { aspect-ratio: 16 / 10; border-radius: 0; }
-@keyframes shimmer { 50% { opacity: .45; } }
+/* Empty states */
 .empty {
   display: grid; justify-items: center; gap: var(--space-2); text-align: center;
   padding: var(--space-6) var(--space-5); background: var(--surface); border: 2px dashed var(--border); border-radius: var(--radius-lg);

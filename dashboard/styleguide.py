@@ -82,6 +82,10 @@ CONTRAST_PAIRS = [
     ('--control-border', '--surface', 3, 'Input outline'),
     ('--focus', '--surface', 3, 'Focus ring on a card'),
     ('--focus', '--bg', 3, 'Focus ring on the page'),
+    ('--warn-text', '--surface', 4.5, 'Amount still owed, on a card'),
+    ('--success-text', '--surface', 4.5, 'Success text on a card'),
+    ('--text', '--bs-primary-bg-subtle', 4.5, 'Text and icons on a pale indigo tile'),
+    ('--on-primary', '--primary-hover', 4.5, 'Primary button label, hovered'),
 ]
 
 
