@@ -105,6 +105,8 @@
         icon.classList.toggle('bi-sun', mode === 'dark');
       }
       btn.title = mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+      const label = btn.querySelector('[data-theme-label]');
+      if (label) label.textContent = mode === 'dark' ? 'Light mode' : 'Dark mode';
     });
   }
 
@@ -117,6 +119,25 @@
   const deviceDark = window.matchMedia('(prefers-color-scheme: dark)');
   deviceDark.addEventListener('change', (e) => { if (!store.get(THEME_KEY)) applyTheme(e.matches ? 'dark' : 'light'); });
   applyTheme(isDark() ? 'dark' : 'light');
+
+  /* Navbar: a little shorter once the page scrolls. */
+  const header = document.getElementById('site-header');
+  if (header) {
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => { header.classList.toggle('is-scrolled', window.scrollY > 8); ticking = false; });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
+  /* Phone menu: tapping a link closes it (data-bs-dismiss would cancel the link). */
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('.offcanvas a[href]');
+    if (link && window.bootstrap) window.bootstrap.Offcanvas.getInstance(link.closest('.offcanvas'))?.hide();
+  });
 
   window.ZCH = { api, esc, kes, store, poll, busy, toast, applyTheme };
 })();

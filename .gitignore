@@ -10,3 +10,6 @@ venv/
 .vscode/
 .idea/
 *.log
+
+# UI screenshots (tools/screenshots.py)
+tools/screenshots/

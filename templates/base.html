@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="csrf-token" content="{{ csrf_token }}">
   <meta name="theme-color" content="#1C2340">
-  <title>{% block title %}{{ business.name }} | Car hire across Kenya, pay with M-Pesa{% endblock %}</title>
-  <meta name="description" content="{% block meta_description %}Car hire across Kenya from {{ business.name }} branches in the major cities. Saloons, SUVs and 4x4s. Book online and pay instantly with M-Pesa.{% endblock %}">
+  <title>{% block title %}{{ business.name }} | Car hire across Kenya{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Car hire across Kenya from {{ business.name }} branches in the major cities. Saloons, SUVs and 4x4s. Book online in minutes and pay securely on your phone.{% endblock %}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="{{ business.name }}">
-  <meta property="og:title" content="{% block og_title %}{{ business.name }}: car hire across Kenya, pay with M-Pesa{% endblock %}">
-  <meta property="og:description" content="{% block og_description %}Book a car online in minutes and pay with M-Pesa. Branches in Kenya's major cities.{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}{{ business.name }}: car hire across Kenya{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Book a car online in minutes and pay securely on your phone. Branches in Kenya's major cities.{% endblock %}">
   <meta property="og:url" content="{{ site_url }}{{ request.path }}">
   {% block og_image %}<meta property="og:image" content="{{ site_url }}{% static 'img/og-image.png' %}">
   <meta property="og:image:width" content="1200">
@@ -23,64 +23,136 @@
   {% include "_theme_head.html" %}
   <link rel="stylesheet" href="{% static 'css/site.css' %}">
 </head>
-<body>
+<body class="{% block body_class %}has-tabbar{% endblock %}">
   <a class="skip-link" href="#main">Skip to content</a>
-  <header class="site-header">
-    <div class="wrap header-inner">
-      <a class="brand" href="{% url 'fleet:home' %}">
-        <img class="brand-logo" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire" width="160" height="40">
-      </a>
-      <nav class="site-nav" aria-label="Main">
-        <a href="{% url 'fleet:cars' %}">Cars</a>
-        <a href="{% url 'fleet:home' %}#branches">Branches</a>
-        <a href="{% url 'pages:faq' %}">Questions</a>
-        <a href="{% url 'bookings:find' %}">Find my booking</a>
-        <a href="tel:{{ business.phone }}" class="nav-phone">{{ business.phone }}</a>
-        <button type="button" class="icon-btn theme-toggle" data-theme-toggle aria-label="Dark mode" aria-pressed="false" title="Switch to dark mode"><i class="bi bi-moon-stars" aria-hidden="true"></i></button>
-      </nav>
-    </div>
+  {% with vn=request.resolver_match.view_name %}
+  <header class="site-header sticky-top" id="site-header">
+    <nav class="navbar navbar-expand-lg" aria-label="Main">
+      <div class="container-xl">
+        <a class="navbar-brand brand" href="{% url 'fleet:home' %}">
+          <img class="brand-logo" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire" width="160" height="40">
+        </a>
+        <ul class="navbar-nav site-nav d-none d-lg-flex me-auto">
+          <li class="nav-item"><a class="nav-link" href="{% url 'fleet:cars' %}"{% if vn == 'fleet:cars' or vn == 'fleet:car' %} aria-current="page"{% endif %}><i class="bi bi-car-front" aria-hidden="true"></i>Cars</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'fleet:home' %}#branches"{% if vn == 'fleet:city' %} aria-current="page"{% endif %}><i class="bi bi-geo-alt" aria-hidden="true"></i>Locations</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'fleet:home' %}#how"><i class="bi bi-list-check" aria-hidden="true"></i>How it works</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'bookings:find' %}"{% if vn == 'bookings:find' or vn == 'bookings:detail' or vn == 'bookings:receipt' %} aria-current="page"{% endif %}><i class="bi bi-search" aria-hidden="true"></i>Find my booking</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'pages:contact' %}"{% if vn == 'pages:contact' %} aria-current="page"{% endif %}><i class="bi bi-envelope" aria-hidden="true"></i>Contact</a></li>
+        </ul>
+        <div class="nav-tools d-none d-lg-flex">
+          <a class="nav-phone" href="tel:{{ business.phone }}" aria-label="Call us on {{ business.phone }}"><i class="bi bi-telephone" aria-hidden="true"></i><span class="d-none d-xl-inline">{{ business.phone }}</span></a>
+          <button type="button" class="icon-btn theme-toggle" data-theme-toggle aria-label="Dark mode" aria-pressed="false" title="Switch to dark mode"><i class="bi bi-moon-stars" aria-hidden="true"></i></button>
+          <a class="btn btn-plate" href="{% url 'fleet:cars' %}">Book a car</a>
+        </div>
+        <button type="button" class="icon-btn menu-btn d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#site-menu"
+                aria-controls="site-menu" aria-label="Open menu"><i class="bi bi-list" aria-hidden="true"></i></button>
+      </div>
+    </nav>
   </header>
+
+  <div class="offcanvas offcanvas-end site-menu d-lg-none" tabindex="-1" id="site-menu" aria-labelledby="site-menu-title">
+    <div class="offcanvas-header">
+      <h2 class="visually-hidden" id="site-menu-title">Menu</h2>
+      <img class="brand-logo" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="" width="160" height="40">
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close menu"></button>
+    </div>
+    <div class="offcanvas-body">
+      <nav aria-label="Menu">
+        <ul class="menu-list">
+          <li><a class="menu-row" href="{% url 'fleet:cars' %}"{% if vn == 'fleet:cars' or vn == 'fleet:car' %} aria-current="page"{% endif %}><i class="bi bi-car-front" aria-hidden="true"></i>Cars<i class="bi bi-chevron-right" aria-hidden="true"></i></a></li>
+          <li><a class="menu-row" href="{% url 'fleet:home' %}#branches"{% if vn == 'fleet:city' %} aria-current="page"{% endif %}><i class="bi bi-geo-alt" aria-hidden="true"></i>Locations<i class="bi bi-chevron-right" aria-hidden="true"></i></a></li>
+          <li><a class="menu-row" href="{% url 'fleet:home' %}#how"><i class="bi bi-list-check" aria-hidden="true"></i>How it works<i class="bi bi-chevron-right" aria-hidden="true"></i></a></li>
+          <li><a class="menu-row" href="{% url 'bookings:find' %}"{% if vn == 'bookings:find' or vn == 'bookings:detail' %} aria-current="page"{% endif %}><i class="bi bi-search" aria-hidden="true"></i>Find my booking<i class="bi bi-chevron-right" aria-hidden="true"></i></a></li>
+          <li><a class="menu-row" href="{% url 'pages:contact' %}"{% if vn == 'pages:contact' %} aria-current="page"{% endif %}><i class="bi bi-envelope" aria-hidden="true"></i>Contact<i class="bi bi-chevron-right" aria-hidden="true"></i></a></li>
+        </ul>
+      </nav>
+      {% if branches %}
+      <h3 class="menu-h">Choose your city</h3>
+      <ul class="city-links">
+        {% for branch in branches %}<li><a class="chip" href="{{ branch.get_absolute_url }}"><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ branch.name }}</a></li>{% endfor %}
+      </ul>
+      {% endif %}
+      <div class="menu-foot">
+        <a class="btn btn-primary" href="tel:{{ business.phone }}"><i class="bi bi-telephone-fill" aria-hidden="true"></i>Call us</a>
+        {% if business.whatsapp %}<a class="btn btn-ghost" href="https://wa.me/{{ business.whatsapp }}?text={{ 'Hi, I would like to hire a car.'|urlencode }}" target="_blank" rel="noopener"><i class="bi bi-whatsapp" aria-hidden="true"></i>WhatsApp</a>{% endif %}
+        <button type="button" class="btn btn-ghost theme-toggle" data-theme-toggle aria-pressed="false"><i class="bi bi-moon-stars" aria-hidden="true"></i><span data-theme-label>Dark mode</span></button>
+      </div>
+    </div>
+  </div>
 
   <main id="main">{% block content %}{% endblock %}</main>
 
   <footer class="site-footer">
-    <div class="wrap footer-inner">
-      <div class="footer-brand">
-        <a href="{% url 'fleet:home' %}"><img class="brand-logo" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire" width="160" height="40" loading="lazy"></a>
-        <p>Car hire across Kenya.<br>Pay with M-Pesa, drive the same day.</p>
-        <p><a href="tel:{{ business.phone }}">{{ business.phone }}</a><br><a href="mailto:{{ business.email }}">{{ business.email }}</a></p>
+    <div class="container-xl">
+      <div class="row g-0 gx-md-4 gy-md-5">
+        <div class="col-12 col-md-6 col-lg-3 footer-brand">
+          <a class="brand" href="{% url 'fleet:home' %}"><img class="brand-logo" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire" width="160" height="40" loading="lazy"></a>
+          <p>Car hire across Kenya, booked online in minutes.</p>
+          <p class="footer-pay"><i class="bi bi-shield-lock" aria-hidden="true"></i>Secure mobile money payments</p>
+        </div>
+        <nav class="col-12 col-md-6 col-lg-3 footer-col" aria-labelledby="f-quick">
+          <h2 class="footer-h" id="f-quick">
+            <button type="button" class="footer-toggle d-md-none" data-bs-toggle="collapse" data-bs-target="#f-quick-list" aria-expanded="false" aria-controls="f-quick-list">Quick links<i class="bi bi-chevron-down" aria-hidden="true"></i></button>
+            <span class="d-none d-md-inline">Quick links</span>
+          </h2>
+          <ul class="footer-list collapse d-md-block" id="f-quick-list">
+            <li><a href="{% url 'fleet:cars' %}">Cars</a></li>
+            <li><a href="{% url 'fleet:home' %}#how">How it works</a></li>
+            <li><a href="{% url 'bookings:find' %}">Find my booking</a></li>
+            <li><a href="{% url 'pages:faq' %}">Questions</a></li>
+            <li><a href="{% url 'pages:about' %}">About us</a></li>
+            <li><a href="{% url 'pages:contact' %}">Contact us</a></li>
+          </ul>
+        </nav>
+        {% if branches %}
+        <nav class="col-12 col-md-6 col-lg-3 footer-col" aria-labelledby="f-branches">
+          <h2 class="footer-h" id="f-branches">
+            <button type="button" class="footer-toggle d-md-none" data-bs-toggle="collapse" data-bs-target="#f-branches-list" aria-expanded="false" aria-controls="f-branches-list">Branches<i class="bi bi-chevron-down" aria-hidden="true"></i></button>
+            <span class="d-none d-md-inline">Branches</span>
+          </h2>
+          <ul class="footer-list collapse d-md-block" id="f-branches-list">
+            {% for branch in branches %}<li><a href="{{ branch.get_absolute_url }}">Car hire in {{ branch.name }}</a></li>{% endfor %}
+          </ul>
+        </nav>
+        {% endif %}
+        <div class="col-12 col-md-6 col-lg-3 footer-col">
+          <h2 class="footer-h" id="f-contact">
+            <button type="button" class="footer-toggle d-md-none" data-bs-toggle="collapse" data-bs-target="#f-contact-list" aria-expanded="false" aria-controls="f-contact-list">Contact<i class="bi bi-chevron-down" aria-hidden="true"></i></button>
+            <span class="d-none d-md-inline">Contact</span>
+          </h2>
+          <ul class="footer-list collapse d-md-block" id="f-contact-list">
+            <li><a href="tel:{{ business.phone }}"><i class="bi bi-telephone" aria-hidden="true"></i>{{ business.phone }}</a></li>
+            {% if business.whatsapp %}<li><a href="https://wa.me/{{ business.whatsapp }}" target="_blank" rel="noopener"><i class="bi bi-whatsapp" aria-hidden="true"></i>WhatsApp us</a></li>{% endif %}
+            <li><a href="mailto:{{ business.email }}"><i class="bi bi-envelope" aria-hidden="true"></i>{{ business.email }}</a></li>
+            <li><span class="footer-address"><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ business.address|default:business.location }}</span></li>
+          </ul>
+        </div>
       </div>
-      {% if branches %}
-      <nav aria-label="Branches">
-        <h2 class="footer-h">Branches</h2>
-        <ul>{% for branch in branches %}<li><a href="{{ branch.get_absolute_url }}">Car hire in {{ branch.name }}</a></li>{% endfor %}</ul>
-      </nav>
-      {% endif %}
-      <nav aria-label="Help">
-        <h2 class="footer-h">Help</h2>
-        <ul>
-          <li><a href="{% url 'bookings:find' %}">Find my booking</a></li>
-          <li><a href="{% url 'pages:faq' %}">Questions</a></li>
-          <li><a href="{% url 'pages:contact' %}">Contact us</a></li>
-          <li><a href="{% url 'pages:about' %}">About us</a></li>
-        </ul>
-      </nav>
-      <nav aria-label="Legal">
-        <h2 class="footer-h">Legal</h2>
-        <ul>
-          <li><a href="{% url 'pages:terms' %}">Terms of hire</a></li>
-          <li><a href="{% url 'pages:privacy' %}">Privacy policy</a></li>
-          <li><a href="/admin/" rel="nofollow">Staff login</a></li>
-        </ul>
-      </nav>
-      <p class="footer-small">&copy; {% now "Y" %} {{ business.name }}</p>
+      <div class="footer-bottom">
+        <p>&copy; {% now "Y" %} {{ business.name }}</p>
+        <nav aria-label="Legal">
+          <a href="{% url 'pages:terms' %}">Terms of hire</a>
+          <a href="{% url 'pages:privacy' %}">Privacy policy</a>
+          <a href="/admin/" rel="nofollow">Staff login</a>
+        </nav>
+      </div>
     </div>
   </footer>
 
+  {% block tabbar %}
+  <nav class="tabbar d-md-none" aria-label="Shortcuts">
+    <a class="tab" href="{% url 'fleet:home' %}"{% if vn == 'fleet:home' %} aria-current="page"{% endif %}><i class="bi {% if vn == 'fleet:home' %}bi-house-fill{% else %}bi-house{% endif %}" aria-hidden="true"></i><span>Home</span></a>
+    <a class="tab" href="{% url 'fleet:cars' %}"{% if vn == 'fleet:cars' or vn == 'fleet:city' %} aria-current="page"{% endif %}><i class="bi {% if vn == 'fleet:cars' or vn == 'fleet:city' %}bi-car-front-fill{% else %}bi-car-front{% endif %}" aria-hidden="true"></i><span>Cars</span></a>
+    <a class="tab" href="{% url 'bookings:find' %}"{% if vn == 'bookings:find' or vn == 'bookings:detail' %} aria-current="page"{% endif %}><i class="bi bi-receipt" aria-hidden="true"></i><span>My booking</span></a>
+    <button type="button" class="tab" data-open-chat><i class="bi bi-chat-dots" aria-hidden="true"></i><span>Chat</span><span class="badge rounded-pill text-bg-danger tab-badge" data-chat-badge hidden>New<span class="visually-hidden"> reply</span></span></button>
+  </nav>
+  {% endblock %}
+  {% endwith %}
+
   {% include "chat_widget.html" %}
 
-  <script src="{% static 'js/common.js' %}"></script>
-  <script src="{% static 'js/chat.js' %}"></script>
+  <script defer src="{% static 'js/common.js' %}"></script>
+  <script defer src="{% static 'js/chat.js' %}"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

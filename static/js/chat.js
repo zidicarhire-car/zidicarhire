@@ -23,13 +23,19 @@
   let poller = null;
   const seen = new Set();
 
+  /* The red dot on the chat button and the badge on the phone tab bar. */
+  function setUnread(on) {
+    dot.hidden = !on;
+    document.querySelectorAll('[data-chat-badge]').forEach((b) => { b.hidden = !on; });
+  }
+
   function setOpen(open) {
     isOpen = open;
     panel.hidden = !open;
     launcher.setAttribute('aria-expanded', String(open));
     root.classList.toggle('is-open', open);
     if (open) {
-      dot.hidden = true;
+      setUnread(false);
       if (chatId) { showThread(); input.focus(); } else { intro.hidden = false; thread.hidden = true; intro.querySelector('input').focus(); }
     }
     restartPolling();
@@ -62,7 +68,7 @@
       if (m.sender === 'admin') { quick.hidden = true; setWaitingForPerson(false); }
     });
     if (messages.length) scrollDown();
-    if (gotReply && !isOpen) dot.hidden = false;
+    if (gotReply && !isOpen) setUnread(true);
   }
 
   async function fetchMessages() {
