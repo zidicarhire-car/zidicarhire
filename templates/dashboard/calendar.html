@@ -4,9 +4,9 @@
 <header class="dash-head">
   <h1>Calendar {% if view_location %}in {{ view_location.name }}{% endif %}</h1>
   <div class="cal-nav" role="group" aria-label="Choose dates">
-    <a class="btn btn-ghost btn-sm" href="?start={{ prev_start|date:'Y-m-d' }}&amp;days={{ length }}">Earlier</a>
+    <a class="btn btn-ghost btn-sm" href="?start={{ prev_start|date:'Y-m-d' }}&amp;days={{ length }}"><i class="bi bi-chevron-left" aria-hidden="true"></i>Earlier</a>
     <a class="btn btn-ghost btn-sm" href="?days={{ length }}">Today</a>
-    <a class="btn btn-ghost btn-sm" href="?start={{ next_start|date:'Y-m-d' }}&amp;days={{ length }}">Later</a>
+    <a class="btn btn-ghost btn-sm" href="?start={{ next_start|date:'Y-m-d' }}&amp;days={{ length }}">Later<i class="bi bi-chevron-right" aria-hidden="true"></i></a>
     {% for n in lengths %}<a class="chip" href="?start={{ start|date:'Y-m-d' }}&amp;days={{ n }}"{% if n == length %} aria-current="true"{% endif %}>{{ n }} days</a>{% endfor %}
   </div>
 </header>
@@ -19,7 +19,7 @@
 </p>
 
 {% if rows %}
-<div class="cal-scroll" tabindex="0" aria-label="Bookings calendar, scroll sideways for more days">
+<div class="card cal-scroll" tabindex="0" aria-label="Bookings calendar, scroll sideways for more days">
   <div class="cal" style="--days: {{ length }};">
     <div class="cal-corner" style="grid-row: 1; grid-column: 1;">Car</div>
     {% for d in days %}
@@ -45,8 +45,8 @@
     {% endfor %}
   </div>
 </div>
-<p class="muted small">A block covers the days the car is out. The car can go out again on the day it comes back. Click a block to open the booking.</p>
+<p class="text-body-secondary small mt-2">A block covers the days the car is out. The car can go out again on the day it comes back. Click a block to open the booking.</p>
 {% else %}
-<p class="muted">No cars here yet. Add cars under Cars and prices.</p>
+<p class="text-body-secondary">No cars here yet. Add cars under Cars and prices.</p>
 {% endif %}
 {% endblock %}

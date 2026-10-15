@@ -1,0 +1,38 @@
+{# The car form in sections. Every CarForm field must appear exactly once below. #}
+{% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+<div class="form-sections">
+  <section class="card form-section" aria-labelledby="fs-prices">
+    <h3 id="fs-prices"><i class="bi bi-tag" aria-hidden="true"></i>Prices</h3>
+    <div class="row gx-3">
+      <div class="col-sm-6 price-field">{% include "_field.html" with field=form.price_per_day %}</div>
+      <div class="col-sm-6 price-field">{% include "_field.html" with field=form.min_booking_fee %}</div>
+      <div class="col-sm-6">{% include "_field.html" with field=form.weekly_rate %}</div>
+      <div class="col-sm-6">{% include "_field.html" with field=form.monthly_rate %}</div>
+    </div>
+  </section>
+  <section class="card form-section" aria-labelledby="fs-car">
+    <h3 id="fs-car"><i class="bi bi-car-front" aria-hidden="true"></i>The car</h3>
+    <div class="row gx-3">
+      <div class="col-12">{% include "_field.html" with field=form.name %}</div>
+      <div class="col-sm-6">{% include "_field.html" with field=form.location %}</div>
+      <div class="col-sm-6">{% include "_field.html" with field=form.category %}</div>
+      <div class="col-sm-6">{% include "_field.html" with field=form.transmission %}</div>
+      <div class="col-sm-6">{% include "_field.html" with field=form.fuel %}</div>
+      <div class="col-6 col-sm-4">{% include "_field.html" with field=form.seats %}</div>
+      <div class="col-6 col-sm-4">{% include "_field.html" with field=form.doors %}</div>
+      <div class="col-6 col-sm-4">{% include "_field.html" with field=form.luggage %}</div>
+      <div class="col-6 col-sm-6">{% include "_field.html" with field=form.engine_size %}</div>
+      <div class="col-sm-6">{% include "_field.html" with field=form.units %}</div>
+      <div class="col-12">{% include "_field.html" with field=form.air_con %}</div>
+    </div>
+  </section>
+  <section class="card form-section" aria-labelledby="fs-features">
+    <h3 id="fs-features"><i class="bi bi-list-check" aria-hidden="true"></i>Features and description</h3>
+    {% include "_field.html" with field=form.features %}
+    {% include "_field.html" with field=form.description %}
+  </section>
+  <section class="card form-section" aria-labelledby="fs-web">
+    <h3 id="fs-web"><i class="bi bi-globe2" aria-hidden="true"></i>Website</h3>
+    {% include "_field.html" with field=form.is_active %}
+  </section>
+</div>

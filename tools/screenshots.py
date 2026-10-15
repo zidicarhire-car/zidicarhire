@@ -239,6 +239,25 @@ def chat_flow(run, visitor, staff_ctx, tag):
     return chat_id, staff
 
 
+def dashboard_flow(run, staff, ref, tag):
+    """Staff: mark the booking picked up through the confirmation popup; hide and show a car with its switch."""
+    goto(staff, f'/dashboard/bookings/{ref}/')
+    staff.locator('.action-bar button', has_text='Mark picked up').click()
+    staff.locator('#confirm-dialog.show').wait_for()
+    with staff.expect_navigation():
+        staff.locator('#confirm-yes').click()
+    if 'Picked up' not in staff.locator('.detail-title .status').inner_text():
+        run.fail(f'dashboard {tag}: marking {ref} picked up did not work')
+    goto(staff, '/dashboard/cars/')
+    car_switch = staff.locator('.fleet-foot input[role="switch"]').first.get_attribute('id')   # hidden cars move in the list
+    switch = lambda: staff.locator(f'#{car_switch}')
+    for want in (False, True):
+        with staff.expect_navigation():
+            switch().click()
+        if switch().is_checked() != want:
+            run.fail(f'dashboard {tag}: the switch did not {"show" if want else "hide"} the car')
+
+
 def menu_flow(run, page):
     """Phone menu: Esc closes it and focus goes back to the menu button; the backdrop closes it; a link closes it."""
     goto(page, '/contact/')
@@ -402,8 +421,10 @@ def main():
                     ctx.update(ref=ref, detail_url=detail,
                                receipt_url=page.locator('a', has_text='Printable receipt').get_attribute('href'))
                 staff_ctx = run.context(width, staff=True)
-                chat_id, _ = chat_flow(run, c.new_page(), staff_ctx, tag)
+                chat_id, staff_page = chat_flow(run, c.new_page(), staff_ctx, tag)
                 print(f'  chat sent, answered and replied to on {tag}')
+                dashboard_flow(run, staff_page, ref, tag)
+                print(f'  staff marked {ref} picked up (confirmation popup) and hid/showed a car on {tag}')
                 ctx['chat_id'] = chat_id
                 if width < 992:
                     menu_flow(run, c.new_page())

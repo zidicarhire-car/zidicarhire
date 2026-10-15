@@ -94,7 +94,7 @@ class StyleguidePageTests(TestCase):
         self.client.login(username='staff', password='pw')
         res = self.client.get(reverse('dashboard:styleguide'))
         self.assertEqual(res.status_code, 200)
-        for text in ('--brand', '--plate', '--mpesa-fill', 'btn-mpesa', 'btn-plate', 'aria-busy="true"', 'dlg-sheet',
+        for text in ('--brand', '--plate', '--mpesa-fill', 'btn-mpesa', 'btn-plate', 'aria-busy="true"', 'offcanvas-bottom',
                      'data-bs-toggle="modal"', 'role="tablist"', 'data-bs-toggle="tab"', 'status-picked_up', 'alert-danger',
                      'accordion-button', 'sk-line', 'class="empty"', 'data-theme-toggle', 'Pass'):
             self.assertContains(res, text)

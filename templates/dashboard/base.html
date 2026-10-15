@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="csrf-token" content="{{ csrf_token }}">
   <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#1C2340">
   <title>{% block title %}Dashboard{% endblock %} | ZIDICARHIRE</title>
   <link rel="icon" href="{% static 'img/zidicarhire-favicon.svg' %}" type="image/svg+xml">
   <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
@@ -12,50 +13,75 @@
   <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
   {% block head %}{% endblock %}
 </head>
-<body class="dash" data-feed-url="{% url 'dashboard:api_feed' %}" data-city="{{ view_location.slug|default:'' }}" data-owner="{{ is_owner|yesno:'1,0' }}">
-  <aside class="dash-side">
-    <a class="brand dash-brand" href="{% url 'dashboard:home' %}">
-      <img class="brand-logo" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire" width="128" height="32">
-      <span class="brand-word">Dashboard</span>
-    </a>
-    <nav class="dash-nav" aria-label="Dashboard">
-      <a href="{% url 'dashboard:home' %}"{% if nav == 'overview' %} aria-current="page"{% endif %}>Today</a>
-      <a href="{% url 'dashboard:bookings' %}"{% if nav == 'bookings' %} aria-current="page"{% endif %}>Bookings</a>
-      <a href="{% url 'dashboard:calendar' %}"{% if nav == 'calendar' %} aria-current="page"{% endif %}>Calendar</a>
-      <a href="{% url 'dashboard:cars' %}"{% if nav == 'cars' %} aria-current="page"{% endif %}>Cars and prices</a>
-      <a href="{% url 'dashboard:chats' %}"{% if nav == 'chats' %} aria-current="page"{% endif %}>Live chat <span class="badge rounded-pill text-bg-plate" id="chat-badge" hidden>0</span></a>
-      <a href="{% url 'dashboard:reports' %}"{% if nav == 'reports' %} aria-current="page"{% endif %}>Reports</a>
-      {% if is_owner %}
-      <a href="{% url 'dashboard:locations' %}"{% if nav == 'branches' %} aria-current="page"{% endif %}>Branches</a>
-      <a href="{% url 'dashboard:routes' %}"{% if nav == 'routes' %} aria-current="page"{% endif %}>One-way routes</a>
-      {% endif %}
-      <a href="{% url 'dashboard:settings_check' %}"{% if nav == 'settings' %} aria-current="page"{% endif %}>Payment settings check</a>
-    </nav>
-    <div class="dash-city">
-      {% if staff_location %}
-      <span class="dash-city-label">Your branch</span>
-      <strong>{{ staff_location.name }}</strong>
-      {% else %}
-      <form method="post" action="{% url 'dashboard:set_city' %}">
-        {% csrf_token %}
-        <input type="hidden" name="next" value="{{ request.get_full_path }}">
-        <label class="dash-city-label" for="dash-city">Showing</label>
-        <select id="dash-city" name="city" onchange="this.form.submit()">
-          <option value="">All of Kenya</option>
-          {% for loc in all_locations %}
-          <option value="{{ loc.pk }}"{% if loc == view_location %} selected{% endif %}>{{ loc.name }}{% if not loc.is_active %} (hidden){% endif %}</option>
-          {% endfor %}
-        </select>
-        <noscript><button class="btn btn-ghost btn-sm" type="submit">Show</button></noscript>
-      </form>
-      {% endif %}
+<body class="dash {% block body_class %}has-dash-tabbar{% endblock %}" data-feed-url="{% url 'dashboard:api_feed' %}" data-city="{{ view_location.slug|default:'' }}" data-owner="{{ is_owner|yesno:'1,0' }}">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  {# Phones and tablets: top bar #}
+  <header class="dash-top d-lg-none">
+    <a class="brand" href="{% url 'dashboard:home' %}"><img class="brand-logo" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire dashboard" width="128" height="32"></a>
+    <div class="dropdown ms-auto">
+      <button type="button" class="icon-btn dash-bell" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="Notifications" data-notify-toggle>
+        <i class="bi bi-bell" aria-hidden="true"></i><span class="badge rounded-pill text-bg-plate dash-bell-count" data-notify-count hidden></span>
+      </button>
+      <div class="dropdown-menu dropdown-menu-end notify-menu">
+        <p class="notify-title">Notifications</p>
+        <ul class="notify-list" data-notify-list><li class="notify-empty">Nothing new yet. Paid bookings and chats show here and play a sound.</li></ul>
+      </div>
     </div>
-    <div class="dash-side-foot">
-      <button type="button" class="btn btn-ghost btn-sm" id="alerts-btn">Turn on desktop alerts</button>
-      <button type="button" class="icon-btn theme-toggle" data-theme-toggle aria-label="Dark mode" aria-pressed="false" title="Switch to dark mode"><i class="bi bi-moon-stars" aria-hidden="true"></i></button>
-      <a href="{% url 'fleet:home' %}" target="_blank" rel="noopener">View website</a>
-      <a href="{% url 'dashboard:styleguide' %}"{% if nav == 'styleguide' %} aria-current="page"{% endif %}>Style guide</a>
-      <form method="post" action="{% url 'dashboard:logout' %}">{% csrf_token %}<button type="submit" class="linklike">Sign out</button></form>
+    <button type="button" class="icon-btn" data-bs-toggle="offcanvas" data-bs-target="#dash-menu" aria-controls="dash-menu" aria-label="Open menu"><i class="bi bi-list" aria-hidden="true"></i></button>
+  </header>
+
+  {# Sidebar: fixed on desktop, a slide-in menu on phones #}
+  <aside class="dash-side">
+    <div class="offcanvas-lg offcanvas-start dash-menu" tabindex="-1" id="dash-menu" aria-labelledby="dash-menu-title">
+      <div class="offcanvas-header">
+        <a class="brand dash-brand" href="{% url 'dashboard:home' %}">
+          <img class="brand-logo" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire" width="128" height="32">
+          <span class="brand-word" id="dash-menu-title">Dashboard</span>
+        </a>
+        <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#dash-menu" aria-label="Close menu"></button>
+      </div>
+      <div class="offcanvas-body">
+        <nav class="dash-nav" aria-label="Dashboard">
+          <a href="{% url 'dashboard:home' %}"{% if nav == 'overview' %} aria-current="page"{% endif %}><i class="bi bi-speedometer2" aria-hidden="true"></i>Overview</a>
+          <a href="{% url 'dashboard:bookings' %}"{% if nav == 'bookings' %} aria-current="page"{% endif %}><i class="bi bi-journal-check" aria-hidden="true"></i>Bookings</a>
+          <a href="{% url 'dashboard:calendar' %}"{% if nav == 'calendar' %} aria-current="page"{% endif %}><i class="bi bi-calendar3" aria-hidden="true"></i>Calendar</a>
+          <a href="{% url 'dashboard:cars' %}"{% if nav == 'cars' %} aria-current="page"{% endif %}><i class="bi bi-car-front" aria-hidden="true"></i>Cars</a>
+          <a href="{% url 'dashboard:chats' %}"{% if nav == 'chats' %} aria-current="page"{% endif %}><i class="bi bi-chat-dots" aria-hidden="true"></i>Chat<span class="badge rounded-pill text-bg-plate ms-auto" id="chat-badge" data-chat-count hidden>0</span></a>
+          {% if is_owner %}
+          <a href="{% url 'dashboard:locations' %}"{% if nav == 'branches' %} aria-current="page"{% endif %}><i class="bi bi-geo-alt" aria-hidden="true"></i>Locations</a>
+          <a href="{% url 'dashboard:routes' %}"{% if nav == 'routes' %} aria-current="page"{% endif %}><i class="bi bi-signpost-split" aria-hidden="true"></i>One-way routes</a>
+          {% endif %}
+          <a href="{% url 'dashboard:reports' %}"{% if nav == 'reports' %} aria-current="page"{% endif %}><i class="bi bi-bar-chart" aria-hidden="true"></i>Reports</a>
+          <a href="{% url 'dashboard:settings_check' %}"{% if nav == 'settings' %} aria-current="page"{% endif %}><i class="bi bi-gear" aria-hidden="true"></i>Settings</a>
+        </nav>
+        <div class="dash-city">
+          {% if staff_location %}
+          <span class="dash-city-label">Your branch</span>
+          <strong>{{ staff_location.name }}</strong>
+          {% else %}
+          <form method="post" action="{% url 'dashboard:set_city' %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <label class="dash-city-label" for="dash-city">Showing</label>
+            <select class="form-select" id="dash-city" name="city" data-autosubmit>
+              <option value="">All of Kenya</option>
+              {% for loc in all_locations %}
+              <option value="{{ loc.pk }}"{% if loc == view_location %} selected{% endif %}>{{ loc.name }}{% if not loc.is_active %} (hidden){% endif %}</option>
+              {% endfor %}
+            </select>
+            <noscript><button class="btn btn-on-brand btn-sm" type="submit">Show</button></noscript>
+          </form>
+          {% endif %}
+        </div>
+        <div class="dash-side-foot">
+          <button type="button" class="btn btn-on-brand btn-sm" id="alerts-btn"><i class="bi bi-bell" aria-hidden="true"></i>Turn on desktop alerts</button>
+          <button type="button" class="btn btn-on-brand btn-sm theme-toggle" data-theme-toggle aria-pressed="false"><i class="bi bi-moon-stars" aria-hidden="true"></i><span data-theme-label>Dark mode</span></button>
+          <a href="{% url 'fleet:home' %}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>View website</a>
+          <a href="{% url 'dashboard:styleguide' %}"{% if nav == 'styleguide' %} aria-current="page"{% endif %}><i class="bi bi-palette" aria-hidden="true"></i>Style guide</a>
+          <form method="post" action="{% url 'dashboard:logout' %}">{% csrf_token %}<button type="submit" class="linklike"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Sign out</button></form>
+        </div>
+      </div>
     </div>
   </aside>
 
@@ -73,10 +99,32 @@
     {% block content %}{% endblock %}
   </main>
 
+  {% block tabbar %}
+  <nav class="dash-tabbar d-lg-none" aria-label="Shortcuts">
+    <a class="tab" href="{% url 'dashboard:home' %}"{% if nav == 'overview' %} aria-current="page"{% endif %}><i class="bi bi-speedometer2" aria-hidden="true"></i><span>Overview</span></a>
+    <a class="tab" href="{% url 'dashboard:bookings' %}"{% if nav == 'bookings' %} aria-current="page"{% endif %}><i class="bi bi-journal-check" aria-hidden="true"></i><span>Bookings</span></a>
+    <a class="tab" href="{% url 'dashboard:chats' %}"{% if nav == 'chats' %} aria-current="page"{% endif %}><i class="bi bi-chat-dots" aria-hidden="true"></i><span>Chat</span><span class="badge rounded-pill text-bg-plate tab-badge" data-chat-count hidden>0</span></a>
+    <button type="button" class="tab" data-bs-toggle="offcanvas" data-bs-target="#dash-menu" aria-controls="dash-menu"><i class="bi bi-grid" aria-hidden="true"></i><span>More</span></button>
+  </nav>
+  {% endblock %}
+
+  {# One confirmation popup for every form with data-confirm (dashboard.js) #}
+  <div class="modal fade" id="confirm-dialog" tabindex="-1" aria-labelledby="confirm-text" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body"><p class="confirm-text" id="confirm-text"></p></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Go back</button>
+          <button type="button" class="btn btn-primary" id="confirm-yes">Yes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-container position-fixed top-0 end-0" id="toasts" aria-live="polite"></div>
 
-  <script src="{% static 'js/common.js' %}"></script>
-  <script src="{% static 'js/dashboard.js' %}"></script>
+  <script defer src="{% static 'js/common.js' %}"></script>
+  <script defer src="{% static 'js/dashboard.js' %}"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

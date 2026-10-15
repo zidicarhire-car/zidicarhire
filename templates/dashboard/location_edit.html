@@ -1,9 +1,11 @@
 {% extends "dashboard/base.html" %}
+{% load ui %}
 {% block title %}Edit {{ loc.name }}{% endblock %}
 {% block content %}
-<header class="dash-head"><h1>{{ loc.name }} branch</h1><a href="{% url 'dashboard:locations' %}">Back to all branches</a></header>
+<nav aria-label="Breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'dashboard:locations' %}">Locations</a></li><li class="breadcrumb-item active" aria-current="page">{{ loc.name }}</li></ol></nav>
+<header class="dash-head"><h1>{{ loc.name }} branch</h1></header>
 
-<form method="post" class="car-form">
+<form method="post" novalidate>
   {% csrf_token %}
   <div class="cars-layout">
     <section class="panel">
@@ -13,19 +15,19 @@
 
     <section class="panel">
       <h2>Pick-up points</h2>
-      <p class="muted small">Customers choose one when they book. The fee is added to their total. Untick "Offer" to hide a point. Fill in a blank row to add one.</p>
+      <p class="text-body-secondary small">Customers choose one when they book. The fee is added to their total. Untick "Offer" to hide a point. Fill in a blank row to add one.</p>
       {{ points.management_form }}
       {% if points.non_form_errors %}<p class="form-error">{{ points.non_form_errors|join:" " }}</p>{% endif %}
-      <div class="table-wrap">
+      <div class="table-responsive formset-table">
         <table class="table compact-table">
-          <thead><tr><th>Name</th><th>Fee (KES)</th><th>Order</th><th>Offer</th></tr></thead>
+          <thead><tr><th scope="col">Name</th><th scope="col">Fee (KES)</th><th scope="col">Order</th><th scope="col">Offer</th></tr></thead>
           <tbody>
             {% for f in points %}
             <tr>
-              <td>{{ f.id }}{{ f.name }}{% for e in f.name.errors %}<small class="form-error">{{ e }}</small>{% endfor %}{% for e in f.non_field_errors %}<small class="form-error">{{ e }}</small>{% endfor %}</td>
-              <td>{{ f.fee }}{% for e in f.fee.errors %}<small class="form-error">{{ e }}</small>{% endfor %}</td>
-              <td>{{ f.display_order }}</td>
-              <td>{{ f.is_active }}</td>
+              <td>{{ f.id }}{{ f.name|bs }}{% for e in f.name.errors %}<small class="form-error">{{ e }}</small>{% endfor %}{% for e in f.non_field_errors %}<small class="form-error">{{ e }}</small>{% endfor %}</td>
+              <td>{{ f.fee|bs }}{% for e in f.fee.errors %}<small class="form-error">{{ e }}</small>{% endfor %}</td>
+              <td>{{ f.display_order|bs }}</td>
+              <td>{{ f.is_active|bs }}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -33,6 +35,6 @@
       </div>
     </section>
   </div>
-  <p><button class="btn btn-primary" type="submit">Save branch</button></p>
+  <div class="form-actions sticky-actions"><button class="btn btn-primary btn-lg" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Save branch</button></div>
 </form>
 {% endblock %}

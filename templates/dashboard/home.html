@@ -1,8 +1,11 @@
 {% extends "dashboard/base.html" %}
-{% block title %}Today{% endblock %}
+{% block title %}Overview{% endblock %}
 {% block content %}
 <header class="dash-head">
-  <h1>Today {% if view_location %}in {{ view_location.name }}{% endif %} <span class="muted head-date">{{ today|date:"l j F" }}</span></h1>
+  <div>
+    <h1>Today {% if view_location %}in {{ view_location.name }}{% endif %}</h1>
+    <p class="head-date">{{ today|date:"l j F" }}</p>
+  </div>
   <p class="live-note"><span class="live-dot" aria-hidden="true"></span> Updates live. New paid bookings play a sound.</p>
 </header>
 <div data-live>

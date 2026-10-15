@@ -251,7 +251,7 @@
   <p class="prose muted">Bootstrap modal: rounded-4, centred on desktop, full screen on phones. Esc or the close button closes it.</p>
   <div class="sg-row">
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sg-bs-modal">Open Bootstrap modal</button>
-    <button type="button" class="btn btn-ghost" id="sg-open-modal">Open sheet dialog (current booking pop-up)</button>
+    <button type="button" class="btn btn-ghost" data-bs-toggle="offcanvas" data-bs-target="#sg-sheet" aria-controls="sg-sheet">Open bottom sheet</button>
   </div>
   <div class="modal fade" id="sg-bs-modal" tabindex="-1" aria-labelledby="sg-bs-modal-title" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
@@ -268,20 +268,13 @@
       </div>
     </div>
   </div>
-  <dialog class="dlg dlg-sheet" id="sg-modal" aria-labelledby="sg-modal-title">
-    <div class="dlg-head">
-      <h2 id="sg-modal-title">Change dates</h2>
-      <button type="button" class="icon-btn dlg-close" data-close aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+  <div class="offcanvas offcanvas-bottom sg-sheet" tabindex="-1" id="sg-sheet" aria-labelledby="sg-sheet-title">
+    <div class="offcanvas-header">
+      <h2 class="offcanvas-title h5" id="sg-sheet-title">Filters</h2>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="dlg-body">
-      <p>The dialog body scrolls on its own, while the header and footer stay in place.</p>
-      <label>New return date<input type="date"></label>
-    </div>
-    <div class="dlg-foot">
-      <button type="button" class="btn btn-ghost" data-close>Keep dates</button>
-      <button type="button" class="btn btn-primary" data-close>Change dates</button>
-    </div>
-  </dialog>
+    <div class="offcanvas-body"><p>Bottom sheets hold filters on phones (car list, bookings). Esc, the close button or the backdrop closes them.</p></div>
+  </div>
 
   <div class="panel" style="margin-top:var(--space-5)">
     <ul class="nav nav-tabs" role="tablist" aria-label="Booking sections">
@@ -343,7 +336,7 @@
 
 {% block scripts %}
 <script>
-(function () {
+document.addEventListener('DOMContentLoaded', () => {   // after the deferred common.js
   const { busy, toast } = window.ZCH;
   document.getElementById('sg-busy').addEventListener('click', (e) => {
     const btn = e.currentTarget;
@@ -356,9 +349,6 @@
     else if (kind === 'error') toast("Couldn't save", 'Check your connection and try again.', { kind });
     else toast('New chat', 'A visitor in Mombasa wrote to you.');
   }));
-  const modal = document.getElementById('sg-modal');
-  document.getElementById('sg-open-modal').addEventListener('click', () => modal.showModal());
-  modal.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => modal.close()));
-})();
+});
 </script>
 {% endblock %}

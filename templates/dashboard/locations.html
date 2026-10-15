@@ -1,7 +1,7 @@
 {% extends "dashboard/base.html" %}
 {% block title %}Branches{% endblock %}
 {% block content %}
-<header class="dash-head"><h1>Branches</h1><a href="{% url 'dashboard:routes' %}">One-way routes</a></header>
+<header class="dash-head"><h1>Locations</h1><a class="btn btn-ghost" href="{% url 'dashboard:routes' %}"><i class="bi bi-signpost-split" aria-hidden="true"></i>One-way routes</a></header>
 
 <div class="cars-layout">
   <section class="panel">
@@ -16,21 +16,21 @@
           {% if branch.is_active %}<a href="{{ branch.get_absolute_url }}" target="_blank" rel="noopener">{{ branch.get_absolute_url }}</a>{% else %}<span class="status status-cancelled">Hidden from website</span>{% endif %}
         </div>
         <div class="fleet-actions">
-          <a class="btn btn-ghost btn-sm" href="{% url 'dashboard:location_edit' branch.pk %}">Edit</a>
+          <a class="btn btn-ghost btn-sm" href="{% url 'dashboard:location_edit' branch.pk %}"><i class="bi bi-pencil" aria-hidden="true"></i>Edit</a>
           <form method="post" action="{% url 'dashboard:location_toggle' branch.pk %}">{% csrf_token %}
             <button class="btn btn-ghost btn-sm" type="submit">{% if branch.is_active %}Hide{% else %}Show{% endif %}</button>
           </form>
         </div>
       </li>
       {% empty %}
-      <li class="muted">No branches yet. Run <code>python manage.py seed_locations</code> or add one here.</li>
+      <li class="text-body-secondary">No branches yet. Run <code>python manage.py seed_locations</code> or add one here.</li>
       {% endfor %}
     </ul>
   </section>
 
   <section class="panel">
     <h2>Add a branch</h2>
-    <form method="post" class="car-form">
+    <form method="post" novalidate>
       {% csrf_token %}
       {% include "dashboard/_form.html" %}
       <button class="btn btn-primary" type="submit">Add branch</button>

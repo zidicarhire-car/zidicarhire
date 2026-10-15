@@ -1,33 +1,49 @@
 {% extends "dashboard/base.html" %}
 {% block title %}Live chat{% endblock %}
 {% block content %}
-<header class="dash-head"><h1>Live chat</h1><p class="live-note"><span class="live-dot" aria-hidden="true"></span> Visitors see you as online while this dashboard is open.</p></header>
-<div class="inbox">
-  <ul class="inbox-list" id="inbox-list" aria-label="Conversations"><li class="muted pad">Loading chats&hellip;</li></ul>
-  <section class="inbox-thread" id="inbox-thread" aria-live="polite">
-    <div class="inbox-empty" id="inbox-empty"><p>Choose a conversation to reply.</p></div>
+<header class="dash-head">
+  <h1>Live chat</h1>
+  <p class="live-note"><span class="live-dot" aria-hidden="true"></span> Visitors see you as online while this dashboard is open.</p>
+</header>
+<div class="card inbox" id="inbox">
+  <div class="inbox-list-pane">
+    <ul class="inbox-list" id="inbox-list" aria-label="Conversations">
+      <li class="inbox-loading placeholder-glow" aria-label="Loading chats"><span class="placeholder col-7"></span><span class="placeholder col-10"></span></li>
+      <li class="inbox-loading placeholder-glow" aria-hidden="true"><span class="placeholder col-6"></span><span class="placeholder col-9"></span></li>
+      <li class="inbox-loading placeholder-glow" aria-hidden="true"><span class="placeholder col-8"></span><span class="placeholder col-11"></span></li>
+    </ul>
+  </div>
+  <section class="inbox-thread" id="inbox-thread" aria-live="polite" aria-label="Conversation">
+    <div class="inbox-empty" id="inbox-empty">
+      <span class="empty-icon" aria-hidden="true"><i class="bi bi-chat-dots"></i></span>
+      <p>Choose a conversation to reply.</p>
+    </div>
     <div class="inbox-active" id="inbox-active" hidden>
       <header class="inbox-head">
-        <strong id="thread-name"></strong><span id="thread-contact" class="muted"></span>
+        <button type="button" class="icon-btn inbox-back d-md-none" id="inbox-back" aria-label="Back to conversations"><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
+        <div class="inbox-who">
+          <strong id="thread-name"></strong>
+          <span id="thread-contact" class="text-body-secondary"></span>
+        </div>
         {% if is_owner %}
-        <label class="thread-city">Branch
-          <select id="thread-city">
+        <div class="thread-city">
+          <label class="visually-hidden" for="thread-city">Branch</label>
+          <select class="form-select form-select-sm" id="thread-city" aria-label="Branch for this chat">
             <option value="">No city</option>
             {% for loc in all_locations %}<option value="{{ loc.pk }}">{{ loc.name }}</option>{% endfor %}
           </select>
-        </label>
+        </div>
         {% else %}
         <span class="city-tag" id="thread-city-tag"></span>
         {% endif %}
       </header>
       <ol class="chat-messages" id="thread-messages"></ol>
       <form class="chat-compose" id="reply-form">
-        <label class="sr-only" for="reply-input">Reply</label>
-        <textarea id="reply-input" rows="2" maxlength="1000" placeholder="Type your reply. Enter sends, Shift+Enter adds a line."></textarea>
-        <button class="btn btn-primary" type="submit">Send</button>
+        <label class="visually-hidden" for="reply-input">Reply</label>
+        <textarea class="form-control" id="reply-input" rows="2" maxlength="1000" placeholder="Type your reply. Enter sends, Shift+Enter adds a line."></textarea>
+        <button class="btn btn-primary chat-send" type="submit" aria-label="Send reply"><i class="bi bi-send-fill" aria-hidden="true"></i></button>
       </form>
     </div>
   </section>
 </div>
 {% endblock %}
-{% block scripts %}<script>ZCHDash.initChats();</script>{% endblock %}

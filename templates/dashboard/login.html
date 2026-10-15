@@ -2,26 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#1C2340">
   <title>Sign in | ZIDICARHIRE</title>
   <link rel="icon" href="{% static 'img/zidicarhire-favicon.svg' %}" type="image/svg+xml">
   {% include "_theme_head.html" %}
   <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 </head>
 <body class="login-page">
-  <main class="login-card">
-    <img class="login-logo only-light" src="{% static 'img/zidicarhire-logo.svg' %}" alt="ZidiCarHire" width="192" height="48">
-    <img class="login-logo only-dark" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire" width="192" height="48">
-    <h1>Sign in to the dashboard</h1>
-    <form method="post">
-      {% csrf_token %}
-      {% if form.non_field_errors %}<p class="form-error">{{ form.non_field_errors|join:" " }}</p>{% endif %}
-      <label>Username<input name="username" autocomplete="username" required autofocus value="{{ form.username.value|default:'' }}"></label>
-      <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
-      <input type="hidden" name="next" value="{{ next }}">
-      <button class="btn btn-primary btn-block" type="submit">Sign in</button>
-    </form>
+  <main class="card login-card">
+    <div class="card-body">
+      <img class="login-logo only-light" src="{% static 'img/zidicarhire-logo.svg' %}" alt="ZidiCarHire" width="192" height="48">
+      <img class="login-logo only-dark" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire" width="192" height="48">
+      <h1>Sign in to the dashboard</h1>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+        <div class="form-floating mb-3">
+          <input class="form-control" id="login-user" name="username" autocomplete="username" required autofocus value="{{ form.username.value|default:'' }}" placeholder="Username">
+          <label for="login-user">Username</label>
+        </div>
+        <div class="form-floating mb-4">
+          <input class="form-control" id="login-pass" type="password" name="password" autocomplete="current-password" required placeholder="Password">
+          <label for="login-pass">Password</label>
+        </div>
+        <input type="hidden" name="next" value="{{ next }}">
+        <button class="btn btn-primary btn-lg w-100" type="submit"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Sign in</button>
+      </form>
+    </div>
   </main>
 </body>
 </html>

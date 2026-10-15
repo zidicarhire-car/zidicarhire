@@ -1,17 +1,9 @@
-{% if form.non_field_errors %}<p class="form-error">{{ form.non_field_errors|join:" " }}</p>{% endif %}
-<div class="form-grid">
+{# Any dashboard form, Bootstrap style: long fields full width, the rest in two columns from 576px. #}
+{% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+<div class="row gx-3">
   {% for field in form %}
-  <div class="field field-{{ field.name }}{% if field.errors %} has-error{% endif %}">
-    {% if field.widget_type == 'checkbox' %}
-      <label class="check">{{ field }} {{ field.label }}</label>
-    {% elif field.widget_type == 'checkboxselectmultiple' %}
-      <fieldset class="checklist"><legend>{{ field.label }}</legend>{{ field }}</fieldset>
-    {% else %}
-      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-      {{ field }}
-    {% endif %}
-    {% if field.help_text and field.widget_type != 'checkbox' %}<small>{{ field.help_text }}</small>{% endif %}
-    {% for error in field.errors %}<small class="form-error">{{ error }}</small>{% endfor %}
+  <div class="{% if field.widget_type == 'textarea' or field.widget_type == 'checkboxselectmultiple' or field.widget_type == 'url' or field.widget_type == 'checkbox' %}col-12{% else %}col-sm-6{% endif %}">
+    {% include "_field.html" %}
   </div>
   {% endfor %}
 </div>

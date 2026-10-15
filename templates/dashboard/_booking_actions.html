@@ -1,0 +1,9 @@
+<div class="dropdown row-menu">
+  <button type="button" class="icon-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Actions for {{ b.ref }}"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><a class="dropdown-item" href="{% url 'dashboard:booking_detail' b.ref %}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>Open booking</a></li>
+    <li><a class="dropdown-item" href="tel:{{ b.local_phone }}"><i class="bi bi-telephone" aria-hidden="true"></i>Call {{ b.customer_name }}</a></li>
+    {% if b.whatsapp_link %}<li><a class="dropdown-item" href="{{ b.whatsapp_link }}" target="_blank" rel="noopener"><i class="bi bi-whatsapp" aria-hidden="true"></i>WhatsApp</a></li>{% endif %}
+    {% if b.is_paid %}<li><a class="dropdown-item" href="{% url 'dashboard:booking_receipt' b.ref %}"><i class="bi bi-download" aria-hidden="true"></i>Download receipt</a></li>{% endif %}
+  </ul>
+</div>

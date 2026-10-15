@@ -2,48 +2,56 @@
 {% load static %}
 {% block title %}Edit {{ car.name }}{% endblock %}
 {% block content %}
+<nav aria-label="Breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:cars' %}">Cars</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ car.name }}</li>
+  </ol>
+</nav>
 <header class="dash-head">
   <h1>Edit {{ car.name }}</h1>
-  <p><a href="{% url 'dashboard:cars' %}">Back to all cars</a>{% if car.is_active %} &middot; <a href="{{ car.get_absolute_url }}" target="_blank" rel="noopener">See it on the website</a>{% endif %}</p>
+  {% if car.is_active %}<a class="btn btn-ghost" href="{{ car.get_absolute_url }}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>See it on the website</a>{% endif %}
 </header>
 
-<section class="panel" id="photos" aria-labelledby="photos-title">
-  <h2 id="photos-title">Photos <span class="count" data-photo-count>{{ photos|length }}</span></h2>
-  <p class="muted small">JPEG, PNG or WebP, up to {{ max_mb }} MB each and {{ max_photos }} per car. Photos are resized for the web and their location data is removed. Drag photos to change the order; the cover photo shows on car cards.</p>
+<section class="card form-section" id="photos" aria-labelledby="photos-title">
+  <h2 id="photos-title"><i class="bi bi-images" aria-hidden="true"></i>Photos <span class="count" data-photo-count>{{ photos|length }}</span></h2>
+  <p class="text-body-secondary small">JPEG, PNG or WebP, up to {{ max_mb }} MB each and {{ max_photos }} per car. Photos are resized for the web and their location data is removed. Drag photos to change the order; the cover photo shows on car cards.</p>
   <div class="photo-manager" id="photo-manager"
        data-upload-url="{% url 'dashboard:photo_upload' car.pk %}" data-order-url="{% url 'dashboard:photo_order' car.pk %}"
        data-base-url="/dashboard/cars/{{ car.pk }}/photos/" data-max-mb="{{ max_mb }}" data-max-photos="{{ max_photos }}">
     <label class="dropzone" id="dropzone">
-      <input type="file" id="photo-input" accept="image/jpeg,image/png,image/webp" multiple class="sr-only">
+      <input type="file" id="photo-input" accept="image/jpeg,image/png,image/webp" multiple class="visually-hidden">
+      <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
       <strong>Drop photos here or choose files</strong>
       <span>You can pick several at once.</span>
+    </label>
+    <label class="btn btn-ghost w-100 camera-btn d-md-none">
+      <input type="file" id="photo-camera" accept="image/*" capture="environment" class="visually-hidden">
+      <i class="bi bi-camera" aria-hidden="true"></i>Take a photo
     </label>
     <ul class="upload-list" id="upload-list" aria-live="polite"></ul>
     <ul class="photo-grid" id="photo-grid" aria-label="Photos of {{ car.name }}">
       {% for p in photos %}
       <li class="photo-tile{% if p.is_cover %} is-cover{% endif %}" draggable="true" data-id="{{ p.pk }}">
         <img src="{{ p.thumbnail.url }}" alt="Photo {{ forloop.counter }} of {{ car.name }}" loading="lazy" width="300" height="188">
-        {% if p.is_cover %}<span class="cover-tag">Cover</span>{% endif %}
+        {% if p.is_cover %}<span class="cover-tag"><i class="bi bi-star-fill" aria-hidden="true"></i>Cover</span>{% endif %}
         <div class="photo-actions">
-          <button type="button" class="btn btn-ghost btn-sm" data-move="-1" aria-label="Move photo {{ forloop.counter }} earlier">&larr;</button>
-          <button type="button" class="btn btn-ghost btn-sm" data-move="1" aria-label="Move photo {{ forloop.counter }} later">&rarr;</button>
-          {% if not p.is_cover %}<button type="button" class="btn btn-ghost btn-sm" data-cover>Make cover</button>{% endif %}
-          <button type="button" class="btn btn-danger btn-sm" data-delete>Delete</button>
+          <button type="button" class="icon-btn" data-move="-1" aria-label="Move photo {{ forloop.counter }} earlier"><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
+          <button type="button" class="icon-btn" data-move="1" aria-label="Move photo {{ forloop.counter }} later"><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+          {% if not p.is_cover %}<button type="button" class="icon-btn" data-cover aria-label="Make photo {{ forloop.counter }} the cover"><i class="bi bi-star" aria-hidden="true"></i></button>{% endif %}
+          <button type="button" class="icon-btn text-danger" data-delete aria-label="Delete photo {{ forloop.counter }}"><i class="bi bi-trash" aria-hidden="true"></i></button>
         </div>
       </li>
       {% endfor %}
     </ul>
-    <p class="muted" id="photo-empty"{% if photos %} hidden{% endif %}>No photos yet. Cars with photos get far more bookings.</p>
+    <p class="text-body-secondary" id="photo-empty"{% if photos %} hidden{% endif %}>No photos yet. Cars with photos get far more bookings.</p>
   </div>
 </section>
 
-<section class="panel narrow-panel">
-  <h2>Details and prices</h2>
-  <form method="post" class="car-form">
-    {% csrf_token %}
-    {% include "dashboard/_form.html" %}
-    <button class="btn btn-primary" type="submit">Save changes</button>
-  </form>
-</section>
+<form method="post" novalidate class="car-edit-form">
+  {% csrf_token %}
+  {% include "dashboard/_car_form.html" %}
+  <div class="form-actions sticky-actions"><button class="btn btn-primary btn-lg" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Save changes</button></div>
+</form>
 {% endblock %}
-{% block scripts %}<script src="{% static 'js/photos.js' %}"></script>{% endblock %}
+{% block scripts %}<script defer src="{% static 'js/photos.js' %}"></script>{% endblock %}

@@ -3,7 +3,7 @@
 {% block content %}
 <header class="dash-head">
   <h1>Payment settings check</h1>
-  <p class="muted">What's filled in your .env file. Passwords and tokens are never shown here.</p>
+  <p class="text-body-secondary">What's filled in your .env file. Passwords and tokens are never shown here.</p>
 </header>
 
 <div class="cars-layout">
@@ -13,23 +13,25 @@
     <ul class="check-list">
       {% for row in rows %}
       <li class="{% if row.ok %}is-ok{% else %}is-missing{% endif %}">
-        <span class="check-icon" aria-hidden="true">{% if row.ok %}&#10003;{% else %}!{% endif %}</span>
+        <span class="check-icon" aria-hidden="true"><i class="bi {% if row.ok %}bi-check-lg{% else %}bi-exclamation-lg{% endif %}"></i></span>
         <span><strong>{{ row.label }}</strong><small>{{ row.detail }}</small></span>
         <span class="sr-only">{% if row.ok %}OK{% else %}Needs attention{% endif %}</span>
       </li>
       {% endfor %}
     </ul>
     {% endfor %}
-    <p class="muted small">After changing .env on PythonAnywhere, click Reload on the Web tab for it to take effect.</p>
+    <p class="text-body-secondary small">After changing .env on PythonAnywhere, click Reload on the Web tab for it to take effect.</p>
   </section>
 
   <section class="panel">
     <h2>Send a test M-Pesa prompt</h2>
-    <p class="muted small">Sends a real prompt for KES 1 to your phone through PayHero, so you can check that the till is connected. The shilling goes to your own till.</p>
-    <form method="post" class="car-form">
+    <p class="text-body-secondary small">Sends a real prompt for KES 1 to your phone through PayHero, so you can check that the till is connected. The shilling goes to your own till.</p>
+    <form method="post" novalidate>
       {% csrf_token %}
-      <label for="test-phone">Your Safaricom number</label>
-      <input id="test-phone" name="phone" type="tel" inputmode="tel" placeholder="0712 345 678" required>
+      <div class="form-floating mb-3">
+        <input class="form-control" id="test-phone" name="phone" type="tel" inputmode="tel" placeholder="0712 345 678" required>
+        <label for="test-phone">Your Safaricom number</label>
+      </div>
       <p><button class="btn btn-mpesa" type="submit">Send test STK push for KES 1 to my phone</button></p>
     </form>
 
@@ -54,7 +56,7 @@
       {% endfor %}
     </ul>
     {% else %}
-    <p class="muted">No test prompts yet.</p>
+    <p class="text-body-secondary">No test prompts yet.</p>
     {% endif %}
   </section>
 </div>

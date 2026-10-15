@@ -20,12 +20,12 @@
     grid.innerHTML = photos.map((p, i) => `
       <li class="photo-tile${p.is_cover ? ' is-cover' : ''}" draggable="true" data-id="${p.id}">
         <img src="${esc(p.thumb)}" alt="Photo ${i + 1}" loading="lazy" width="300" height="188">
-        ${p.is_cover ? '<span class="cover-tag">Cover</span>' : ''}
+        ${p.is_cover ? '<span class="cover-tag"><i class="bi bi-star-fill" aria-hidden="true"></i>Cover</span>' : ''}
         <div class="photo-actions">
-          <button type="button" class="btn btn-ghost btn-sm" data-move="-1" aria-label="Move photo ${i + 1} earlier">&larr;</button>
-          <button type="button" class="btn btn-ghost btn-sm" data-move="1" aria-label="Move photo ${i + 1} later">&rarr;</button>
-          ${p.is_cover ? '' : '<button type="button" class="btn btn-ghost btn-sm" data-cover>Make cover</button>'}
-          <button type="button" class="btn btn-danger btn-sm" data-delete>Delete</button>
+          <button type="button" class="icon-btn" data-move="-1" aria-label="Move photo ${i + 1} earlier"><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
+          <button type="button" class="icon-btn" data-move="1" aria-label="Move photo ${i + 1} later"><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+          ${p.is_cover ? '' : `<button type="button" class="icon-btn" data-cover aria-label="Make photo ${i + 1} the cover"><i class="bi bi-star" aria-hidden="true"></i></button>`}
+          <button type="button" class="icon-btn text-danger" data-delete aria-label="Delete photo ${i + 1}"><i class="bi bi-trash" aria-hidden="true"></i></button>
         </div>
       </li>`).join('');
     empty.hidden = photos.length > 0;
@@ -40,7 +40,7 @@
       const preview = TYPES.includes(file.type) ? URL.createObjectURL(file) : '';
       li.innerHTML = `${preview ? `<img src="${preview}" alt="">` : '<span class="upload-noimg" aria-hidden="true"></span>'}
         <span class="upload-name">${esc(file.name)}</span>
-        <progress max="100" value="0" aria-label="Uploading ${esc(file.name)}"></progress>
+        <progress class="upload-bar" max="100" value="0" aria-label="Uploading ${esc(file.name)}"></progress>
         <span class="upload-status">Waiting…</span>`;
       uploads.appendChild(li);
       const status = li.querySelector('.upload-status');
@@ -93,6 +93,10 @@
   }
 
   input.addEventListener('change', () => { addFiles(input.files); input.value = ''; });
+  const camera = document.getElementById('photo-camera');   // phones: take a photo straight away
+  camera?.addEventListener('change', () => { addFiles(camera.files); camera.value = ''; });
+  const toast = (title, text) => window.ZCH.toast(title, text, { kind: 'error' });
+  const confirmBox = (text, yes) => (window.ZCHDash ? window.ZCHDash.confirm(text, yes) : Promise.resolve(window.confirm(text)));
   ['dragenter', 'dragover'].forEach((type) => dropzone.addEventListener(type, (e) => {
     if (!e.dataTransfer?.types?.includes('Files')) return;
     e.preventDefault();
@@ -109,7 +113,7 @@
   async function saveOrder() {
     const order = [...grid.querySelectorAll('.photo-tile')].map((li) => Number(li.dataset.id));
     try { render((await api(root.dataset.orderUrl, { method: 'POST', body: { order } })).photos); }
-    catch (err) { alert(`The new order wasn't saved: ${err.message}`); }
+    catch (err) { toast("The new order wasn't saved", err.message); }
   }
 
   let dragged = null;
@@ -153,9 +157,9 @@
       if (e.target.closest('[data-cover]')) {
         render((await api(`${root.dataset.baseUrl}${id}/cover/`, { method: 'POST', body: {} })).photos);
       } else if (e.target.closest('[data-delete]')) {
-        if (!confirm('Delete this photo? This cannot be undone.')) return;
+        if (!(await confirmBox('Delete this photo? This cannot be undone.', 'Yes, delete'))) return;
         render((await api(`${root.dataset.baseUrl}${id}/delete/`, { method: 'POST', body: {} })).photos);
       }
-    } catch (err) { alert(err.message); }
+    } catch (err) { toast("That didn't work", err.message); }
   });
 })();

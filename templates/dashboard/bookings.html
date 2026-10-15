@@ -2,51 +2,74 @@
 {% block title %}Bookings{% endblock %}
 {% block content %}
 <header class="dash-head">
-  <h1>Bookings {% if filter_city %}in {{ filter_city.name }}{% elif staff_location %}in {{ staff_location.name }}{% endif %}</h1>
-  <p class="live-note"><span class="live-dot" aria-hidden="true"></span> Updates live.</p>
+  <div>
+    <h1>Bookings {% if filter_city %}in {{ filter_city.name }}{% elif staff_location %}in {{ staff_location.name }}{% endif %}</h1>
+    <p class="live-note"><span class="live-dot" aria-hidden="true"></span> Updates live.</p>
+  </div>
+  <div class="dash-head-actions">
+    <button type="button" class="btn btn-ghost d-md-none" data-bs-toggle="offcanvas" data-bs-target="#booking-filters" aria-controls="booking-filters"><i class="bi bi-sliders" aria-hidden="true"></i>Filters</button>
+    <a class="btn btn-ghost" href="?{{ query }}{% if query %}&amp;{% endif %}export=csv"><i class="bi bi-download" aria-hidden="true"></i>CSV</a>
+  </div>
 </header>
 
-<form class="filter-bar" method="get" role="search" aria-label="Search and filter bookings">
-  <label class="fb-search">Search
-    <input type="search" name="q" value="{{ filters.q|default:'' }}" placeholder="Booking number, name, phone or M-Pesa code">
-  </label>
-  <label>Status
-    <select name="status">
-      <option value="">All statuses</option>
-      {% for value, label in statuses %}<option value="{{ value }}"{% if filters.status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
-    </select>
-  </label>
-  <label>Car
-    <select name="car">
-      <option value="">All cars</option>
-      {% for car in cars %}<option value="{{ car.pk }}"{% if filters.car == car.pk|stringformat:"s" %} selected{% endif %}>{{ car.name }}{% if is_owner %} ({{ car.location.name }}){% endif %}</option>{% endfor %}
-    </select>
-  </label>
-  {% if is_owner %}
-  <label>City
-    <select name="city">
-      <option value="">All of Kenya</option>
-      {% for loc in all_locations %}<option value="{{ loc.slug }}"{% if filter_city == loc %} selected{% endif %}>{{ loc.name }}</option>{% endfor %}
-    </select>
-  </label>
-  {% endif %}
-  <label>Hire dates from
-    <input type="date" name="from" value="{{ filters.from|default:'' }}">
-  </label>
-  <label>to
-    <input type="date" name="to" value="{{ filters.to|default:'' }}">
-  </label>
-  <label>Sort
-    <select name="sort">
-      {% for value, label in sorts %}<option value="{{ value }}"{% if sort == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
-    </select>
-  </label>
-  <div class="fb-actions">
-    <button class="btn btn-primary btn-sm" type="submit">Show bookings</button>
-    <a class="btn btn-ghost btn-sm" href="{% url 'dashboard:bookings' %}">Clear filters</a>
-    <a class="btn btn-ghost btn-sm" href="?{{ query }}{% if query %}&amp;{% endif %}export=csv">Download CSV</a>
+<div class="offcanvas-md offcanvas-bottom filter-sheet" tabindex="-1" id="booking-filters" aria-labelledby="booking-filters-title">
+  <div class="offcanvas-header">
+    <h2 class="h5 m-0" id="booking-filters-title">Filter bookings</h2>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#booking-filters" aria-label="Close filters"></button>
   </div>
-</form>
+  <div class="offcanvas-body">
+    <form class="filter-bar" method="get" role="search" aria-label="Search and filter bookings">
+      <div class="fb-search">
+        <label class="form-label" for="fb-q">Search</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+          <input class="form-control" type="search" id="fb-q" name="q" value="{{ filters.q|default:'' }}" placeholder="Booking number, name, phone or M-Pesa code">
+        </div>
+      </div>
+      <div>
+        <label class="form-label" for="fb-status">Status</label>
+        <select class="form-select" id="fb-status" name="status">
+          <option value="">All statuses</option>
+          {% for value, label in statuses %}<option value="{{ value }}"{% if filters.status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="form-label" for="fb-car">Car</label>
+        <select class="form-select" id="fb-car" name="car">
+          <option value="">All cars</option>
+          {% for car in cars %}<option value="{{ car.pk }}"{% if filters.car == car.pk|stringformat:"s" %} selected{% endif %}>{{ car.name }}{% if is_owner %} ({{ car.location.name }}){% endif %}</option>{% endfor %}
+        </select>
+      </div>
+      {% if is_owner %}
+      <div>
+        <label class="form-label" for="fb-city">City</label>
+        <select class="form-select" id="fb-city" name="city">
+          <option value="">All of Kenya</option>
+          {% for loc in all_locations %}<option value="{{ loc.slug }}"{% if filter_city == loc %} selected{% endif %}>{{ loc.name }}</option>{% endfor %}
+        </select>
+      </div>
+      {% endif %}
+      <div>
+        <label class="form-label" for="fb-from">Hire dates from</label>
+        <input class="form-control" type="date" id="fb-from" name="from" value="{{ filters.from|default:'' }}">
+      </div>
+      <div>
+        <label class="form-label" for="fb-to">to</label>
+        <input class="form-control" type="date" id="fb-to" name="to" value="{{ filters.to|default:'' }}">
+      </div>
+      <div>
+        <label class="form-label" for="fb-sort">Sort</label>
+        <select class="form-select" id="fb-sort" name="sort">
+          {% for value, label in sorts %}<option value="{{ value }}"{% if sort == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="fb-actions">
+        <button class="btn btn-primary" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i>Show bookings</button>
+        <a class="btn btn-ghost" href="{% url 'dashboard:bookings' %}">Clear filters</a>
+      </div>
+    </form>
+  </div>
+</div>
 
 <div data-live>
   {% include "dashboard/_booking_table.html" %}

@@ -4,11 +4,11 @@
 {% block content %}
 <header class="dash-head">
   <h1>Reports {% if view_location %}for {{ view_location.name }}{% else %}across Kenya{% endif %}</h1>
-  <p class="muted">Paid bookings by the month they were paid, per pick-up city. Last 12 months.</p>
+  <p class="text-body-secondary">Paid bookings by the month they were paid, per pick-up city. Last 12 months.</p>
 </header>
 
-<div class="table-wrap">
-  <table class="table report-table">
+<div class="card table-card"><div class="table-responsive">
+  <table class="table table-hover report-table">
     <thead>
       <tr>
         <th scope="col">Month</th>
@@ -21,7 +21,7 @@
       <tr>
         <th scope="row">{{ row.month|date:"F Y" }}</th>
         {% for n, revenue in row.cells %}
-        <td class="num">{% if n %}KES {{ revenue|intcomma }}<small>{{ n }} booking{{ n|pluralize }}</small>{% else %}<span class="muted">-</span>{% endif %}</td>
+        <td class="num">{% if n %}KES {{ revenue|intcomma }}<small>{{ n }} booking{{ n|pluralize }}</small>{% else %}<span class="text-body-secondary">-</span>{% endif %}</td>
         {% endfor %}
         {% if cities|length > 1 %}<td class="num"><strong>KES {{ row.revenue|intcomma }}</strong><small>{{ row.n }} booking{{ row.n|pluralize }}</small></td>{% endif %}
       </tr>
@@ -35,5 +35,5 @@
       </tr>
     </tfoot>
   </table>
-</div>
+</div></div>
 {% endblock %}
