@@ -278,6 +278,15 @@ def open_chat(page):
     page.locator('#chat-panel').wait_for(state='visible')
 
 
+def chat_thread(page):
+    open_chat(page)
+    page.locator('#chat-intro [name="name"]').fill('Grace Wanjiku')
+    page.locator('#chat-intro [type="submit"]').click()
+    page.locator('#chat-input').fill('What are your prices?')
+    page.locator('#chat-input').press('Enter')
+    page.locator('#chat-messages .msg-them').first.wait_for()
+
+
 def open_gallery(page):
     page.locator('[data-gallery-open]').first.click()
     page.locator('#lightbox.show').wait_for()
@@ -289,6 +298,7 @@ def public_screens(ctx):
         ('home', '/', None, None),
         ('home-menu-open', '/', open_menu, (375, 768)),
         ('home-chat-open', '/', open_chat, None),
+        ('chat-thread', '/faq/', chat_thread, (375, 1440)),
         ('cars', '/cars/?city=nairobi', None, None),
         ('cars-filters-open', '/cars/?city=nairobi&transmission=automatic', open_filters, (375, 768)),
         ('cars-empty', '/cars/?city=nairobi&price_max=100', None, (375, 1440)),

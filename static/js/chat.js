@@ -34,6 +34,7 @@
     panel.hidden = !open;
     launcher.setAttribute('aria-expanded', String(open));
     root.classList.toggle('is-open', open);
+    document.documentElement.classList.toggle('chat-open', open);   // phones: the page behind stops scrolling
     if (open) {
       setUnread(false);
       if (chatId) { showThread(); input.focus(); } else { intro.hidden = false; thread.hidden = true; intro.querySelector('input').focus(); }
@@ -76,7 +77,7 @@
     try {
       const res = await api(`/chat/${chatId}/messages/?after=${lastId}`);
       render(res.messages);
-      presence.textContent = res.agent_online ? "We're online now" : 'Instant answers, or a person during opening hours';
+      presence.textContent = res.agent_online ? 'Online now' : 'Instant answers, or a person during opening hours';
       if (res.wants_agent) setWaitingForPerson(true);
       root.classList.toggle('agent-online', !!res.agent_online);
     } catch (err) {
@@ -164,6 +165,10 @@
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
   function autosize() { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 120) + 'px'; }
   input.addEventListener('input', autosize);
+
+  /* Phones: the full-screen panel follows the visible height, so the message box stays above the keyboard. */
+  const vv = window.visualViewport;
+  if (vv) vv.addEventListener('resize', () => panel.style.setProperty('--vvh', `${Math.round(vv.height)}px`));
 
   restartPolling();
 })();
