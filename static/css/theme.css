@@ -324,6 +324,8 @@ input:disabled, select:disabled, textarea:disabled { opacity: .55; cursor: not-a
 }
 .form-control:focus, .form-select:focus { border-color: var(--focus); box-shadow: var(--ring); background-color: var(--surface); color: var(--text); }
 .form-select { --bs-form-select-bg-img: var(--chevron); }
+.form-floating { --bs-body-bg: var(--surface); }   /* the floated label's backing matches the field, not the page */
+.form-floating > label { color: var(--text-muted); }
 .form-check-input { border-color: var(--control-border); }
 .form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
 .form-check-input:focus { box-shadow: var(--ring); border-color: var(--focus); }

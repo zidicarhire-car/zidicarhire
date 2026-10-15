@@ -36,6 +36,8 @@
   let resendTimer = null;
   let countdownTimer = null;
 
+  const modal = () => window.bootstrap.Modal.getOrCreateInstance(dialog);
+  const LOCKED_STEPS = ['pay', 'waiting', 'failed'];   // tapping outside must not close the popup mid-payment
   const fill = (key, value) => dialog.querySelectorAll(`[data-fill="${key}"]`).forEach((el) => { el.textContent = value; });
   const setError = (step, message) => { const el = dialog.querySelector(`[data-error="${step}"]`); if (el) el.textContent = message || ''; };
   const fmtDay = (isoDay) => { const d = RC.parse(isoDay); return `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`; };
@@ -44,6 +46,11 @@
   /* ---------- steps ---------- */
   function showStep(name) {
     dialog.querySelectorAll('.bd-step').forEach((s) => { s.hidden = s.dataset.step !== name; });
+    dialog.querySelectorAll('[data-foot]').forEach((f) => { f.hidden = f.dataset.foot !== name; });
+    dialog.querySelector('[data-foot-total]').hidden = !['dates', 'details', 'pay'].includes(name);
+    const locked = LOCKED_STEPS.includes(name);
+    dialog.dataset.bsBackdrop = locked ? 'static' : 'true';
+    modal()._config.backdrop = locked ? 'static' : true;   // Bootstrap reads this on each backdrop click
     const step = dialog.querySelector(`.bd-step[data-step="${name}"]`);
     const at = PROGRESS.indexOf(step.dataset.progressStep);
     dialog.querySelectorAll('[data-progress]').forEach((li) => {
@@ -73,9 +80,11 @@
 
   function renderBreakdown(lines) {
     const html = lines.map((l) => (l.total
-      ? `<div class="bd-total"><dt>Total to pay</dt><dd><strong>${kes(l.amount)}</strong></dd></div>`
-      : `<div><dt>${esc(l.label)}</dt><dd>${kes(l.amount)}</dd></div>`)).join('');
+      ? `<li class="list-group-item bd-total"><span>Total</span><strong>${kes(l.amount)}</strong></li>`
+      : `<li class="list-group-item"><span>${esc(l.label)}</span><span>${kes(l.amount)}</span></li>`)).join('');
     dialog.querySelectorAll('[data-breakdown]').forEach((el) => { el.innerHTML = html; });
+    const total = lines.find((l) => l.total);
+    fill('foot-total', total ? kes(total.amount) : '–');
   }
 
   function chosenExtras() {
@@ -153,7 +162,10 @@
     const input = detailsForm.elements[name];
     const out = document.getElementById(`err-${name}`);
     if (out) out.textContent = message || '';
-    if (input) { if (message) input.setAttribute('aria-invalid', 'true'); else input.removeAttribute('aria-invalid'); }
+    if (input) {
+      if (message) input.setAttribute('aria-invalid', 'true'); else input.removeAttribute('aria-invalid');
+      input.classList.toggle('is-invalid', !!message);
+    }
   }
 
   function validateField(name) {
@@ -243,6 +255,7 @@
   function showPayError(message) {
     document.getElementById('err-pay_now').textContent = message || '';
     if (message) payInput.setAttribute('aria-invalid', 'true'); else payInput.removeAttribute('aria-invalid');
+    payInput.classList.toggle('is-invalid', !!message);
   }
 
   function payNowAmount() {
@@ -442,7 +455,7 @@
     calendar.setUnavailable([]);
     calendar.clear();
     showStep('dates');
-    dialog.showModal();
+    modal().show();
     await loadBookedDays();
     if (opts.start) {
       const message = calendar.setRange(opts.start, opts.end || null);
@@ -453,7 +466,7 @@
     }
   }
 
-  function close() { stopWatching(); dialog.close(); }
+  function close() { stopWatching(); modal().hide(); }
 
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('.book-btn');
@@ -463,7 +476,19 @@
     if (e.target.closest('[data-close]')) close();
     if (e.target.closest('[data-open-chat]')) close();   // the chat panel sits under the popup
   });
-  dialog.addEventListener('close', stopWatching);
+  dialog.addEventListener('hidden.bs.modal', stopWatching);
+  dialog.addEventListener('shown.bs.modal', () => {
+    const heading = dialog.querySelector('.bd-step:not([hidden]) h3');
+    if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); }
+  });
+
+  /* Phones: keep the popup (and its footer button) above the on-screen keyboard. */
+  const vv = window.visualViewport;
+  if (vv) {
+    const fit = () => { dialog.style.setProperty('--vvh', `${Math.round(vv.height)}px`); };
+    vv.addEventListener('resize', fit);
+    fit();
+  }
 
   /* ---------- live availability on the car list ---------- */
   // Looked up each time: the car list is replaced when filters change.

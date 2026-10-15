@@ -1,6 +1,6 @@
 /*
  * Date-range calendar for the booking popup. Vanilla JS, no library.
- * Two months side by side on wide screens, one on phones. Swipe or use the arrow buttons to
+ * Two months side by side when there's room, one on phones. Swipe or use the arrow buttons to
  * change month. Keyboard: arrow keys move a day/week, Home/End jump to the week's start/end,
  * Page Up/Down change month, Enter or Space picks the day.
  *
@@ -35,8 +35,14 @@
       this.end = null;
       this.view = monthStart(this.min);
       this.focused = this.min;
-      this.wide = window.matchMedia('(min-width: 700px)');
-      this.wide.addEventListener('change', () => this.render());
+      // One month, or two side by side when the calendar itself is wide enough (e.g. the popup on a desktop).
+      this.months = 1;
+      if (window.ResizeObserver) {
+        new ResizeObserver(() => {
+          const n = this.el.clientWidth >= 560 ? 2 : 1;
+          if (n !== this.months) { this.months = n; this.render(); }
+        }).observe(this.el);
+      }
       this.uid = `rc${Math.random().toString(36).slice(2, 7)}`;
       this.bind();
       this.render();
@@ -135,7 +141,7 @@
     }
 
     /* ---------- rendering ---------- */
-    monthsShown() { return this.wide.matches ? 2 : 1; }
+    monthsShown() { return this.months; }
 
     render(keepFocus) {
       const months = this.monthsShown();
@@ -148,12 +154,13 @@
 
       let html = `<div class="rc-nav">
         <button type="button" class="icon-btn rc-prev" aria-label="Previous month"${this.view <= monthStart(this.min) ? ' disabled' : ''}>
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <i class="bi bi-chevron-left" aria-hidden="true"></i></button>
         <button type="button" class="icon-btn rc-next" aria-label="Next month"${this.view >= lastView ? ' disabled' : ''}>
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div><div class="rc-months">`;
       for (let m = 0; m < months; m += 1) html += this.monthHtml(addMonths(this.view, m), m);
-      html += '</div><p class="rc-key"><span class="rc-key-booked" aria-hidden="true"></span> Booked</p>';
+      html += '</div><p class="rc-key"><span><span class="rc-key-swatch rc-key-booked" aria-hidden="true">8</span> Booked</span>'
+        + '<span><span class="rc-key-swatch rc-key-picked" aria-hidden="true">8</span> Your dates</span></p>';
       this.el.innerHTML = html;
       if (hadFocus) this.el.querySelector(`[data-date="${this.focused}"]`)?.focus();
     }

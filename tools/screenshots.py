@@ -170,6 +170,11 @@ def booking_flow(run, page, tag, *, shots=False, fail_payment=False):
         run.snap(page, f'booking-2-details-{tag}', full=False)
     modal.locator('[data-next="pay"]').click()
     modal.locator('.bd-step[data-step="pay"]').wait_for(state='visible')
+    if page.viewport_size['width'] >= 576:            # phones get a full-screen popup: nothing outside to tap
+        page.mouse.click(5, page.viewport_size['height'] - 5)
+        page.wait_for_timeout(400)
+        if not modal.locator('.bd-step[data-step="pay"]').is_visible():
+            run.fail(f'booking {tag}: a click outside closed the popup on the pay step')
     if shots:
         run.snap(page, f'booking-3-pay-{tag}', full=False)
 
@@ -368,8 +373,8 @@ def main():
             run = Run(pw, shots=not args.check)
 
             print('Booking flow and chat, phone (375 px) and desktop (1440 px)...')
-            for width in (375, 1440):
-                tag = 'phone' if width < 768 else 'desktop'
+            for width in ((375, 1440) if args.check else (375, 768, 1440)):
+                tag = {375: 'phone', 768: 'tablet'}.get(width, 'desktop')
                 c = run.context(width)
                 page = c.new_page()
                 ref, detail = booking_flow(run, page, tag, shots=not args.check)
