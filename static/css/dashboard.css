@@ -24,7 +24,7 @@ body.dash { display: grid; grid-template-columns: minmax(0, 1fr); min-height: 10
 .dash-side-foot a, .dash-side-foot .linklike { color: var(--on-brand-muted); }
 .dash-side-foot a:hover, .dash-side-foot .linklike:hover { color: var(--on-brand); }
 .dash-side-foot form { margin: 0; }
-.dash-side .btn-ghost { --btn-fg: var(--on-brand); --btn-border: rgba(255, 255, 255, .45); --btn-bg-hover: rgba(255, 255, 255, .1); }
+.dash-side .btn-ghost { --bs-btn-color: var(--on-brand); --bs-btn-border-color: rgba(255, 255, 255, .45); --bs-btn-hover-color: var(--on-brand); --bs-btn-hover-bg: rgba(255, 255, 255, .1); --bs-btn-hover-border-color: rgba(255, 255, 255, .7); --bs-btn-active-color: var(--on-brand); }
 
 @media (min-width: 1024px) {
   body.dash { grid-template-columns: 240px minmax(0, 1fr); }

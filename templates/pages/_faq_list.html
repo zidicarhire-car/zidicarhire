@@ -1,11 +1,21 @@
-<div class="accordion faq-list">
+{# Questions and answers as a Bootstrap accordion. "prefix" keeps ids unique if it appears twice on a page. #}
+{% with prefix=home_only|yesno:"faq-home,faq" %}
+<div class="accordion faq-list" id="{{ prefix }}">
   {% for item in faq %}{% if not home_only or item.home %}
-  <details class="accordion-item">
-    <summary>{{ item.q }}</summary>
-    <div class="accordion-body">
-      {% if item.confirmed %}<p>{{ item.a }}</p>
-      {% else %}<p><mark class="owner-edit">Owner to confirm: {{ item.a }}</mark></p>{% endif %}
+  <div class="accordion-item">
+    <h3 class="accordion-header" id="{{ prefix }}-h{{ forloop.counter }}">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+              data-bs-target="#{{ prefix }}-a{{ forloop.counter }}" aria-expanded="false" aria-controls="{{ prefix }}-a{{ forloop.counter }}">
+        {{ item.q }}
+      </button>
+    </h3>
+    <div id="{{ prefix }}-a{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="{{ prefix }}-h{{ forloop.counter }}" data-bs-parent="#{{ prefix }}">
+      <div class="accordion-body">
+        {% if item.confirmed %}<p>{{ item.a }}</p>
+        {% else %}<p><mark class="owner-edit">Owner to confirm: {{ item.a }}</mark></p>{% endif %}
+      </div>
     </div>
-  </details>
+  </div>
   {% endif %}{% endfor %}
 </div>
+{% endwith %}

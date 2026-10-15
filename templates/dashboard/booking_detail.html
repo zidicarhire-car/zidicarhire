@@ -113,7 +113,7 @@
 
 {# ---------- Dialogs ---------- #}
 {% if allowed.cancel %}
-<dialog class="modal dash-dialog" id="dlg-cancel" aria-labelledby="dlg-cancel-title">
+<dialog class="dlg dash-dialog" id="dlg-cancel" aria-labelledby="dlg-cancel-title">
   <form method="post">{% csrf_token %}
     <input type="hidden" name="action" value="cancel">
     <h2 id="dlg-cancel-title">Cancel {{ booking.ref }}?</h2>
@@ -129,7 +129,7 @@
 {% endif %}
 
 {% if allowed.mark_paid %}
-<dialog class="modal dash-dialog" id="dlg-paid" aria-labelledby="dlg-paid-title">
+<dialog class="dlg dash-dialog" id="dlg-paid" aria-labelledby="dlg-paid-title">
   <form method="post">{% csrf_token %}
     <input type="hidden" name="action" value="mark_paid">
     <h2 id="dlg-paid-title">Mark {{ booking.ref }} as paid</h2>
@@ -145,7 +145,7 @@
 {% endif %}
 
 {% if allowed.balance %}
-<dialog class="modal dash-dialog" id="dlg-balance" aria-labelledby="dlg-balance-title">
+<dialog class="dlg dash-dialog" id="dlg-balance" aria-labelledby="dlg-balance-title">
   <form method="post">{% csrf_token %}
     <input type="hidden" name="action" value="balance">
     <h2 id="dlg-balance-title">Record a payment for {{ booking.ref }}</h2>
@@ -163,7 +163,7 @@
 {% endif %}
 
 {% if allowed.dates %}
-<dialog class="modal dash-dialog" id="dlg-dates" aria-labelledby="dlg-dates-title"{% if open_dates %} data-open-on-load{% endif %}>
+<dialog class="dlg dash-dialog" id="dlg-dates" aria-labelledby="dlg-dates-title"{% if open_dates %} data-open-on-load{% endif %}>
   <form method="post">{% csrf_token %}
     <h2 id="dlg-dates-title">Change dates for {{ booking.ref }}</h2>
     <div class="form-grid">
@@ -197,7 +197,7 @@
 </dialog>
 {% endif %}
 
-<dialog class="modal dash-dialog" id="confirm-dialog" aria-labelledby="confirm-text">
+<dialog class="dlg dash-dialog" id="confirm-dialog" aria-labelledby="confirm-text">
   <p id="confirm-text"></p>
   <div class="dialog-actions">
     <button type="button" class="btn btn-ghost" data-close-dialog>Go back</button>

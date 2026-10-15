@@ -182,7 +182,7 @@
           <span class="city-tag">${esc(c.city)}</span>
           ${c.wants_agent ? '<span class="status status-pending">Wants a person</span>' : ''}
           <span class="inbox-preview">${esc(c.preview)}</span>
-          ${c.unread && c.id !== current ? `<span class="badge">${c.unread}</span>` : ''}
+          ${c.unread && c.id !== current ? `<span class="badge rounded-pill text-bg-plate">${c.unread}</span>` : ''}
         </button></li>`).join('');
     }
 

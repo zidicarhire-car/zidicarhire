@@ -5,19 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <title>Sign in | ZIDICARHIRE</title>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
   <link rel="icon" href="{% static 'img/zidicarhire-favicon.svg' %}" type="image/svg+xml">
-  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  {% include "_theme_head.html" %}
   <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 </head>
 <body class="login-page">
   <main class="login-card">
-    <picture>
-      <source srcset="{% static 'img/zidicarhire-logo-white.svg' %}" media="(prefers-color-scheme: dark)">
-      <img class="login-logo" src="{% static 'img/zidicarhire-logo.svg' %}" alt="ZidiCarHire" width="192" height="48">
-    </picture>
+    <img class="login-logo only-light" src="{% static 'img/zidicarhire-logo.svg' %}" alt="ZidiCarHire" width="192" height="48">
+    <img class="login-logo only-dark" src="{% static 'img/zidicarhire-logo-white.svg' %}" alt="ZidiCarHire" width="192" height="48">
     <h1>Sign in to the dashboard</h1>
     <form method="post">
       {% csrf_token %}

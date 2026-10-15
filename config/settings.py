@@ -1,6 +1,7 @@
 """ZIDICARHIRE settings. Values come from the .env file next to manage.py (see .env.example)."""
 from pathlib import Path
 
+from django.contrib.messages import constants as message_levels
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
@@ -162,3 +163,6 @@ LOGGING = {
     'handlers': {'console': {'class': 'logging.StreamHandler'}},
     'root': {'handlers': ['console'], 'level': 'INFO'},
 }
+
+# Bootstrap calls the red alert 'danger'; Django calls that message level 'error'.
+MESSAGE_TAGS = {message_levels.ERROR: 'danger'}

@@ -214,7 +214,14 @@
 <section class="sg-section" id="status" aria-labelledby="sg-status">
   <h2 id="sg-status">Status pills, badges and tags</h2>
   <div class="sg-row">{% for key, label in statuses %}<span class="status status-{{ key }}">{{ label }}</span>{% endfor %}</div>
-  <div class="sg-row"><span class="badge">3</span><span class="tag">SUV</span><span class="tag tag-quiet">Nairobi</span><span class="plate plate-sm">KES 3,500</span></div>
+  <div class="sg-row">
+    <span class="badge rounded-pill text-bg-plate">3</span>
+    <span class="bg-plate px-2 py-1 rounded-3">.bg-plate</span>
+    <span class="text-plate bg-brand px-2 py-1 rounded-3">.text-plate on indigo</span>
+    <span class="d-inline-grid bg-plate rounded-3 border border-dark" style="width:56px;height:56px;place-items:center"><i class="bi bi-lightning-charge fs-4" aria-hidden="true"></i></span>
+    <button type="button" class="btn btn-ghost" data-theme-toggle aria-label="Dark mode" aria-pressed="false"><i class="bi bi-moon-stars" aria-hidden="true"></i> Toggle dark mode</button>
+  </div>
+  <div class="sg-row"><span class="tag">SUV</span><span class="tag tag-quiet">Nairobi</span><span class="plate plate-sm">KES 3,500</span></div>
 </section>
 
 {# ---------------------------------------------------------------- Alerts and toasts #}
@@ -225,7 +232,7 @@
       <div class="alert alert-success"><strong>Booking paid</strong>KES 28,500 received from 0712 345 678.</div>
       <div class="alert alert-info">Prices include VAT and unlimited mileage.</div>
       <div class="alert alert-warning">This car is held for 10 minutes while you pay.</div>
-      <div class="alert alert-error"><strong>Payment didn't go through</strong>The M-Pesa prompt was cancelled. Check your phone and try again.</div>
+      <div class="alert alert-danger"><strong>Payment didn't go through</strong>The M-Pesa prompt was cancelled. Check your phone and try again.</div>
     </div>
     <div>
       <p class="muted">Toasts confirm that something worked, then disappear after a few seconds.</p>
@@ -241,40 +248,64 @@
 {# ---------------------------------------------------------------- Modal and tabs #}
 <section class="sg-section" id="overlays" aria-labelledby="sg-overlays">
   <h2 id="sg-overlays">Modal, bottom sheet and tabs</h2>
-  <p class="prose muted">On screens under 768px wide, a modal with the sheet style rises from the bottom. Esc or the close button closes it.</p>
+  <p class="prose muted">Bootstrap modal: rounded-4, centred on desktop, full screen on phones. Esc or the close button closes it.</p>
   <div class="sg-row">
-    <button type="button" class="btn btn-primary" id="sg-open-modal">Open modal</button>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sg-bs-modal">Open Bootstrap modal</button>
+    <button type="button" class="btn btn-ghost" id="sg-open-modal">Open sheet dialog (current booking pop-up)</button>
   </div>
-  <dialog class="modal modal-sheet" id="sg-modal" aria-labelledby="sg-modal-title">
-    <div class="modal-head">
-      <h2 id="sg-modal-title">Change dates</h2>
-      <button type="button" class="icon-btn modal-close" data-close aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+  <div class="modal fade" id="sg-bs-modal" tabindex="-1" aria-labelledby="sg-bs-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h3" id="sg-bs-modal-title">Change dates</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body"><p>The body scrolls on its own while the header and footer stay in place.</p></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Keep dates</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Change dates</button>
+        </div>
+      </div>
     </div>
-    <div class="modal-body">
-      <p>The modal body scrolls on its own, while the header and footer stay in place.</p>
+  </div>
+  <dialog class="dlg dlg-sheet" id="sg-modal" aria-labelledby="sg-modal-title">
+    <div class="dlg-head">
+      <h2 id="sg-modal-title">Change dates</h2>
+      <button type="button" class="icon-btn dlg-close" data-close aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="dlg-body">
+      <p>The dialog body scrolls on its own, while the header and footer stay in place.</p>
       <label>New return date<input type="date"></label>
     </div>
-    <div class="modal-foot">
+    <div class="dlg-foot">
       <button type="button" class="btn btn-ghost" data-close>Keep dates</button>
       <button type="button" class="btn btn-primary" data-close>Change dates</button>
     </div>
   </dialog>
 
   <div class="panel" style="margin-top:var(--space-5)">
-    <div class="tabs" role="tablist" aria-label="Booking sections">
-      <button type="button" class="tab" role="tab" id="sg-tab-1" aria-controls="sg-panel-1" aria-selected="true">Details</button>
-      <button type="button" class="tab" role="tab" id="sg-tab-2" aria-controls="sg-panel-2">Payments</button>
-      <button type="button" class="tab" role="tab" id="sg-tab-3" aria-controls="sg-panel-3">Timeline</button>
+    <ul class="nav nav-tabs" role="tablist" aria-label="Booking sections">
+      <li class="nav-item" role="presentation"><button class="nav-link active" id="sg-tab-1" data-bs-toggle="tab" data-bs-target="#sg-panel-1" type="button" role="tab" aria-controls="sg-panel-1" aria-selected="true">Details</button></li>
+      <li class="nav-item" role="presentation"><button class="nav-link" id="sg-tab-2" data-bs-toggle="tab" data-bs-target="#sg-panel-2" type="button" role="tab" aria-controls="sg-panel-2" aria-selected="false">Payments</button></li>
+      <li class="nav-item" role="presentation"><button class="nav-link" id="sg-tab-3" data-bs-toggle="tab" data-bs-target="#sg-panel-3" type="button" role="tab" aria-controls="sg-panel-3" aria-selected="false">Timeline</button></li>
+    </ul>
+    <div class="tab-content pt-3">
+      <div class="tab-pane fade show active" id="sg-panel-1" role="tabpanel" aria-labelledby="sg-tab-1" tabindex="0">Customer and car details.</div>
+      <div class="tab-pane fade" id="sg-panel-2" role="tabpanel" aria-labelledby="sg-tab-2" tabindex="0">Every M-Pesa prompt for this booking.</div>
+      <div class="tab-pane fade" id="sg-panel-3" role="tabpanel" aria-labelledby="sg-tab-3" tabindex="0">What happened, and who did it.</div>
     </div>
-    <div class="tab-panel" role="tabpanel" id="sg-panel-1" aria-labelledby="sg-tab-1" tabindex="0">Customer and car details.</div>
-    <div class="tab-panel" role="tabpanel" id="sg-panel-2" aria-labelledby="sg-tab-2" tabindex="0" hidden>Every M-Pesa prompt for this booking.</div>
-    <div class="tab-panel" role="tabpanel" id="sg-panel-3" aria-labelledby="sg-tab-3" tabindex="0" hidden>What happened, and who did it.</div>
   </div>
 
   <h3 style="margin-top:var(--space-5)">Accordion</h3>
-  <div class="accordion" style="max-width:640px">
-    <details class="accordion-item"><summary>Do I need a deposit?</summary><div class="accordion-body"><p>The answer appears here, at a readable width.</p></div></details>
-    <details class="accordion-item"><summary>Can I return the car in another city?</summary><div class="accordion-body"><p>Yes, on routes where one-way hire is offered.</p></div></details>
+  <div class="accordion" id="sg-acc" style="max-width:640px">
+    <div class="accordion-item">
+      <h4 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sg-acc-1" aria-expanded="false" aria-controls="sg-acc-1">Do I need a deposit?</button></h4>
+      <div id="sg-acc-1" class="accordion-collapse collapse" data-bs-parent="#sg-acc"><div class="accordion-body"><p>The answer appears here, at a readable width.</p></div></div>
+    </div>
+    <div class="accordion-item">
+      <h4 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sg-acc-2" aria-expanded="false" aria-controls="sg-acc-2">Can I return the car in another city?</button></h4>
+      <div id="sg-acc-2" class="accordion-collapse collapse" data-bs-parent="#sg-acc"><div class="accordion-body"><p>Yes, on routes where one-way hire is offered.</p></div></div>
+    </div>
   </div>
 </section>
 

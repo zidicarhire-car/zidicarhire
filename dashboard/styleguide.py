@@ -1,7 +1,7 @@
 """
 Staff-only style guide (/dashboard/styleguide/) and the colour contrast rules it shows.
 
-The same CONTRAST_PAIRS are checked against static/css/tokens.css in light and dark mode by
+The same CONTRAST_PAIRS are checked against static/css/theme.css in light and dark mode by
 dashboard/tests_design.py, so a colour change that breaks WCAG AA fails the tests.
 """
 import re
@@ -12,7 +12,7 @@ from django.shortcuts import render
 
 from .views import _ctx, staff_page
 
-TOKENS_CSS = Path(settings.BASE_DIR) / 'static' / 'css' / 'tokens.css'
+TOKENS_CSS = Path(settings.BASE_DIR) / 'static' / 'css' / 'theme.css'
 
 COLOR_GROUPS = [
     ('Brand', [
@@ -60,6 +60,11 @@ CONTRAST_PAIRS = [
     ('--on-brand-muted', '--brand', 4.5, 'Secondary header and footer text'),
     ('--plate-ink', '--plate', 4.5, 'Number plate'),
     ('--plate', '--brand', 3, 'Yellow button on the indigo header'),
+    ('--plate-ink', '--plate-hover', 4.5, 'Yellow button, hovered'),
+    ('--plate', '--brand', 3, 'Yellow focus ring on indigo'),
+    ('--focus-surface', '--surface', 3, 'Focus ring inside white boxes'),
+    ('--link', '--bg', 4.5, 'Links on the page'),
+    ('--link', '--surface', 4.5, 'Links on a card'),
     ('--on-primary', '--primary', 4.5, 'Primary button label'),
     ('--on-mpesa', '--mpesa-fill', 4.5, 'M-Pesa button label'),
     ('--mpesa', '--surface', 3, 'M-Pesa icons and ticks on a card'),
@@ -84,9 +89,9 @@ def read_tokens(css=None):
     """{'light': {name: value}, 'dark': {...}} with var() references resolved. Dark inherits light."""
     css = css if css is not None else TOKENS_CSS.read_text(encoding='utf-8')
     decl = re.compile(r'(--[\w-]+)\s*:\s*([^;]+);')
-    light_block = css.split('@media', 1)[0]
-    dark_match = re.search(r'@media\s*\(prefers-color-scheme:\s*dark\)\s*\{\s*:root\s*\{(.*?)\}\s*\}', css, re.S)
-    light = dict(decl.findall(light_block))
+    light_match = re.search(r'^:root \{(.*?)^\}', css, re.S | re.M)
+    dark_match = re.search(r'^\[data-bs-theme="dark"\] \{(.*?)^\}', css, re.S | re.M)
+    light = dict(decl.findall(light_match.group(1) if light_match else ''))
     dark = {**light, **dict(decl.findall(dark_match.group(1) if dark_match else ''))}
 
     def resolve(values):

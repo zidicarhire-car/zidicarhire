@@ -42,19 +42,24 @@ class ContrastTests(SimpleTestCase):
 
 class StylesheetTests(SimpleTestCase):
     def test_css_is_split_into_layers(self):
-        for name in ('tokens.css', 'base.css', 'components.css', 'site.css', 'dashboard.css'):
+        for name in ('theme.css', 'site.css', 'dashboard.css'):
             self.assertTrue((CSS / name).exists(), name)
+        for gone in ('tokens.css', 'base.css', 'components.css'):
+            self.assertFalse((CSS / gone).exists(), f'{gone} should have moved into theme.css')
 
     def test_colours_live_in_tokens(self):
-        """Apart from a few documented exceptions (WhatsApp brand, photo overlays, print), no hex colours outside tokens.css."""
+        """Apart from a few documented exceptions (WhatsApp brand, photo overlays, print), no hex colours outside theme.css."""
         allowed = {'#FFFFFF', '#000000', '#1C2340', '#0B6B35', '#EAF7EF', '#5BD46A', '#FF8A80'}
-        for name in ('base.css', 'components.css', 'site.css', 'dashboard.css'):
+        for name in ('site.css', 'dashboard.css'):
             found = {h.upper() for h in HEX.findall((CSS / name).read_text(encoding='utf-8'))}
             self.assertEqual(found - allowed, set(), name)
 
     def test_tokens_have_a_dark_mode_and_reduced_motion(self):
-        css = (CSS / 'tokens.css').read_text(encoding='utf-8')
-        self.assertIn('@media (prefers-color-scheme: dark)', css)
+        css = (CSS / 'theme.css').read_text(encoding='utf-8')
+        self.assertIn('[data-bs-theme="dark"] {', css)
+        self.assertIn('--bs-primary: #1C2340;', css)
+        for utility in ('.btn-plate', '.text-plate', '.bg-plate', '.plate {'):
+            self.assertIn(utility, css)
         self.assertIn('@media (prefers-reduced-motion: reduce)', css)
         for scale in ('--space-1', '--space-9', '--radius-sm', '--radius-lg', '--shadow-1', '--shadow-2', '--dur', '--ease',
                       '--fs-display', '--fs-h1', '--fs-h2', '--fs-h3', '--fs-body', '--fs-small'):
@@ -62,8 +67,18 @@ class StylesheetTests(SimpleTestCase):
 
     def test_pages_load_the_layers_in_order(self):
         base = (Path(settings.BASE_DIR) / 'templates' / 'base.html').read_text(encoding='utf-8')
-        order = [base.index(f"css/{n}") for n in ('tokens.css', 'base.css', 'components.css', 'site.css')]
-        self.assertEqual(order, sorted(order))
+        head = (Path(settings.BASE_DIR) / 'templates' / '_theme_head.html').read_text(encoding='utf-8')
+        order = [head.index(n) for n in ('data-bs-theme', 'bootstrap@5.3.3/dist/css/bootstrap.min.css',
+                                         'bootstrap-icons@1.11.3', 'css/theme.css')]
+        self.assertEqual(order, sorted(order), 'theme script first, then Bootstrap, icons, theme.css')
+        self.assertLess(base.index('_theme_head.html'), base.index('css/site.css'))
+        for tag in re.findall(r'<(?:link|script)[^>]+cdn\.jsdelivr\.net/npm/[^>]+>', head):
+            self.assertIn('integrity="sha384-', tag)
+            self.assertIn('crossorigin="anonymous"', tag)
+        self.assertIn('<script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"', head)
+        for template in ('dashboard/base.html', 'dashboard/login.html', '500.html'):
+            text = (Path(settings.BASE_DIR) / 'templates' / template).read_text(encoding='utf-8')
+            self.assertIn('_theme_head.html', text, template)
 
 
 class StyleguidePageTests(TestCase):
@@ -79,7 +94,8 @@ class StyleguidePageTests(TestCase):
         self.client.login(username='staff', password='pw')
         res = self.client.get(reverse('dashboard:styleguide'))
         self.assertEqual(res.status_code, 200)
-        for text in ('--brand', '--plate', '--mpesa-fill', 'btn-mpesa', 'aria-busy="true"', 'modal-sheet', 'role="tablist"',
-                     'status-picked_up', 'alert-error', 'accordion-item', 'sk-line', 'class="empty"', 'Pass'):
+        for text in ('--brand', '--plate', '--mpesa-fill', 'btn-mpesa', 'btn-plate', 'aria-busy="true"', 'dlg-sheet',
+                     'data-bs-toggle="modal"', 'role="tablist"', 'data-bs-toggle="tab"', 'status-picked_up', 'alert-danger',
+                     'accordion-button', 'sk-line', 'class="empty"', 'data-theme-toggle', 'Pass'):
             self.assertContains(res, text)
         self.assertNotContains(res, 'Fail</span>')

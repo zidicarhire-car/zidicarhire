@@ -74,12 +74,13 @@
     if (!box) {
       box = document.createElement('div');
       box.id = 'toasts';
-      box.className = 'toasts';
+      box.className = 'toast-container position-fixed top-0 end-0';
       box.setAttribute('aria-live', 'polite');
       document.body.appendChild(box);
     }
     const el = document.createElement(href ? 'a' : 'div');
-    el.className = 'toast' + (kind ? ` toast-${kind}` : '');
+    el.className = 'toast show' + (kind ? ` toast-${kind}` : '');
+    el.setAttribute('role', kind === 'error' ? 'alert' : 'status');
     if (href) el.href = href;
     el.innerHTML = `<strong>${esc(title)}</strong>${text ? `<span>${esc(text)}</span>` : ''}`;
     box.appendChild(el);
@@ -88,36 +89,34 @@
     return el;
   }
 
-  /* Tabs: <div role="tablist"> with <button role="tab" aria-controls="panel-id">. Arrow keys, Home and End move. */
-  function initTabs(root = document) {
-    root.querySelectorAll('[role="tablist"]').forEach((list) => {
-      const tabs = [...list.querySelectorAll('[role="tab"]')];
-      if (!tabs.length) return;
-      const select = (tab, focus) => {
-        tabs.forEach((t) => {
-          const on = t === tab;
-          t.setAttribute('aria-selected', String(on));
-          t.tabIndex = on ? 0 : -1;
-          const panel = document.getElementById(t.getAttribute('aria-controls'));
-          if (panel) panel.hidden = !on;
-        });
-        if (focus) tab.focus();
-      };
-      tabs.forEach((t, i) => {
-        t.addEventListener('click', () => select(t));
-        t.addEventListener('keydown', (e) => {
-          const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
-          let next = null;
-          if (step) next = tabs[(i + step + tabs.length) % tabs.length];
-          else if (e.key === 'Home') next = tabs[0];
-          else if (e.key === 'End') next = tabs[tabs.length - 1];
-          if (next) { e.preventDefault(); select(next, true); }
-        });
-      });
-      select(tabs.find((t) => t.getAttribute('aria-selected') === 'true') || tabs[0]);
+  /* Light / dark mode. _theme_head.html applies it before first paint; any [data-theme-toggle] button
+     switches it and the choice is remembered. Until the visitor chooses, it follows the device. */
+  const THEME_KEY = 'zch-theme';
+  const root = document.documentElement;
+  const isDark = () => root.getAttribute('data-bs-theme') === 'dark';
+
+  function applyTheme(mode) {
+    root.setAttribute('data-bs-theme', mode);
+    document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
+      btn.setAttribute('aria-pressed', String(mode === 'dark'));
+      const icon = btn.querySelector('.bi');
+      if (icon) {
+        icon.classList.toggle('bi-moon-stars', mode !== 'dark');
+        icon.classList.toggle('bi-sun', mode === 'dark');
+      }
+      btn.title = mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
     });
   }
-  initTabs();
 
-  window.ZCH = { api, esc, kes, store, poll, busy, toast, initTabs };
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('[data-theme-toggle]')) return;
+    const next = isDark() ? 'light' : 'dark';
+    store.set(THEME_KEY, next);
+    applyTheme(next);
+  });
+  const deviceDark = window.matchMedia('(prefers-color-scheme: dark)');
+  deviceDark.addEventListener('change', (e) => { if (!store.get(THEME_KEY)) applyTheme(e.matches ? 'dark' : 'light'); });
+  applyTheme(isDark() ? 'dark' : 'light');
+
+  window.ZCH = { api, esc, kes, store, poll, busy, toast, applyTheme };
 })();

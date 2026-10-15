@@ -1,5 +1,5 @@
 {% load humanize %}
-<dialog class="modal modal-sheet modal-full booking-dialog" id="booking-dialog" aria-labelledby="bd-title"
+<dialog class="dlg dlg-sheet dlg-full booking-dialog" id="booking-dialog" aria-labelledby="bd-title"
   data-create-url="{% url 'bookings:create' %}" data-quote-url="{% url 'bookings:quote' %}"
   data-from="{{ start|date:'Y-m-d' }}" data-to="{{ end|date:'Y-m-d' }}" data-preselect="{{ preselect_dates|yesno:'1,0' }}"
   data-today="{{ today|date:'Y-m-d' }}" data-min-days="{{ min_days }}" data-max-days="{{ max_days }}"

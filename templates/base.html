@@ -20,12 +20,7 @@
   {% block head %}{% endblock %}
   <link rel="icon" href="{% static 'img/zidicarhire-favicon.svg' %}" type="image/svg+xml">
   <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  {% include "_theme_head.html" %}
   <link rel="stylesheet" href="{% static 'css/site.css' %}">
 </head>
 <body>
@@ -41,6 +36,7 @@
         <a href="{% url 'pages:faq' %}">Questions</a>
         <a href="{% url 'bookings:find' %}">Find my booking</a>
         <a href="tel:{{ business.phone }}" class="nav-phone">{{ business.phone }}</a>
+        <button type="button" class="icon-btn theme-toggle" data-theme-toggle aria-label="Dark mode" aria-pressed="false" title="Switch to dark mode"><i class="bi bi-moon-stars" aria-hidden="true"></i></button>
       </nav>
     </div>
   </header>
