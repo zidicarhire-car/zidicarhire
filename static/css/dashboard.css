@@ -299,6 +299,7 @@ body.modal-open .dash-tabbar { display: none; }
 /* ===================== Live chat inbox ===================== */
 .inbox { display: grid; grid-template-columns: minmax(0, 1fr); overflow: hidden; box-shadow: var(--shadow-1); }
 @media (min-width: 768px) { .inbox { grid-template-columns: 320px minmax(0, 1fr); height: calc(100dvh - 10rem); min-height: 480px; } }
+@media (min-width: 768px) and (max-width: 991.98px) { .inbox { height: calc(100dvh - var(--dash-top-h) - var(--tabbar-h) - 10rem); } }   /* top bar and tab bar */
 .inbox-list-pane { min-height: 0; overflow-y: auto; }
 @media (min-width: 768px) { .inbox-list-pane { border-right: 1px solid var(--border); } }
 .inbox-list { list-style: none; margin: 0; padding: 0; }

@@ -93,6 +93,21 @@ PayHero can't send payment results to `localhost`. You have three options:
 To test the real till end to end, use the **Send test STK push for KES 1** button on the Payment
 settings check page.
 
+### Checking the look on phones and desktops
+
+`tools/screenshots.py` (only for your computer, never the server) runs the site against a throwaway
+database with fake payments, so your own data is never touched:
+
+```
+pip install -r requirements-dev.txt
+python -m playwright install chromium
+python tools/screenshots.py --check   # a full booking with receipt, a chat with a staff reply, dashboard actions
+python tools/screenshots.py           # the same, plus every page at 375, 768 and 1440 px, light and dark
+```
+
+Screenshots land in `tools/screenshots/`. It stops with a list of problems if a flow breaks, a page
+scrolls sideways, a button or field has no accessible name, or the receipt doesn't print on one A4 page.
+
 ## 4. Deploying to PythonAnywhere
 
 **Plan:** a paid plan (Hacker, about $5/month). The free plan can't use a custom domain and blocks
