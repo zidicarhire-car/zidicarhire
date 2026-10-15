@@ -300,10 +300,13 @@ def api_feed(request):
         item['just_paid'] = bool(since and b.paid_at and b.paid_at > since)
         bookings.append(item)
     unread = scoped_chats(request.user).aggregate(total=Sum('unread_for_admin'))['total'] or 0
+    waiting = list(scoped_chats(request.user).filter(wants_agent=True).order_by('agent_requested_at')
+                   .values('id', 'name')[:20])
     return JsonResponse({
         'bookings': bookings,
         'stats': _stats(viewing, request.user),
         'unread_chats': unread,
+        'waiting_chats': [{'id': str(c['id']), 'name': c['name']} for c in waiting],
         'city': viewing.slug if viewing else '',
         'server_time': timezone.now().isoformat(),
     })
@@ -354,7 +357,8 @@ def api_chats(request):
             'contact': conv.contact,
             **_chat_city(conv),
             'unread': conv.unread_for_admin,
-            'preview': (('You: ' if last and last.sender == 'admin' else '') + last.body[:80]) if last else 'No messages yet',
+            'wants_agent': conv.wants_agent,
+            'preview': ({'admin': 'You: ', 'bot': 'Auto: '}.get(last.sender, '') + last.body[:80]) if last else 'No messages yet',
             'time': timezone.localtime(conv.last_message_at).strftime('%d %b, %H:%M'),
         })
     return JsonResponse({'chats': items})
@@ -385,7 +389,8 @@ def api_chat_reply(request, cid):
     if not body:
         return JsonResponse({'error': 'Type a reply first.'}, status=400)
     msg = Message.objects.create(conversation=conv, sender=Message.Sender.ADMIN, body=body)
-    Conversation.objects.filter(pk=conv.pk).update(last_message_at=timezone.now(), unread_for_admin=0)
+    Conversation.objects.filter(pk=conv.pk).update(last_message_at=timezone.now(), unread_for_admin=0,
+                                                   wants_agent=False)
     return JsonResponse({'message': msg.as_dict()}, status=201)
 
 

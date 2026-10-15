@@ -294,3 +294,11 @@ body:has(dialog[open]) { overflow: hidden; }
 .chat-compose { display: flex; gap: var(--space-2); padding: var(--space-2); border-top: 1px solid var(--border); align-items: flex-end; }
 .chat-compose textarea { resize: none; min-height: var(--tap); }
 @media (prefers-color-scheme: dark) { .msg-me { background: var(--brand-hover); } }
+.msg-label { display: block; font-size: .72rem; font-weight: var(--fw-bold); opacity: .8; margin-bottom: .1rem; }
+.msg-bot { border-style: dashed; }
+.msg a { color: inherit; font-weight: var(--fw-semibold); overflow-wrap: anywhere; }
+.chat-quick { display: flex; gap: var(--space-2); overflow-x: auto; padding: var(--space-2); border-top: 1px solid var(--border); scrollbar-width: none; }
+.chat-quick::-webkit-scrollbar { display: none; }
+.chat-quick .chip { flex: none; min-height: 36px; }
+.chip-agent { border-color: var(--primary); background: var(--primary); color: var(--on-primary); }
+.chip-agent:disabled { opacity: 1; border-style: dashed; color: var(--text-muted); border-color: var(--border); background: var(--surface); }

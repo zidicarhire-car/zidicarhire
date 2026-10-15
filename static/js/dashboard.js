@@ -91,7 +91,22 @@
 
     if (!firstLoad && res.bookings.length) refreshLive();
     updateChatBadge(res.unread_chats);
+    alertWaiting(res.waiting_chats || []);
     firstLoad = false;
+  }
+
+  /* A visitor asked for a person: alert once per chat, on every dashboard page. */
+  const waitingSeen = new Set();
+  function alertWaiting(list) {
+    if (firstLoad && list.length) {
+      toast(list.length === 1 ? `${list[0].name} is waiting for a person` : `${list.length} chats are waiting for a person`,
+        'Open Live chat to reply.', list.length === 1 ? `/dashboard/chats/?c=${list[0].id}` : '/dashboard/chats/');
+    }
+    list.forEach((c) => {
+      if (waitingSeen.has(c.id)) return;
+      waitingSeen.add(c.id);
+      if (!firstLoad) alertAll(`${c.name} wants to talk to a person`, 'Open the chat and reply.', `/dashboard/chats/?c=${c.id}`);
+    });
   }
 
   function updateChatBadge(n) {
@@ -165,6 +180,7 @@
         <li><button type="button" class="inbox-item${c.id === current ? ' is-active' : ''}" data-id="${esc(c.id)}">
           <span class="inbox-row"><strong>${esc(c.name)}</strong><time>${esc(c.time)}</time></span>
           <span class="city-tag">${esc(c.city)}</span>
+          ${c.wants_agent ? '<span class="status status-pending">Wants a person</span>' : ''}
           <span class="inbox-preview">${esc(c.preview)}</span>
           ${c.unread && c.id !== current ? `<span class="badge">${c.unread}</span>` : ''}
         </button></li>`).join('');
@@ -176,8 +192,8 @@
         seen.add(m.id);
         lastId = Math.max(lastId, m.id);
         const li = document.createElement('li');
-        li.className = `msg msg-${m.sender === 'admin' ? 'me' : 'them'}`;
-        li.innerHTML = `<p>${esc(m.body)}</p><time>${esc(m.time)}</time>`;
+        li.className = `msg msg-${m.sender === 'visitor' ? 'them' : 'me'}${m.sender === 'bot' ? ' msg-bot' : ''}`;
+        li.innerHTML = `${m.label ? `<span class="msg-label">${esc(m.label)}</span>` : ''}<p>${esc(m.body)}</p><time>${esc(m.time)}</time>`;
         msgs.appendChild(li);
       });
       if (list.length) msgs.scrollTop = msgs.scrollHeight;

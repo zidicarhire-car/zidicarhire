@@ -24,7 +24,7 @@
     </header>
 
     <form class="chat-intro" id="chat-intro" novalidate>
-      <p>Ask about a car, prices or delivery. Tell us who you are so we can follow up.</p>
+      <p>Get instant answers about prices, booking and payment, or talk to our team. Tell us who you are so we can follow up.</p>
       <label>Your name<input name="name" autocomplete="name" required maxlength="80"></label>
       <label>Phone or email <span class="optional">(optional)</span><input name="contact" maxlength="120"></label>
       {% if branches %}
@@ -41,6 +41,14 @@
 
     <div class="chat-thread" id="chat-thread" hidden>
       <ol class="chat-messages" id="chat-messages" aria-live="polite"></ol>
+      <div class="chat-quick" id="chat-quick" role="group" aria-label="Quick questions">
+        <button type="button" class="chip chip-agent" id="chat-agent">Talk to a person</button>
+        <button type="button" class="chip" data-ask="What are your prices?">Prices</button>
+        <button type="button" class="chip" data-ask="How do I book a car?">How to book</button>
+        <button type="button" class="chip" data-ask="How do I pay with M-Pesa?">Payment</button>
+        <button type="button" class="chip" data-ask="What documents do I need?">Documents</button>
+        <button type="button" class="chip" data-ask="Where can I pick up the car?">Pick-up places</button>
+      </div>
       <form class="chat-compose" id="chat-compose">
         <label class="sr-only" for="chat-input">Message</label>
         <textarea id="chat-input" rows="1" maxlength="1000" placeholder="Type a message"></textarea>

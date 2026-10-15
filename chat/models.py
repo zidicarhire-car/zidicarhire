@@ -11,6 +11,8 @@ class Conversation(models.Model):
     location = models.ForeignKey('fleet.Location', on_delete=models.SET_NULL, null=True, blank=True,
                                  related_name='conversations', help_text='City the visitor is asking about')
     unread_for_admin = models.PositiveIntegerField(default=0)
+    wants_agent = models.BooleanField(default=False, help_text='The visitor asked for a person and no one has replied yet')
+    agent_requested_at = models.DateTimeField(null=True, blank=True)
     last_message_at = models.DateTimeField(default=timezone.now, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -25,6 +27,7 @@ class Message(models.Model):
     class Sender(models.TextChoices):
         VISITOR = 'visitor', 'Visitor'
         ADMIN = 'admin', 'ZIDICARHIRE'
+        BOT = 'bot', 'Automatic reply'
 
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     sender = models.CharField(max_length=10, choices=Sender.choices)
@@ -38,6 +41,7 @@ class Message(models.Model):
         return {
             'id': self.id,
             'sender': self.sender,
+            'label': 'Automatic reply' if self.sender == self.Sender.BOT else '',
             'body': self.body,
             'time': timezone.localtime(self.created_at).strftime('%H:%M'),
         }

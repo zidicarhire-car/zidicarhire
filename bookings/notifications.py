@@ -115,3 +115,18 @@ def notify_new_chat(conversation, first_message):
         f'Reply in the dashboard: {settings.SITE_URL}/dashboard/chats/?c={conversation.id}\n',
         branch_recipients(conversation.location),
     )
+
+
+
+def notify_agent_request(conversation, reason=''):
+    """A visitor in the chat wants a person (asked for one, or the assistant couldn't help)."""
+    city = conversation.location.name if conversation.location_id else 'No city chosen'
+    _send(
+        f'Chat: {conversation.name} wants to talk to a person ({city})',
+        f'{conversation.name} ({conversation.contact or "no contact given"}) is waiting for a team member in the '
+        'website chat.\n\n'
+        + (f'Last message: "{reason}"\n\n' if reason else '')
+        + f'City: {city}\n\n'
+        f'Reply in the dashboard: {settings.SITE_URL}/dashboard/chats/?c={conversation.id}\n',
+        branch_recipients(conversation.location),
+    )

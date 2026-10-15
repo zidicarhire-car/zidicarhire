@@ -77,6 +77,7 @@ class StkPushTests(TestCase):
             start_payment(booking)
         payload = post.call_args.kwargs['json']
         self.assertEqual(payload['amount'], 12000)
+        self.assertEqual(payload['phone_number'], '0712345678')   # the format in PayHero's docs
         self.assertEqual(payload['channel_id'], 1234)
         self.assertEqual(payload['external_reference'], booking.ref)
         self.assertEqual(payload['callback_url'], 'https://www.zidicarhire.com/payments/callback/')
@@ -212,6 +213,20 @@ class StatusCheckFallbackTests(TestCase):
         booking = check_pending_payment(self.pending(200))
         self.assertEqual(booking.status, Booking.Status.FAILED)
         self.assertIn("wasn't answered in time", booking.result_desc)
+
+    @mock.patch('payments.payhero.transaction_status',
+                return_value={'status': 'FAILED', 'result_desc': 'Insufficient service wallet balance'})
+    def test_payhero_reason_is_kept_for_staff(self, _status):
+        booking = check_pending_payment(self.pending(30))
+        attempt = booking.payments.get()
+        self.assertIn('Insufficient service wallet balance', attempt.result_desc)
+        self.assertEqual(attempt.raw_callback['status_check']['status'], 'FAILED')
+
+    @mock.patch('payments.payhero.transaction_status', return_value={'status': 'QUEUED', 'message': 'Waiting for customer'})
+    def test_stuck_prompt_shows_payhero_status(self, _status):
+        booking = check_pending_payment(self.pending(30))
+        self.assertEqual(booking.status, Booking.Status.PENDING)
+        self.assertIn('Status check: QUEUED (Waiting for customer)', booking.payments.get().result_desc)
 
     @mock.patch('payments.payhero.transaction_status', side_effect=ValueError('PayHero down'))
     def test_payhero_errors_dont_break_polling(self, _status):

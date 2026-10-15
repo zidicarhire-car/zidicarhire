@@ -280,6 +280,6 @@ def sitemap(request):
 
 @require_GET
 def robots(request):
-    lines = ['User-agent: *', 'Disallow: /dashboard/', 'Disallow: /django-admin/', 'Disallow: /bookings/',
+    lines = ['User-agent: *', 'Disallow: /dashboard/', 'Disallow: /django-admin/', 'Disallow: /admin/', 'Disallow: /bookings/',
              f'Sitemap: {settings.SITE_URL}{reverse("fleet:sitemap")}']
     return HttpResponse('\n'.join(lines) + '\n', content_type='text/plain')

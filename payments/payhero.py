@@ -74,6 +74,12 @@ def _mask(phone):
     return f'{phone[:6]}***{phone[-3:]}' if len(phone) > 9 else phone
 
 
+def local_phone(phone):
+    """254712345678 -> 0712345678: the format PayHero's API documentation uses."""
+    phone = str(phone or '')
+    return '0' + phone[3:] if phone.startswith('254') and len(phone) == 12 else phone
+
+
 def stk_push(amount, phone, reference, customer_name, callback_url):
     """Sends the M-Pesa prompt. Returns {'success', 'status', 'reference', 'CheckoutRequestID'}."""
     logger.info('STK push %s: KES %s to %s', reference, amount, _mask(phone))
@@ -95,7 +101,7 @@ def stk_push(amount, phone, reference, customer_name, callback_url):
 
     payload = {
         'amount': int(amount),
-        'phone_number': phone,
+        'phone_number': local_phone(phone),
         'channel_id': channel_id,
         'provider': 'm-pesa',
         'external_reference': reference,
@@ -129,6 +135,22 @@ def transaction_status(reference):
     response = requests.get(
         f'{BASE_URL}/transaction-status', params={'reference': reference}, headers=_headers(), timeout=15
     )
-    data = response.json()
-    logger.info('Status check %s: %s', reference, data.get('status'))
+    try:
+        data = response.json()
+    except ValueError:
+        data = {}
+    logger.info('Status check %s: HTTP %s, %s', reference, response.status_code,
+                {k: v for k, v in data.items() if k in STATUS_LOG_FIELDS})
     return data
+
+
+STATUS_LOG_FIELDS = ('status', 'reference', 'provider_reference', 'third_party_reference', 'result_desc',
+                     'ResultDesc', 'message', 'error_message', 'amount', 'phone_number')
+
+
+def status_message(data):
+    """PayHero's own words about a payment, for the dashboard (blank if it gave none)."""
+    for key in ('result_desc', 'ResultDesc', 'message', 'error_message', 'description'):
+        if data.get(key):
+            return str(data[key])[:200]
+    return ''

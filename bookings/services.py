@@ -152,15 +152,25 @@ def check_pending_payment(booking):
                     booking, _ = mark_paid(booking.pk, receipt=receipt, desc='Confirmed by status check')
                     return booking
                 if status in ('FAILED', 'CANCELLED'):
+                    reason = payhero.status_message(data)
                     message = 'The M-Pesa payment was not completed. Send a new prompt to try again.'
                     record_result(attempt, Payment.Status.CANCELLED if status == 'CANCELLED' else Payment.Status.FAILED,
-                                  desc=f'Status check: {status}')
+                                  desc=f'Status check: {status}' + (f' ({reason})' if reason else ''),
+                                  raw={'status_check': data})
                     return mark_failed(booking.pk, message)
+                if attempt is not None and data:
+                    # Keep PayHero's latest answer on the attempt, so staff can see why a prompt is stuck.
+                    record_result(attempt, attempt.status, desc=f'Status check: {status or "no status yet"}'
+                                  + (f' ({payhero.status_message(data)})' if payhero.status_message(data) else ''),
+                                  raw={'status_check': data})
             except Exception:
                 logger.exception('PayHero status check failed for %s', booking.ref)
 
     if elapsed > NO_RESPONSE_SECONDS:
-        record_result(latest_attempt(booking), Payment.Status.FAILED, desc='No answer within 3 minutes')
+        attempt = latest_attempt(booking)
+        last = attempt.result_desc if attempt is not None and attempt.result_desc.startswith('Status check') else ''
+        record_result(attempt, Payment.Status.FAILED,
+                      desc='No answer within 3 minutes' + (f'. Last PayHero answer: {last}' if last else ''))
         return mark_failed(booking.pk, "The M-Pesa prompt wasn't answered in time. Send a new prompt to try again.")
 
     booking.refresh_from_db()

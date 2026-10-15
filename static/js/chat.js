@@ -14,6 +14,8 @@
   const input = document.getElementById('chat-input');
   const dot = document.getElementById('chat-dot');
   const presence = document.getElementById('chat-presence');
+  const quick = document.getElementById('chat-quick');
+  const agentBtn = document.getElementById('chat-agent');
 
   let chatId = store.get('zch_chat');
   let lastId = 0;
@@ -34,6 +36,16 @@
   }
 
   function showThread() { intro.hidden = true; thread.hidden = false; scrollDown(); }
+
+  /* Plain text with web links made clickable (text is escaped first). */
+  function linkify(text) {
+    return esc(text).replace(/https?:\/\/[^\s<]+[^\s<.,;:!?)]/g, (url) => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`);
+  }
+
+  function setWaitingForPerson(waiting) {
+    agentBtn.disabled = waiting;
+    agentBtn.textContent = waiting ? 'Team member requested' : 'Talk to a person';
+  }
   function scrollDown() { list.scrollTop = list.scrollHeight; }
 
   function render(messages) {
@@ -43,10 +55,11 @@
       seen.add(m.id);
       lastId = Math.max(lastId, m.id);
       const li = document.createElement('li');
-      li.className = `msg msg-${m.sender === 'admin' ? 'them' : 'me'}`;
-      li.innerHTML = `<p>${esc(m.body)}</p><time>${esc(m.time)}</time>`;
+      li.className = `msg msg-${m.sender === 'visitor' ? 'me' : 'them'}${m.sender === 'bot' ? ' msg-bot' : ''}`;
+      li.innerHTML = `${m.label ? `<span class="msg-label">${esc(m.label)}</span>` : ''}<p>${linkify(m.body)}</p><time>${esc(m.time)}</time>`;
       list.appendChild(li);
-      if (m.sender === 'admin') gotReply = true;
+      if (m.sender !== 'visitor') gotReply = true;
+      if (m.sender === 'admin') { quick.hidden = true; setWaitingForPerson(false); }
     });
     if (messages.length) scrollDown();
     if (gotReply && !isOpen) dot.hidden = false;
@@ -57,7 +70,8 @@
     try {
       const res = await api(`/chat/${chatId}/messages/?after=${lastId}`);
       render(res.messages);
-      presence.textContent = res.agent_online ? "We're online now" : 'We usually reply within a few minutes';
+      presence.textContent = res.agent_online ? "We're online now" : 'Instant answers, or a person during opening hours';
+      if (res.wants_agent) setWaitingForPerson(true);
       root.classList.toggle('agent-online', !!res.agent_online);
     } catch (err) {
       if (err.status === 404) { store.del('zch_chat'); chatId = null; }
@@ -102,16 +116,16 @@
     } catch (err) { introError.textContent = err.message; }
   });
 
-  async function send() {
-    const body = input.value.trim();
+  async function send(text) {
+    const body = (text ?? input.value).trim();
     if (!body || !chatId) return;
-    input.value = '';
-    autosize();
+    if (text === undefined) { input.value = ''; autosize(); }
     try {
       const res = await api(`/chat/${chatId}/send/`, { method: 'POST', body: { body } });
-      render([res.message]);
+      render([res.message, ...(res.replies || [])]);
+      if (res.wants_agent) setWaitingForPerson(true);
     } catch (err) {
-      input.value = body;
+      if (text === undefined) input.value = body;
       const li = document.createElement('li');
       li.className = 'msg msg-error';
       li.textContent = err.message;
@@ -121,6 +135,26 @@
   }
 
   compose.addEventListener('submit', (e) => { e.preventDefault(); send(); });
+  quick.addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-ask]');
+    if (chip) send(chip.dataset.ask);
+  });
+  agentBtn.addEventListener('click', async () => {
+    if (!chatId) return;
+    agentBtn.disabled = true;
+    try {
+      const res = await api(`/chat/${chatId}/agent/`, { method: 'POST', body: {} });
+      render(res.replies || []);
+      setWaitingForPerson(true);
+    } catch (err) {
+      agentBtn.disabled = false;
+      const li = document.createElement('li');
+      li.className = 'msg msg-error';
+      li.textContent = err.message;
+      list.appendChild(li);
+      scrollDown();
+    }
+  });
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
   function autosize() { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 120) + 'px'; }
   input.addEventListener('input', autosize);
