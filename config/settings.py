@@ -66,12 +66,35 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# ---------- Database ----------
+# MySQL on PythonAnywhere (DB_ENGINE=mysql in .env), SQLite on your computer (default).
+if env_str('DB_ENGINE', 'sqlite').lower() == 'mysql':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': env_str('DB_NAME'),
+            'USER': env_str('DB_USER'),
+            'PASSWORD': env_str('DB_PASSWORD'),
+            'HOST': env_str('DB_HOST'),
+            'PORT': env_int('DB_PORT', 3306),
+            # PythonAnywhere closes idle MySQL connections after 300 seconds.
+            'CONN_MAX_AGE': 240,
+            'OPTIONS': {
+                'charset': 'utf8mb4',
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
+        }
     }
-}
+    for _key in ('NAME', 'USER', 'PASSWORD', 'HOST'):
+        if not DATABASES['default'][_key]:
+            raise ImproperlyConfigured(f'DB_ENGINE=mysql but DB_{_key} is empty in .env.')
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
