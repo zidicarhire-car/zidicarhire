@@ -110,6 +110,7 @@
   --tap: 44px;
   --header-h: 68px;              /* sticky navbar, for anchor offsets */
   --tabbar-h: 58px;              /* phone tab bar, without the safe area */
+  --bookbar-h: 68px;             /* car page booking bar on phones */
 
   /* Shape: rounded-3 (8px) for buttons and inputs, rounded-4 (16px) for cards and modals */
   --radius-sm: var(--bs-border-radius);
@@ -388,6 +389,8 @@ legend { float: none; width: auto; font-size: .95rem; font-weight: var(--fw-semi
   --bs-btn-active-color: var(--danger); --bs-btn-active-bg: var(--danger-bg); --bs-btn-active-border-color: var(--danger-hover);
   --bs-btn-disabled-color: var(--danger); --bs-btn-disabled-bg: transparent; --bs-btn-disabled-border-color: var(--danger);
 }
+/* Segmented choices (radio .btn-check + label): the chosen one is filled */
+.btn-check:checked + .btn { --bs-btn-active-bg: var(--primary); --bs-btn-active-color: var(--on-primary); --bs-btn-active-border-color: var(--primary); }
 /* On indigo (navbar, footer, dashboard sidebar) */
 .btn-on-brand {
   --bs-btn-color: var(--on-brand); --bs-btn-bg: transparent; --bs-btn-border-color: rgba(255, 255, 255, .45);

@@ -1,12 +1,33 @@
-<p class="results-count" id="results-count" role="status">
-  {% if cars|length == all_cars_count %}{{ cars|length }} car{{ cars|length|pluralize }}{% else %}{{ cars|length }} of {{ all_cars_count }} car{{ all_cars_count|pluralize }} match your filters{% endif %}
-  in {{ location.name }}, {{ start|date:"D j M" }} to {{ end|date:"D j M" }} ({{ days }} day{{ days|pluralize }})
-</p>
+{% load humanize %}{# Results for /cars/: also returned alone (?partial=1) when a filter changes. #}
+<div class="results-head">
+  <p class="results-count" id="results-count" role="status" data-count="{{ cars|length }}">
+    {% if cars|length == all_cars_count %}{{ cars|length }} car{{ cars|length|pluralize }}{% else %}{{ cars|length }} of {{ all_cars_count }} car{{ all_cars_count|pluralize }} match your filters{% endif %}
+    in {{ location.name }}, {{ start|date:"D j M" }} to {{ end|date:"D j M" }} ({{ days }} day{{ days|pluralize }})
+  </p>
+  <div class="results-sort">
+    <label class="form-label" for="sort">Sort</label>
+    <select class="form-select" id="sort" name="sort" form="car-filters">
+      {% for value, label in sort_choices %}<option value="{{ value }}"{% if filters.sort == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </div>
+</div>
+{% if category or filters.transmission or filters.seats or filters.price_min or filters.price_max %}
+<ul class="filter-chips" aria-label="Active filters">
+  {% if category %}{% for value, label in categories %}{% if value == category %}<li><button type="button" class="chip" data-clear="category" aria-label="Remove filter: {{ label }}">{{ label }}<i class="bi bi-x" aria-hidden="true"></i></button></li>{% endif %}{% endfor %}{% endif %}
+  {% if filters.transmission %}{% for value, label in transmissions %}{% if value == filters.transmission %}<li><button type="button" class="chip" data-clear="transmission" aria-label="Remove filter: {{ label }}">{{ label }}<i class="bi bi-x" aria-hidden="true"></i></button></li>{% endif %}{% endfor %}{% endif %}
+  {% if filters.seats %}{% for value, label in seat_choices %}{% if value == filters.seats %}<li><button type="button" class="chip" data-clear="seats" aria-label="Remove filter: {{ label }} seats">{{ label }} seats<i class="bi bi-x" aria-hidden="true"></i></button></li>{% endif %}{% endfor %}{% endif %}
+  {% if filters.price_min or filters.price_max %}<li><button type="button" class="chip" data-clear="price" aria-label="Remove the price filter">{% if filters.price_min and filters.price_max %}KES {{ filters.price_min|intcomma }} to {{ filters.price_max|intcomma }}{% elif filters.price_min %}From KES {{ filters.price_min|intcomma }}{% else %}Up to KES {{ filters.price_max|intcomma }}{% endif %} a day<i class="bi bi-x" aria-hidden="true"></i></button></li>{% endif %}
+</ul>
+{% endif %}
 {% if not cars and all_cars_count %}
 <div class="empty">
+  <span class="empty-icon" aria-hidden="true"><i class="bi bi-car-front"></i></span>
   <h3>No cars match these filters</h3>
   <p>Try a wider price range, fewer seats, or any gearbox.</p>
-  <a class="btn btn-primary" href="?city={{ location.slug }}&amp;from={{ start|date:'Y-m-d' }}&amp;to={{ end|date:'Y-m-d' }}" data-clear-filters>Clear the filters</a>
+  <div class="empty-actions">
+    <a class="btn btn-primary" href="?city={{ location.slug }}&amp;from={{ start|date:'Y-m-d' }}&amp;to={{ end|date:'Y-m-d' }}" data-clear-filters>Clear filters</a>
+    <button type="button" class="btn btn-ghost" data-open-chat data-chat-city="{{ location.slug }}"><i class="bi bi-chat-dots" aria-hidden="true"></i>Chat with us</button>
+  </div>
 </div>
 {% elif suggestions or not cars %}{% include "fleet/_no_cars.html" %}{% endif %}
 {% if cars %}

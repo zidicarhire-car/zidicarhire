@@ -1,111 +1,113 @@
 /*
- * Car page: swipeable photo gallery (scroll-snap, so swiping is native), a full-screen view with
- * keyboard and touch support, and the availability preview calendar.
+ * Car page: photo carousel with thumbnails and a full-screen view (Bootstrap carousel + modal, swipe and arrow keys
+ * built in), the availability preview calendar, and the booking card's dates and total (priced by the server).
  */
 (function () {
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const { api, kes } = window.ZCH;
+  const bs = window.bootstrap;
 
-  /* ---------- gallery ---------- */
-  const gallery = document.querySelector('[data-gallery]');
-  const track = gallery?.querySelector('.gallery-track');
-  const slides = track ? [...track.querySelectorAll('.gallery-slide')] : [];
+  /* ---------- photos ---------- */
+  const gallery = document.getElementById('car-gallery');
   const lightbox = document.getElementById('lightbox');
-  let current = 0;
+  const boxCarousel = document.getElementById('lightbox-carousel');
+  const thumbs = [...document.querySelectorAll('[data-gallery-thumb]')];
 
-  function show(i, smooth = true) {
-    if (!slides.length) return;
-    current = (i + slides.length) % slides.length;
-    track.scrollTo({ left: slides[current].offsetLeft - track.offsetLeft, behavior: smooth && !reduceMotion ? 'smooth' : 'auto' });
-    mark();
+  function markThumb(i) {
+    thumbs.forEach((t, n) => { if (n === i) t.setAttribute('aria-current', 'true'); else t.removeAttribute('aria-current'); });
+    thumbs[i]?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }
 
-  function mark() {
-    const counter = gallery.querySelector('[data-current]');
-    if (counter) counter.textContent = current + 1;
-    gallery.querySelectorAll('.gallery-thumbs button').forEach((b, i) => {
-      if (i === current) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
+  /* Shows slide i straight away (no slide animation), e.g. before the full-screen view opens. */
+  function jump(carousel, i) {
+    carousel.querySelectorAll('.carousel-item').forEach((item, n) => item.classList.toggle('active', n === i));
+    carousel.querySelectorAll('.carousel-indicators [data-bs-slide-to]').forEach((b, n) => {
+      b.classList.toggle('active', n === i);
+      if (n === i) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
     });
   }
 
-  if (track && slides.length) {
-    let ticking = false;
-    track.addEventListener('scroll', () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        current = Math.round(track.scrollLeft / track.clientWidth);
-        mark();
-        ticking = false;
-      });
-    }, { passive: true });
-    gallery.querySelector('.gallery-prev')?.addEventListener('click', () => show(current - 1));
-    gallery.querySelector('.gallery-next')?.addEventListener('click', () => show(current + 1));
-    gallery.querySelectorAll('.gallery-thumbs button').forEach((b) => b.addEventListener('click', () => show(Number(b.dataset.index))));
-    track.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
-      if (e.key === 'ArrowRight') { e.preventDefault(); show(current + 1); }
-    });
-    track.addEventListener('click', (e) => {
-      const btn = e.target.closest('.gallery-open');
-      if (btn) openLightbox(Number(btn.dataset.index));
+  if (gallery && bs) {
+    gallery.addEventListener('slide.bs.carousel', (e) => markThumb(e.to));
+    gallery.addEventListener('click', (e) => {
+      const open = e.target.closest('[data-gallery-open]');
+      if (!open || !lightbox) return;
+      const i = Number(open.dataset.index);
+      jump(boxCarousel, i);
+      lightbox.querySelector('[data-lightbox-count]').textContent = i + 1;
+      bs.Modal.getOrCreateInstance(lightbox).show();
     });
   }
-
-  /* ---------- full-screen view ---------- */
-  const fullImg = document.getElementById('lightbox-img');
-  let boxIndex = 0;
-
-  function paint() {
-    const btn = slides[boxIndex].querySelector('.gallery-open');
-    fullImg.src = btn.dataset.full;
-    fullImg.alt = btn.querySelector('img').alt;
-    lightbox.querySelector('.lightbox-count').textContent = `${boxIndex + 1} / ${slides.length}`;
-  }
-
-  function openLightbox(i) {
-    if (!lightbox) return;
-    boxIndex = i;
-    paint();
-    lightbox.showModal();
-    lightbox.querySelector('.lightbox-close').focus();
-  }
-
-  function step(n) {
-    boxIndex = (boxIndex + n + slides.length) % slides.length;
-    paint();
-  }
-
-  if (lightbox) {
-    lightbox.querySelector('.lightbox-prev')?.addEventListener('click', () => step(-1));
-    lightbox.querySelector('.lightbox-next')?.addEventListener('click', () => step(1));
-    lightbox.querySelector('[data-close-lightbox]').addEventListener('click', () => lightbox.close());
-    lightbox.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') step(-1);
-      if (e.key === 'ArrowRight') step(1);
+  if (lightbox && bs) {
+    boxCarousel.addEventListener('slide.bs.carousel', (e) => {
+      lightbox.querySelector('[data-lightbox-count]').textContent = e.to + 1;
     });
-    lightbox.addEventListener('close', () => show(boxIndex, false));
-    let startX = null;
-    lightbox.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
-    lightbox.addEventListener('touchend', (e) => {
-      if (startX === null) return;
-      const dx = e.changedTouches[0].clientX - startX;
-      startX = null;
-      if (Math.abs(dx) > 45) step(dx < 0 ? 1 : -1);
-    }, { passive: true });
-    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) lightbox.close(); });
+    lightbox.addEventListener('keydown', (e) => {   // arrow keys anywhere in the full-screen view
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      const c = bs.Carousel.getOrCreateInstance(boxCarousel);
+      if (e.key === 'ArrowLeft') c.prev(); else c.next();
+    });
+    lightbox.addEventListener('hidden.bs.modal', () => {   // come back to the photo you were looking at
+      const items = [...boxCarousel.querySelectorAll('.carousel-item')];
+      const i = items.findIndex((item) => item.classList.contains('active'));
+      if (gallery && i >= 0) { jump(gallery, i); markThumb(i); }
+    });
+  }
+
+  /* ---------- booking card: dates and total ---------- */
+  const card = document.querySelector('[data-quick-quote]');
+  const bookButtons = document.querySelectorAll('.book-btn[data-from]');
+  const totals = document.querySelectorAll('[data-quote-total]');
+  const DAY_MS = 86400000;
+  const parse = (v) => { const [y, m, d] = v.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+  const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
+  let seq = 0;
+
+  function showTotal(text) { totals.forEach((el) => { el.textContent = text; }); }
+
+  async function requote() {
+    const from = card.elements.from.value;
+    const to = card.elements.to.value;
+    if (!from || !to || to <= from) { showTotal('Choose a return date after the pick-up date'); return; }
+    bookButtons.forEach((b) => { b.dataset.from = from; b.dataset.to = to; });
+    const id = ++seq;
+    const t = card.dataset.time;
+    const params = new URLSearchParams({ car_id: card.dataset.carId, from, to, pickup_time: t, return_time: t,
+      pickup_point: card.dataset.pickupPoint });   // the branch's first pick-up point, as in the booking popup
+    try {
+      const res = await api(`${card.dataset.quoteUrl}?${params}`);
+      if (id !== seq) return;
+      const q = res.quote;
+      showTotal(`${kes(q.total)} for ${q.days} day${q.days === 1 ? '' : 's'}`);
+    } catch (err) {
+      if (id === seq) showTotal(err.message);
+    }
+  }
+
+  if (card) {
+    card.elements.from.addEventListener('change', () => {
+      const from = card.elements.from.value;
+      if (from) {
+        const next = iso(parse(from) + DAY_MS);
+        card.elements.to.min = next;
+        if (!card.elements.to.value || card.elements.to.value < next) card.elements.to.value = next;
+      }
+      requote();
+    });
+    card.elements.to.addEventListener('change', requote);
+    requote();
   }
 
   /* ---------- availability preview ---------- */
   const preview = document.getElementById('availability-preview');
-  const bookBtn = document.querySelector('.car-info .book-btn');
-  if (preview && window.RangeCalendar && window.ZCH) {
+  const bookBtn = document.querySelector('[data-book-main]');
+  if (preview && window.RangeCalendar) {
     const cal = new window.RangeCalendar(preview, {
       min: preview.dataset.today,
       onPick: (day) => window.ZCHBooking?.open(bookBtn, { start: day }),
       onMessage: () => {},
     });
-    window.ZCH.api(`/api/cars/${preview.dataset.carId}/booked-dates/?months=12`)
+    api(`/api/cars/${preview.dataset.carId}/booked-dates/?months=12`)
       .then((res) => cal.setUnavailable(res.unavailable))
-      .catch(() => { preview.insertAdjacentHTML('beforeend', '<p class="muted small">Booked days could not be loaded. You can still pick dates when you book.</p>'); });
+      .catch(() => { preview.insertAdjacentHTML('beforeend', '<p class="fine">Booked days could not be loaded. You can still pick dates when you book.</p>'); });
   }
 })();

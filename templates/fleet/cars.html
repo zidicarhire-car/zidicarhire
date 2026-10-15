@@ -6,55 +6,91 @@
 {% block head %}<link rel="canonical" href="{{ site_url }}{% url 'fleet:cars' %}{% if location %}?city={{ location.slug }}{% endif %}">{% endblock %}
 
 {% block content %}
-<section class="hero hero-compact">
-  <div class="wrap">
-    <h1 class="hero-title hero-title-small">Cars for hire{% if location %} in {{ location.name }}{% endif %}</h1>
+<section class="hero hero-compact" aria-labelledby="cars-title">
+  <div class="container-xl">
+    <h1 class="hero-title hero-title-small" id="cars-title">Cars for hire{% if location %} in {{ location.name }}{% endif %}</h1>
     {% include "fleet/_search.html" with hide_category=True %}
   </div>
 </section>
 
-<section class="fleet" id="cars">
-  <div class="wrap listing">
-    <form class="filters-panel" id="car-filters" method="get" action="{% url 'fleet:cars' %}" aria-label="Filter cars">
-      <input type="hidden" name="city" value="{{ location.slug }}">
-      <input type="hidden" name="from" value="{{ start|date:'Y-m-d' }}">
-      <input type="hidden" name="to" value="{{ end|date:'Y-m-d' }}">
-      {% if return_route %}<input type="hidden" name="return_to" value="{{ return_route.to_location.slug }}">{% endif %}
-      <h2 class="filters-title">Filter</h2>
-      <label>Type of car
-        <select name="category">
-          <option value="">Any type</option>
-          {% for value, label in categories %}<option value="{{ value }}"{% if value == category %} selected{% endif %}>{{ label }}</option>{% endfor %}
-        </select>
-      </label>
-      <fieldset class="radio-row">
-        <legend>Gearbox</legend>
-        <label class="check"><input type="radio" name="transmission" value=""{% if not filters.transmission %} checked{% endif %}> Any</label>
-        {% for value, label in transmissions %}
-        <label class="check"><input type="radio" name="transmission" value="{{ value }}"{% if filters.transmission == value %} checked{% endif %}> {{ label }}</label>
-        {% endfor %}
-      </fieldset>
-      <label>Seats
-        <select name="seats">
-          <option value="">Any number</option>
-          {% for value, label in seat_choices %}<option value="{{ value }}"{% if filters.seats == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
-        </select>
-      </label>
-      <fieldset class="price-range">
-        <legend>Price per day (KES)</legend>
-        <label>From<input type="number" name="price_min" inputmode="numeric" min="0" step="500" value="{{ filters.price_min|default_if_none:'' }}" placeholder="0"></label>
-        <label>To<input type="number" name="price_max" inputmode="numeric" min="0" step="500" value="{{ filters.price_max|default_if_none:'' }}" placeholder="Any"></label>
-      </fieldset>
-      <label>Sort by
-        <select name="sort">
-          {% for value, label in sort_choices %}<option value="{{ value }}"{% if filters.sort == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
-        </select>
-      </label>
-      <button class="btn btn-primary btn-block filters-apply" type="submit">Show cars</button>
-    </form>
+<section class="listing" id="cars">
+  <div class="container-xl">
+    <div class="row g-4">
+      <div class="col-lg-3">
+        <div class="offcanvas-lg offcanvas-bottom filters-sheet" tabindex="-1" id="car-filters-panel" aria-labelledby="filters-title">
+          <div class="offcanvas-header">
+            <h2 class="filters-title" id="filters-title"><i class="bi bi-sliders" aria-hidden="true"></i>Filters</h2>
+            <button type="button" class="btn btn-ghost btn-sm" data-clear-filters>Clear all</button>
+            <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#car-filters-panel" aria-label="Close filters"></button>
+          </div>
+          <div class="offcanvas-body">
+            <form class="filters-panel" id="car-filters" method="get" action="{% url 'fleet:cars' %}" aria-label="Filter cars">
+              <input type="hidden" name="from" value="{{ start|date:'Y-m-d' }}">
+              <input type="hidden" name="to" value="{{ end|date:'Y-m-d' }}">
+              {% if return_route %}<input type="hidden" name="return_to" value="{{ return_route.to_location.slug }}">{% endif %}
+              <div class="mb-3">
+                <label class="form-label" for="f-city">City</label>
+                <select class="form-select" id="f-city" name="city">
+                  {% for loc in locations %}<option value="{{ loc.slug }}"{% if loc == location %} selected{% endif %}>{{ loc.name }}</option>{% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="f-category">Car type</label>
+                <select class="form-select" id="f-category" name="category">
+                  <option value="">Any type</option>
+                  {% for value, label in categories %}<option value="{{ value }}"{% if value == category %} selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+              </div>
+              <fieldset class="mb-3">
+                <legend class="form-label">Gearbox</legend>
+                <div class="btn-group w-100" role="group">
+                  <input type="radio" class="btn-check" name="transmission" id="f-tr-any" value=""{% if not filters.transmission %} checked{% endif %}>
+                  <label class="btn btn-ghost" for="f-tr-any">Any</label>
+                  {% for value, label in transmissions %}
+                  <input type="radio" class="btn-check" name="transmission" id="f-tr-{{ value }}" value="{{ value }}"{% if filters.transmission == value %} checked{% endif %}>
+                  <label class="btn btn-ghost" for="f-tr-{{ value }}">{{ label }}</label>
+                  {% endfor %}
+                </div>
+              </fieldset>
+              <div class="mb-3">
+                <label class="form-label" for="f-seats">Seats</label>
+                <select class="form-select" id="f-seats" name="seats">
+                  <option value="">Any number</option>
+                  {% for value, label in seat_choices %}<option value="{{ value }}"{% if filters.seats == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+              </div>
+              <fieldset class="mb-3">
+                <legend class="form-label">Price per day (KES)</legend>
+                <div class="row g-2">
+                  <div class="col-6">
+                    <label class="visually-hidden" for="f-min">Lowest price per day</label>
+                    <input class="form-control" type="number" id="f-min" name="price_min" inputmode="numeric" min="0" step="500" value="{{ filters.price_min|default_if_none:'' }}" placeholder="From">
+                  </div>
+                  <div class="col-6">
+                    <label class="visually-hidden" for="f-max">Highest price per day</label>
+                    <input class="form-control" type="number" id="f-max" name="price_max" inputmode="numeric" min="0" step="500" value="{{ filters.price_max|default_if_none:'' }}" placeholder="To">
+                  </div>
+                </div>
+              </fieldset>
+              <button class="btn btn-primary w-100 filters-apply" type="submit">Show cars</button>
+            </form>
+          </div>
+          <div class="filters-foot d-lg-none">
+            <button type="button" class="btn btn-primary w-100" data-bs-dismiss="offcanvas" data-bs-target="#car-filters-panel" data-show-cars>Show {{ cars|length }} car{{ cars|length|pluralize }}</button>
+          </div>
+        </div>
+      </div>
 
-    <div class="results" id="car-results" aria-busy="false">
-      {% include "fleet/_car_results.html" %}
+      <div class="col-lg-9">
+        <div class="listing-toolbar d-lg-none">
+          <button type="button" class="btn btn-ghost" data-bs-toggle="offcanvas" data-bs-target="#car-filters-panel" aria-controls="car-filters-panel">
+            <i class="bi bi-sliders" aria-hidden="true"></i>Filters<span class="badge rounded-pill text-bg-plate" data-filter-count hidden></span>
+          </button>
+        </div>
+        <div class="results" id="car-results" aria-busy="false">
+          {% include "fleet/_car_results.html" %}
+        </div>
+      </div>
     </div>
   </div>
 </section>

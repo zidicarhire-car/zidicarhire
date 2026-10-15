@@ -213,7 +213,7 @@ class CarPageTests(TestCase):
         res = self.client.get(self.car.get_absolute_url())
         self.assertEqual(res.status_code, 200)
         for text in ('Toyota Axio', 'Reverse camera', 'KES 4,500', 'KES 4,000', 'KES 28,000 a week',
-                     'Choose dates and book', 'id="availability-preview"', 'id="booking-dialog"'):
+                     'Book now', 'id="availability-preview"', 'id="booking-dialog"'):
             self.assertContains(res, text)
 
     def test_wrong_slug_redirects_and_hidden_cars_404(self):

@@ -131,6 +131,10 @@
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
+    // Sticky toolbars and cards sit just under the navbar: --header-live is its current height.
+    const setHeight = () => root.style.setProperty('--header-live', `${header.offsetHeight}px`);
+    if (window.ResizeObserver) new ResizeObserver(setHeight).observe(header);
+    setHeight();
   }
 
   /* Phone menu: tapping a link closes it (data-bs-dismiss would cancel the link). */

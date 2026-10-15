@@ -445,7 +445,8 @@
     dialog.showModal();
     await loadBookedDays();
     if (opts.start) {
-      setError('dates', calendar.setRange(opts.start, null));
+      const message = calendar.setRange(opts.start, opts.end || null);
+      if (message) setError('dates', opts.end ? `Those dates don't work for this car: ${message}` : message);
     } else if (ds.preselect === '1' && !range.start) {
       const message = calendar.setRange(ds.from, ds.to);
       if (message) setError('dates', `Your search dates don't work for this car: ${message}`);
@@ -456,7 +457,7 @@
 
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('.book-btn');
-    if (btn && !btn.disabled) open(btn);
+    if (btn && !btn.disabled) open(btn, { start: btn.dataset.from, end: btn.dataset.to });   // the car page's dates
   });
   dialog.addEventListener('click', (e) => {
     if (e.target.closest('[data-close]')) close();

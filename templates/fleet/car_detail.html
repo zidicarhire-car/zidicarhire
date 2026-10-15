@@ -10,128 +10,194 @@
 {% block head %}
 <link rel="canonical" href="{{ site_url }}{{ car.get_absolute_url }}">
 {% endblock %}
+{% block body_class %}has-bookbar{% endblock %}
+{% block tabbar %}{% endblock %}
 
 {% block content %}
-<section class="car-page">
-  <div class="wrap">
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="{{ car.location.get_absolute_url }}">Car hire in {{ car.location.name }}</a> <span aria-hidden="true">/</span> <span aria-current="page">{{ car.name }}</span>
+<div class="car-page">
+  <div class="container-xl">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'fleet:home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'fleet:cars' %}?city={{ car.location.slug }}">Cars</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ car.name }}</li>
+      </ol>
     </nav>
 
-    <div class="car-layout">
-      <div class="car-media">
+    <div class="row g-4 g-xl-5">
+      <div class="col-lg-7">
         {% if photos %}
-        <div class="gallery" data-gallery>
-          <div class="gallery-track" tabindex="0" role="region" aria-roledescription="carousel"
-               aria-label="Photos of {{ car.name }}. Use the arrow keys to move between photos.">
+        <div id="car-gallery" class="carousel slide car-gallery" data-bs-interval="false" data-bs-touch="true" aria-roledescription="carousel" aria-label="Photos of {{ car.name }}">
+          {% if photos|length > 1 %}
+          <div class="carousel-indicators">
+            {% for p in photos %}<button type="button" data-bs-target="#car-gallery" data-bs-slide-to="{{ forloop.counter0 }}"{% if forloop.first %} class="active" aria-current="true"{% endif %} aria-label="Photo {{ forloop.counter }}"></button>{% endfor %}
+          </div>
+          {% endif %}
+          <div class="carousel-inner">
             {% for p in photos %}
-            <figure class="gallery-slide" aria-label="Photo {{ forloop.counter }} of {{ photos|length }}">
-              <button type="button" class="gallery-open" data-index="{{ forloop.counter0 }}" data-full="{{ p.image.url }}"
-                      aria-label="Open photo {{ forloop.counter }} full screen">
+            <div class="carousel-item{% if forloop.first %} active{% endif %}" aria-label="Photo {{ forloop.counter }} of {{ photos|length }}">
+              <button type="button" class="gallery-open ratio ratio-16x10" data-gallery-open data-index="{{ forloop.counter0 }}" data-full="{{ p.image.url }}" aria-label="Open photo {{ forloop.counter }} full screen">
                 <img src="{{ p.thumbnail.url }}" srcset="{{ p.thumbnail.url }} 600w, {{ p.image.url }} 1600w"
-                     sizes="(max-width: 900px) 100vw, 640px" alt="{{ car.name }}, photo {{ forloop.counter }}"
+                     sizes="(max-width: 991px) 100vw, 700px" alt="{{ car.name }}, photo {{ forloop.counter }}"
                      width="{{ p.width|default:1600 }}" height="{{ p.height|default:1000 }}"{% if not forloop.first %} loading="lazy"{% endif %}>
               </button>
-            </figure>
+            </div>
             {% endfor %}
           </div>
           {% if photos|length > 1 %}
-          <button type="button" class="gallery-nav gallery-prev icon-btn" aria-label="Previous photo">
-            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <button type="button" class="gallery-nav gallery-next icon-btn" aria-label="Next photo">
-            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <p class="gallery-count" aria-live="polite"><span data-current>1</span> / {{ photos|length }}</p>
-          <div class="gallery-thumbs" role="group" aria-label="Choose a photo">
-            {% for p in photos %}<button type="button" data-index="{{ forloop.counter0 }}" aria-label="Show photo {{ forloop.counter }}"{% if forloop.first %} aria-current="true"{% endif %}><img src="{{ p.thumbnail.url }}" alt="" width="96" height="60" loading="lazy"></button>{% endfor %}
-          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#car-gallery" data-bs-slide="prev"><span class="gallery-arrow" aria-hidden="true"><i class="bi bi-chevron-left"></i></span><span class="visually-hidden">Previous photo</span></button>
+          <button class="carousel-control-next" type="button" data-bs-target="#car-gallery" data-bs-slide="next"><span class="gallery-arrow" aria-hidden="true"><i class="bi bi-chevron-right"></i></span><span class="visually-hidden">Next photo</span></button>
           {% endif %}
+          <span class="gallery-zoom" aria-hidden="true"><i class="bi bi-arrows-fullscreen"></i></span>
         </div>
-        <dialog class="lightbox" id="lightbox" aria-label="Photos of {{ car.name }}">
-          <img id="lightbox-img" alt="">
-          <p class="lightbox-count" aria-live="polite"></p>
-          <button type="button" class="icon-btn lightbox-close" data-close-lightbox aria-label="Close photos">
-            <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-          {% if photos|length > 1 %}
-          <button type="button" class="icon-btn lightbox-prev" aria-label="Previous photo">
-            <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <button type="button" class="icon-btn lightbox-next" aria-label="Next photo">
-            <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          {% endif %}
-        </dialog>
-        {% else %}
-        <div class="gallery gallery-empty"><img src="{% static 'img/car-placeholder.svg' %}" alt="" width="600" height="375"></div>
+        {% if photos|length > 1 %}
+        <div class="gallery-thumbs" role="group" aria-label="Choose a photo">
+          {% for p in photos %}<button type="button" data-bs-target="#car-gallery" data-bs-slide-to="{{ forloop.counter0 }}" data-gallery-thumb aria-label="Show photo {{ forloop.counter }}"{% if forloop.first %} aria-current="true"{% endif %}><img src="{{ p.thumbnail.url }}" alt="" width="96" height="60" loading="lazy"></button>{% endfor %}
+        </div>
         {% endif %}
-      </div>
 
-      <div class="car-info">
-        <p class="car-kicker">{{ car.get_category_display }} &middot; {{ car.location.name }}</p>
-        <h1>{{ car.name }}</h1>
-        <p class="car-price"><span class="plate">KES {{ car.price_per_day|intcomma }}</span> <span class="per">per day</span></p>
-        <ul class="spec-grid" aria-label="Specifications">
-          <li><strong>{{ car.seats }}</strong> seats</li>
-          <li><strong>{{ car.doors }}</strong> doors</li>
-          <li><strong>{{ car.luggage }}</strong> large bag{{ car.luggage|pluralize }}</li>
-          <li><strong>{{ car.get_transmission_display }}</strong></li>
-          <li><strong>{{ car.get_fuel_display }}</strong></li>
-          {% if car.engine_size %}<li><strong>{{ car.engine_size }}</strong> engine</li>{% endif %}
-          <li><strong>{% if car.air_con %}Air conditioning{% else %}No air conditioning{% endif %}</strong></li>
+        <div class="modal lightbox" id="lightbox" tabindex="-1" aria-label="Photos of {{ car.name }}" aria-hidden="true">
+          <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+              <div class="lightbox-bar">
+                <p class="lightbox-count" aria-live="polite"><span data-lightbox-count>1</span> / {{ photos|length }}</p>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close photos"></button>
+              </div>
+              <div id="lightbox-carousel" class="carousel slide" data-bs-interval="false" data-bs-touch="true">
+                <div class="carousel-inner">
+                  {% for p in photos %}<div class="carousel-item{% if forloop.first %} active{% endif %}"><img src="{{ p.image.url }}" alt="{{ car.name }}, photo {{ forloop.counter }}" loading="lazy"></div>{% endfor %}
+                </div>
+                {% if photos|length > 1 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#lightbox-carousel" data-bs-slide="prev"><span class="gallery-arrow" aria-hidden="true"><i class="bi bi-chevron-left"></i></span><span class="visually-hidden">Previous photo</span></button>
+                <button class="carousel-control-next" type="button" data-bs-target="#lightbox-carousel" data-bs-slide="next"><span class="gallery-arrow" aria-hidden="true"><i class="bi bi-chevron-right"></i></span><span class="visually-hidden">Next photo</span></button>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="car-gallery ratio ratio-16x10 gallery-empty"><img src="{% static 'img/car-placeholder.svg' %}" alt="" width="600" height="375"></div>
+        {% endif %}
+
+        <div class="car-intro">
+          <p class="car-kicker"><span class="badge car-category">{{ car.get_category_display }}</span><span><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ car.location.name }}</span></p>
+          <h1>{{ car.name }}</h1>
+          <p class="car-price d-lg-none"><span class="plate">KES {{ car.price_per_day|intcomma }}</span> <span class="per">/ day</span></p>
+        </div>
+
+        <h2 class="visually-hidden">Specifications</h2>
+        <ul class="row row-cols-2 row-cols-md-4 g-2 spec-grid">
+          <li class="col"><div class="spec"><i class="bi bi-people" aria-hidden="true"></i><strong>{{ car.seats }}</strong> seats</div></li>
+          <li class="col"><div class="spec"><i class="bi bi-gear" aria-hidden="true"></i><strong>{{ car.get_transmission_display }}</strong></div></li>
+          <li class="col"><div class="spec"><i class="bi bi-fuel-pump" aria-hidden="true"></i><strong>{{ car.get_fuel_display }}</strong></div></li>
+          <li class="col"><div class="spec"><i class="bi bi-suitcase" aria-hidden="true"></i><strong>{{ car.luggage }}</strong> large bag{{ car.luggage|pluralize }}</div></li>
+          <li class="col"><div class="spec"><i class="bi bi-door-closed" aria-hidden="true"></i><strong>{{ car.doors }}</strong> doors</div></li>
+          {% if car.engine_size %}<li class="col"><div class="spec"><i class="bi bi-speedometer2" aria-hidden="true"></i><strong>{{ car.engine_size }}</strong> engine</div></li>{% endif %}
+          <li class="col"><div class="spec"><i class="bi bi-snow" aria-hidden="true"></i><strong>{% if car.air_con %}Air con{% else %}No air con{% endif %}</strong></div></li>
         </ul>
-        <button type="button" class="btn btn-primary btn-block book-btn btn-lg"
-          data-car-id="{{ car.pk }}" data-name="{{ car.name }}" data-city="{{ car.location.name }}" data-price="{{ car.price_per_day }}">
-          Choose dates and book
-        </button>
-        <p class="fine">Book with as little as <strong>KES {{ car.booking_fee|intcomma }}</strong> by M-Pesa and pay the rest when you pick up the car. Your booking is confirmed the moment you pay.</p>
 
-        <h2 class="car-h2">Prices</h2>
-        <table class="price-table">
-          <caption class="sr-only">Prices for the {{ car.name }}</caption>
-          <tbody>
-            {% for label, rate, note in prices %}
-            <tr><th scope="row">{{ label }}</th><td><strong>KES {{ rate|intcomma }}</strong> <span class="muted">{{ note }}</span></td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-        <p class="fine">Every started 24 hours counts as a day. Airport and delivery pick-ups and one-way returns are added when you book.</p>
-      </div>
-    </div>
+        {% if car.description %}
+        <h2 class="car-h2">About this car</h2>
+        <p class="car-desc">{{ car.description|linebreaksbr }}</p>
+        {% endif %}
 
-    <div class="car-more">
-      <div>
-        {% if car.description %}<h2 class="car-h2">About this car</h2><p>{{ car.description|linebreaksbr }}</p>{% endif %}
         {% if car.feature_labels %}
         <h2 class="car-h2">Features</h2>
-        <ul class="feature-list">{% for f in car.feature_labels %}<li>{{ f }}</li>{% endfor %}</ul>
+        <ul class="car-features">{% for f in car.feature_labels %}<li><i class="bi bi-check2" aria-hidden="true"></i>{{ f }}</li>{% endfor %}</ul>
         {% endif %}
-        <h2 class="car-h2">Where to collect it</h2>
-        <ul class="points">
-          {% for point in pickup_points %}<li><span>{{ point.name }}</span><strong>{% if point.fee %}+KES {{ point.fee|intcomma }}{% else %}Free{% endif %}</strong></li>
-          {% empty %}<li><span>{{ car.location.name }} branch</span><strong>Free</strong></li>{% endfor %}
-        </ul>
-      </div>
-      <div>
+
+        <h2 class="car-h2">Prices</h2>
+        <div class="card price-card">
+          <table class="table price-table">
+            <caption class="visually-hidden">Prices for the {{ car.name }}</caption>
+            <tbody>
+              {% for label, rate, note in prices %}
+              <tr><th scope="row">{{ label }}</th><td><strong>KES {{ rate|intcomma }}</strong> <span class="text-body-secondary">{{ note }}</span></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="fine">Every started 24 hours counts as a day. Airport and delivery pick-ups and one-way returns are added when you book.</p>
+
         <h2 class="car-h2">When it's free</h2>
-        <p class="muted small">Struck-through days are booked. Tap a free day to start booking from then.</p>
+        <p class="fine">Struck-through days are booked. Tap a free day to start booking from then.</p>
         <div class="rangecal rangecal-preview" id="availability-preview" data-car-id="{{ car.pk }}" data-today="{{ today|date:'Y-m-d' }}"></div>
+
+        <div class="row g-3 mt-2">
+          <div class="col-md-6">
+            <h2 class="car-h2">Where to collect it</h2>
+            <ul class="list-group">
+              {% for point in pickup_points %}<li class="list-group-item d-flex justify-content-between gap-3"><span>{{ point.name }}</span><strong>{% if point.fee %}+KES {{ point.fee|intcomma }}{% else %}Free{% endif %}</strong></li>
+              {% empty %}<li class="list-group-item d-flex justify-content-between"><span>{{ car.location.name }} branch</span><strong>Free</strong></li>{% endfor %}
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <h2 class="car-h2">The branch</h2>
+            <div class="card branch-info">
+              <div class="card-body">
+                <h3 class="h5"><i class="bi bi-buildings" aria-hidden="true"></i>{{ car.location.name }}</h3>
+                <p class="branch-line"><i class="bi bi-geo-alt" aria-hidden="true"></i><span>{% if car.location.address %}{{ car.location.address }}{% else %}{{ car.location.city }}{% endif %}</span></p>
+                {% if car.location.opening_hours %}<p class="branch-line"><i class="bi bi-clock" aria-hidden="true"></i><span>{{ car.location.opening_hours }}</span></p>{% endif %}
+                <p class="branch-line"><i class="bi bi-telephone" aria-hidden="true"></i><a href="tel:{{ car.location.contact_phone }}">{{ car.location.contact_phone }}</a></p>
+                {% if car.location.maps_url %}<a class="btn btn-ghost btn-sm" href="{{ car.location.maps_url }}" target="_blank" rel="noopener"><i class="bi bi-map" aria-hidden="true"></i>Directions</a>{% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <aside class="card book-card d-none d-lg-block" aria-labelledby="book-card-title">
+          <div class="card-body">
+            <h2 class="visually-hidden" id="book-card-title">Book the {{ car.name }}</h2>
+            <p class="car-price"><span class="plate">KES {{ car.price_per_day|intcomma }}</span> <span class="per">/ day</span></p>
+            <form class="row g-2" data-quick-quote data-car-id="{{ car.pk }}" data-pickup-point="{{ pickup_points.0.pk|default:'' }}" data-time="{{ default_time|time:'H:i' }}" data-quote-url="{% url 'bookings:quote' %}">
+              <div class="col-6">
+                <label class="form-label" for="bc-from">Pick-up</label>
+                <input class="form-control" type="date" id="bc-from" name="from" value="{{ start|date:'Y-m-d' }}" min="{{ today|date:'Y-m-d' }}">
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="bc-to">Return</label>
+                <input class="form-control" type="date" id="bc-to" name="to" value="{{ end|date:'Y-m-d' }}" min="{{ today|date:'Y-m-d' }}">
+              </div>
+            </form>
+            <p class="book-total" aria-live="polite" data-quote-total>{{ days }} day{{ days|pluralize }}</p>
+            <button type="button" class="btn btn-primary btn-lg w-100 book-btn" data-book-main data-from="{{ start|date:'Y-m-d' }}" data-to="{{ end|date:'Y-m-d' }}"
+              data-car-id="{{ car.pk }}" data-name="{{ car.name }}" data-city="{{ car.location.name }}" data-price="{{ car.price_per_day }}">Book now</button>
+            <p class="fine mb-0">Book with as little as <strong>KES {{ car.booking_fee|intcomma }}</strong> and pay the rest when you pick up the car. Your booking is confirmed the moment you pay.</p>
+          </div>
+        </aside>
       </div>
     </div>
 
     {% if others %}
-    <h2 class="car-h2">More cars in {{ car.location.name }}</h2>
-    <ul class="car-grid car-grid-small">
-      {% for other in others %}
-      {% with cover=other.cover %}
-      <li class="car mini-car">
-        <a href="{{ other.get_absolute_url }}">
-          <img src="{% if cover %}{{ cover.thumbnail.url }}{% else %}{% static 'img/car-placeholder.svg' %}{% endif %}" alt="" loading="lazy" width="600" height="375">
-          <span><strong>{{ other.name }}</strong> from KES {{ other.price_per_day|intcomma }} a day</span>
-        </a>
-      </li>
-      {% endwith %}
-      {% endfor %}
-    </ul>
+    <section class="more-cars" aria-labelledby="more-title">
+      <h2 class="car-h2" id="more-title">More cars in {{ car.location.name }}</h2>
+      <ul class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 car-grid">
+        {% for other in others %}
+        {% with cover=other.cover %}
+        <li class="col">
+          <a class="card mini-car h-100" href="{{ other.get_absolute_url }}">
+            <span class="ratio ratio-16x10"><img src="{% if cover %}{{ cover.thumbnail.url }}{% else %}{% static 'img/car-placeholder.svg' %}{% endif %}" alt="" loading="lazy" width="600" height="375"></span>
+            <span class="card-body"><strong>{{ other.name }}</strong><span class="plate plate-sm">KES {{ other.price_per_day|intcomma }}</span> <span class="text-body-secondary">/ day</span></span>
+          </a>
+        </li>
+        {% endwith %}
+        {% endfor %}
+      </ul>
+    </section>
     {% endif %}
   </div>
-</section>
+</div>
+
+<div class="bookbar d-lg-none" role="region" aria-label="Book this car">
+  <div class="bookbar-price">
+    <span class="plate plate-sm">KES {{ car.price_per_day|intcomma }}</span> <span class="per">/ day</span>
+    <small data-quote-total>{{ days }} day{{ days|pluralize }}</small>
+  </div>
+  <button type="button" class="btn btn-primary book-btn" data-from="{{ start|date:'Y-m-d' }}" data-to="{{ end|date:'Y-m-d' }}"
+    data-car-id="{{ car.pk }}" data-name="{{ car.name }}" data-city="{{ car.location.name }}" data-price="{{ car.price_per_day }}">Book now</button>
+</div>
 
 {% include "fleet/_booking_dialog.html" %}
 {% endblock %}
