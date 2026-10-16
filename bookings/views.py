@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 from datetime import timezone as dt_timezone
 
 from django.conf import settings
-from django.db import transaction
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -12,20 +11,16 @@ from django.views.decorators.http import require_GET, require_POST
 
 from fleet.models import Car
 from fleet.utils import parse_date
-from payments.payhero import PayHeroError
 
 from . import tokens
-from .models import Booking, BookingEvent, BookingExtra, log_event
-from .pricing import QuoteError, kes, quote
+from .models import Booking
+from .pricing import QuoteError, quote
 from .receipts import build_pdf, receipt_address
-from .services import check_pending_payment, start_payment
+from .services import BookingRequestError, check_dates, check_pending_payment, place_booking, retry_booking_payment
 from .utils import normalize_phone, rate_limited
-from .validation import clean_customer
 
 logger = logging.getLogger(__name__)
 
-PROMPT_FAILED = "We couldn't send the M-Pesa prompt. Check the phone number and try again."
-MAX_DAYS_AHEAD = 365
 
 
 def _error(message, status=400, **extra):
@@ -35,17 +30,6 @@ def _error(message, status=400, **extra):
 def _bookable_car(car_id):
     return (Car.objects.select_related('location')
             .filter(pk=car_id, is_active=True, location__is_active=True).first())
-
-
-def _dates(start, end):
-    """Validates the date pair itself; quote() handles times, length and prices."""
-    if not start or not end:
-        raise QuoteError('Choose your pick-up and return dates.', field='pickup_date')
-    today = timezone.localdate()
-    if start < today:
-        raise QuoteError("The pick-up date has passed. Choose today or a later date.", field='pickup_date')
-    if start > today + timedelta(days=MAX_DAYS_AHEAD):
-        raise QuoteError('Bookings open up to one year ahead. Choose an earlier pick-up date.', field='pickup_date')
 
 
 def _booking_json(request, booking):
@@ -67,7 +51,7 @@ def quote_view(request):
     start = parse_date(request.GET.get('from'))
     end = parse_date(request.GET.get('to'))
     try:
-        _dates(start, end)
+        check_dates(start, end)
         result = quote(car, start, end, request.GET.get('pickup_point'), request.GET.get('return_location'),
                        extras=request.GET.getlist('extras') or request.GET.get('extras'),
                        pickup_time=request.GET.get('pickup_time'), return_time=request.GET.get('return_time'))
@@ -86,70 +70,20 @@ def quote_view(request):
 def create_booking(request):
     if rate_limited(request, 'book', limit=6, window_seconds=300):
         return _error('Too many booking attempts. Wait a few minutes and try again.', 429)
-
     try:
         data = json.loads(request.body or b'{}')
-        car_id = int(data.get('car_id'))
-    except (ValueError, TypeError):
-        return _error('Choose a car to book.')
-
-    car = _bookable_car(car_id)
-    if not car:
-        return _error('That car is no longer available. Refresh the page and pick another.', 404)
-
-    # A car is only hired out from its own branch.
-    city = str(data.get('pickup_location') or '').strip()
-    if city and city not in (str(car.location_id), car.location.slug):
-        return _error(f'This car is at our {car.location.name} branch. Search {car.location.name} to book it, '
-                      'or pick a car in your city.', field='pickup_location')
-
-    start = parse_date(data.get('pickup_date'))
-    end = parse_date(data.get('return_date'))
+    except ValueError:
+        data = {}
+    if not isinstance(data, dict):
+        data = {}
     try:
-        customer = clean_customer(data)
-        _dates(start, end)
-    except QuoteError as exc:
-        return _error(exc.message, field=exc.field)
-
-    with transaction.atomic():
-        car = Car.objects.select_for_update().select_related('location').get(pk=car.pk)
-        # Priced inside the lock from the database only: any amount or day count the browser sends is ignored.
-        try:
-            price = quote(car, start, end, data.get('pickup_point'), data.get('return_location'),
-                          extras=data.get('extras'), pickup_time=data.get('pickup_time'),
-                          return_time=data.get('return_time'))
-            pay_now = price.pay_now(data.get('pay_now'))
-        except QuoteError as exc:
-            return _error(exc.message, field=exc.field)
-        if not car.is_available(start, end):
-            return _error('This car was just booked for those dates. Try other dates or another car.', 409)
-        booking = Booking.objects.create(
-            car=car, **customer,
-            pickup_location=car.location, pickup_point=price.pickup_point, return_location=price.return_location,
-            pickup_date=start, pickup_time=price.start_time, return_date=end, return_time=price.end_time,
-            days=price.days, daily_rate=price.daily_rate, rate_type=price.rate_type,
-            pickup_fee=price.pickup_fee, one_way_fee=price.one_way_fee, extras_amount=price.extras,
-            amount=price.total, pay_now=pay_now, payment_requested_at=timezone.now(),
-        )
-        BookingExtra.objects.bulk_create([
-            BookingExtra(booking=booking, extra=extra, name=extra.name, price=extra.price, per_day=extra.per_day,
-                         amount=amount)
-            for extra, amount in price.extra_items
-        ])
-        log_event(booking, BookingEvent.Kind.CREATED,
-                  f'Booked on the website: {price.days} days, {kes(price.total)}'
-                  + (f'; paying {kes(pay_now)} now, {kes(price.total - pay_now)} at pick-up' if pay_now < price.total else ''))
+        booking = place_booking(data, channel='website')
+    except BookingRequestError as exc:
+        if exc.booking:   # saved, but the M-Pesa prompt failed: the customer can retry from the popup
+            tokens.remember(request, exc.booking)
+            return _error(exc.message, exc.status, booking=_booking_json(request, exc.booking))
+        return _error(exc.message, exc.status, **({'field': exc.field} if exc.field else {}))
     tokens.remember(request, booking)
-
-    try:
-        start_payment(booking)
-    except PayHeroError as exc:
-        logger.warning('STK push failed for %s: %s', booking.ref, exc)
-        booking.status = Booking.Status.FAILED
-        booking.result_desc = str(exc)[:255]
-        booking.save(update_fields=['status', 'result_desc', 'updated_at'])
-        return _error(PROMPT_FAILED, 502, booking=_booking_json(request, booking))
-
     return JsonResponse({'booking': _booking_json(request, booking)}, status=201)
 
 
@@ -164,32 +98,13 @@ def booking_status(request, ref):
 def retry_payment(request, ref):
     if rate_limited(request, f'retry:{ref}', limit=4, window_seconds=600):
         return _error('Too many attempts. Wait a few minutes, or chat with us for help.', 429)
-
     booking = get_object_or_404(Booking.objects.with_details(), ref=ref)
-    if booking.status not in (Booking.Status.PENDING, Booking.Status.FAILED):
-        return JsonResponse({'booking': _booking_json(request, booking)})
-    if booking.created_at < timezone.now() - timedelta(hours=1):
-        return _error('This booking has expired. Start a new booking.', 410)
-    if booking.pickup_date < timezone.localdate():
-        return _error('The pick-up date has passed. Start a new booking.', 410)
-
-    with transaction.atomic():
-        car = type(booking.car).objects.select_for_update().get(pk=booking.car_id)
-        if not car.is_available(booking.pickup_date, booking.return_date, exclude=booking):
-            return _error('Sorry, someone else booked this car for those dates. Try another car.', 409)
-        booking.status = Booking.Status.PENDING
-        booking.payment_requested_at = timezone.now()
-        booking.save(update_fields=['status', 'payment_requested_at', 'updated_at'])
-
     try:
-        start_payment(booking)
-    except PayHeroError as exc:
-        logger.warning('STK retry failed for %s: %s', booking.ref, exc)
-        booking.status = Booking.Status.FAILED
-        booking.result_desc = str(exc)[:255]
-        booking.save(update_fields=['status', 'result_desc', 'updated_at'])
-        return _error(PROMPT_FAILED, 502, booking=_booking_json(request, booking))
-
+        booking = retry_booking_payment(booking)
+    except BookingRequestError as exc:
+        if exc.booking:
+            return _error(exc.message, exc.status, booking=_booking_json(request, exc.booking))
+        return _error(exc.message, exc.status)
     return JsonResponse({'booking': _booking_json(request, booking)})
 
 

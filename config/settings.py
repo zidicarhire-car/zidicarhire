@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'chat',
     'dashboard',
     'pages',
+    'api',
 ]
 
 MIDDLEWARE = [

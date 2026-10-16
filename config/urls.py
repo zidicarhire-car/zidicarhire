@@ -15,6 +15,7 @@ def to_dashboard(request, rest=''):
 
 urlpatterns = [
     path('django-admin/', admin.site.urls),
+    path('api/v1/', include('api.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('admin/', to_dashboard),
     path('admin/<path:rest>', to_dashboard),
