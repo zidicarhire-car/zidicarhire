@@ -10,6 +10,7 @@ from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 
 from fleet import brand
+from fleet.models import Location
 
 PAGE_W, PAGE_H = A4
 MARGIN = 18 * mm
@@ -69,6 +70,20 @@ def _when(day, at):
     return f'{day:%a} {day.day} {day:%b %Y}, {at:%H:%M}'
 
 
+RECEIPT_BRANCH = 'nairobi'   # receipts carry the Nairobi office's address
+
+
+def receipt_address():
+    """The address printed on receipts: the Nairobi branch's (Dashboard > Locations), else BUSINESS_ADDRESS."""
+    office = Location.objects.filter(slug=RECEIPT_BRANCH).first()
+    if office is None:
+        return settings.BUSINESS['address']
+    address = office.address.strip()
+    if office.city and office.city.lower() not in address.lower():
+        address = f'{address}, {office.city}' if address else office.city
+    return address
+
+
 def build_pdf(booking):
     biz = settings.BUSINESS
     buf = BytesIO()
@@ -86,7 +101,7 @@ def build_pdf(booking):
     c.drawString(MARGIN, y, biz['name'])
     c.setFont('Helvetica', 9)
     c.setFillColor(MUTED)
-    details = [biz['address'], f'Phone {biz["phone"]}' if biz['phone'] else '', biz['email'],
+    details = [receipt_address(), f'Phone {biz["phone"]}' if biz['phone'] else '', biz['email'],
                f'KRA PIN {biz["kra_pin"]}' if biz['kra_pin'] else '',
                f'M-Pesa till {biz["till_number"]}' if biz['till_number'] else '']
     for line in filter(None, details):

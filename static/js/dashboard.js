@@ -73,16 +73,37 @@
   async function refreshLive() {
     const box = document.querySelector('[data-live]');
     if (!box || refreshing || document.querySelector('.modal.show, .dropdown-menu.show, .offcanvas.show')) return;
-    if (box.contains(document.activeElement)) return;   // don't pull the page from under the keyboard
+    const focused = box.contains(document.activeElement) ? document.activeElement : null;
+    if (focused && focused.matches('input, textarea, select')) return;   // don't pull the page from under the keyboard
     refreshing = true;
     try {
       const url = new URL(location.href);
       url.searchParams.set('partial', '1');
       const res = await fetch(url, { credentials: 'same-origin' });
-      if (res.ok && !res.redirected) box.innerHTML = await res.text();
+      if (res.ok && !res.redirected) {
+        box.innerHTML = await res.text();
+        restoreTodayTab();
+        if (focused?.id) document.getElementById(focused.id)?.focus();
+      }
     } catch (e) { /* try again on the next change */ }
     refreshing = false;
   }
+
+  /* Overview tabs: the one the staff member chose (kept across live updates), else the first with something in it. */
+  const TAB_KEY = 'zch-today-tab';
+  function restoreTodayTab() {
+    const tabs = [...document.querySelectorAll('.today-tab')];
+    if (!tabs.length) return;
+    let saved = null;
+    try { saved = sessionStorage.getItem(TAB_KEY); } catch (e) { /* storage blocked */ }
+    const pick = tabs.find((t) => t.id === saved) || tabs.find((t) => t.dataset.count !== '0') || tabs[0];
+    if (!pick.classList.contains('active')) bs.Tab.getOrCreateInstance(pick).show();
+  }
+  document.addEventListener('shown.bs.tab', (e) => {
+    if (!e.target.classList.contains('today-tab')) return;
+    try { sessionStorage.setItem(TAB_KEY, e.target.id); } catch (err) { /* storage blocked */ }
+  });
+  restoreTodayTab();
 
   /* ---------- Feed (runs on every dashboard page) ---------- */
   async function feed() {

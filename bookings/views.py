@@ -17,7 +17,7 @@ from payments.payhero import PayHeroError
 from . import tokens
 from .models import Booking, BookingEvent, BookingExtra, log_event
 from .pricing import QuoteError, kes, quote
-from .receipts import build_pdf
+from .receipts import build_pdf, receipt_address
 from .services import check_pending_payment, start_payment
 from .utils import normalize_phone, rate_limited
 from .validation import clean_customer
@@ -233,7 +233,8 @@ def receipt_page(request, ref):
     problem = _receipt_problem(request, booking)
     if problem:
         return problem
-    return render(request, 'bookings/receipt.html', {'booking': booking, 'links': tokens.links(booking)})
+    return render(request, 'bookings/receipt.html', {'booking': booking, 'links': tokens.links(booking),
+                                                     'office_address': receipt_address()})
 
 
 FIND_LIMIT = 10  # lookups per IP per 10 minutes, so booking numbers can't be guessed

@@ -1,49 +1,91 @@
-{% load humanize %}{# Re-fetched by dashboard.js (?partial=1) when bookings change. #}
+{% load humanize %}{# Re-fetched by dashboard.js (?partial=1) when bookings change; the chosen tab is kept. #}
 <section aria-label="Summary">
-  <ul class="row row-cols-2 row-cols-lg-4 g-2 g-md-3 stat-row">
-    <li class="col"><div class="card stat"><span class="stat-icon" aria-hidden="true"><i class="bi bi-cash-coin"></i></span><span class="stat-num">KES {{ stats.revenue_today|intcomma }}</span><span class="stat-label">Paid today ({{ stats.paid_today }} booking{{ stats.paid_today|pluralize }})</span></div></li>
-    <li class="col"><div class="card stat"><span class="stat-icon" aria-hidden="true"><i class="bi bi-graph-up"></i></span><span class="stat-num">KES {{ stats.revenue_month|intcomma }}</span><span class="stat-label">Paid this month</span></div></li>
-    <li class="col"><div class="card stat"><span class="stat-icon" aria-hidden="true"><i class="bi bi-car-front"></i></span><span class="stat-num">{{ stats.on_the_road }}</span><span class="stat-label">Cars out now</span></div></li>
-    <li class="col"><div class="card stat"><span class="stat-icon stat-icon-warn" aria-hidden="true"><i class="bi bi-hourglass-split"></i></span><span class="stat-num">{{ stats.awaiting_payment }}</span><span class="stat-label">Waiting for payment</span></div></li>
-    {% if stats.returning %}<li class="col"><div class="card stat"><span class="stat-icon stat-icon-warn" aria-hidden="true"><i class="bi bi-signpost-split"></i></span><span class="stat-num">{{ stats.returning }}</span><span class="stat-label">One-way cars to move</span></div></li>{% endif %}
+  <ul class="row row-cols-2 row-cols-xl-4 g-2 g-md-3 stat-row">
+    <li class="col"><a class="card stat" href="{% url 'dashboard:bookings' %}?status=paid">
+      <span class="stat-icon" aria-hidden="true"><i class="bi bi-cash-coin"></i></span>
+      <span class="stat-num">KES {{ stats.revenue_today|intcomma }}</span>
+      <span class="stat-label">Paid today &middot; {{ stats.paid_today }} booking{{ stats.paid_today|pluralize }}</span>
+    </a></li>
+    <li class="col"><a class="card stat" href="{% url 'dashboard:reports' %}">
+      <span class="stat-icon" aria-hidden="true"><i class="bi bi-graph-up"></i></span>
+      <span class="stat-num">KES {{ stats.revenue_month|intcomma }}</span>
+      <span class="stat-label">Paid this month</span>
+    </a></li>
+    <li class="col"><a class="card stat" href="{% url 'dashboard:bookings' %}?status=picked_up">
+      <span class="stat-icon" aria-hidden="true"><i class="bi bi-car-front"></i></span>
+      <span class="stat-num">{{ stats.on_the_road }}</span>
+      <span class="stat-label">Cars out now</span>
+    </a></li>
+    <li class="col"><a class="card stat{% if stats.awaiting_payment %} stat-warn{% endif %}" href="{% url 'dashboard:bookings' %}?status=pending">
+      <span class="stat-icon" aria-hidden="true"><i class="bi bi-hourglass-split"></i></span>
+      <span class="stat-num">{{ stats.awaiting_payment }}</span>
+      <span class="stat-label">Waiting for payment</span>
+    </a></li>
   </ul>
+  {% if stats.returning %}
+  <a class="alert alert-warning returning-alert" href="{% url 'dashboard:cars' %}">
+    <i class="bi bi-signpost-split" aria-hidden="true"></i>
+    <span><strong>{{ stats.returning }} one-way car{{ stats.returning|pluralize }} to move.</strong> Mark {{ stats.returning|pluralize:"it,them" }} as arrived on the Cars page.</span>
+    <i class="bi bi-chevron-right ms-auto" aria-hidden="true"></i>
+  </a>
+  {% endif %}
 </section>
 
-<div class="row g-3 mb-3">
-  <section class="col-md-6">
-    <div class="card h-100 list-card">
-      <h2 class="list-card-title"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Pick-ups today <span class="count">{{ pickups|length }}</span></h2>
+<section class="card list-card today-card" aria-labelledby="today-title">
+  <h2 class="visually-hidden" id="today-title">Today's work</h2>
+  <div class="today-tabs" role="tablist" aria-label="Today's work">
+    <button class="today-tab active" id="today-tab-pickups" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#today-pickups" aria-controls="today-pickups" aria-selected="true" data-count="{{ pickups|length }}">
+      <i class="bi bi-box-arrow-right" aria-hidden="true"></i>Pick-ups<span class="tab-count">{{ pickups|length }}</span></button>
+    <button class="today-tab" id="today-tab-returns" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#today-returns" aria-controls="today-returns" aria-selected="false" tabindex="-1" data-count="{{ returns|length }}">
+      <i class="bi bi-box-arrow-in-left" aria-hidden="true"></i>Returns<span class="tab-count">{{ returns|length }}</span></button>
+    <button class="today-tab" id="today-tab-out" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#today-out" aria-controls="today-out" aria-selected="false" tabindex="-1" data-count="{{ out|length }}">
+      <i class="bi bi-car-front" aria-hidden="true"></i>Out now<span class="tab-count">{{ out|length }}</span></button>
+    <button class="today-tab" id="today-tab-waiting" type="button" role="tab" data-bs-toggle="tab" data-bs-target="#today-waiting" aria-controls="today-waiting" aria-selected="false" tabindex="-1" data-count="{{ awaiting|length }}">
+      <i class="bi bi-hourglass-split" aria-hidden="true"></i>Waiting<span class="tab-count">{{ awaiting|length }}</span></button>
+  </div>
+  <div class="tab-content">
+    <div class="tab-pane show active" id="today-pickups" role="tabpanel" aria-labelledby="today-tab-pickups" tabindex="0">
       {% if pickups %}<ul class="list-group list-group-flush bk-list">{% for b in pickups %}{% include "dashboard/_booking_item.html" with when="pickup" %}{% endfor %}</ul>
-      {% else %}<p class="list-card-empty">No pick-ups today.</p>{% endif %}
+      {% else %}<p class="list-card-empty"><i class="bi bi-cup-hot" aria-hidden="true"></i>No pick-ups today.</p>{% endif %}
     </div>
-  </section>
-  <section class="col-md-6">
-    <div class="card h-100 list-card">
-      <h2 class="list-card-title"><i class="bi bi-box-arrow-in-left" aria-hidden="true"></i>Returns today <span class="count">{{ returns|length }}</span></h2>
+    <div class="tab-pane" id="today-returns" role="tabpanel" aria-labelledby="today-tab-returns" tabindex="0">
       {% if returns %}<ul class="list-group list-group-flush bk-list">{% for b in returns %}{% include "dashboard/_booking_item.html" with when="return" %}{% endfor %}</ul>
-      {% else %}<p class="list-card-empty">No returns today.</p>{% endif %}
+      {% else %}<p class="list-card-empty"><i class="bi bi-cup-hot" aria-hidden="true"></i>No returns today.</p>{% endif %}
     </div>
-  </section>
-  <section class="col-md-6">
-    <div class="card h-100 list-card">
-      <h2 class="list-card-title"><i class="bi bi-car-front" aria-hidden="true"></i>Cars out now <span class="count">{{ out|length }}</span></h2>
+    <div class="tab-pane" id="today-out" role="tabpanel" aria-labelledby="today-tab-out" tabindex="0">
       {% if out %}<ul class="list-group list-group-flush bk-list">{% for b in out %}{% include "dashboard/_booking_item.html" %}{% endfor %}</ul>
-      {% else %}<p class="list-card-empty">No cars are out right now.</p>{% endif %}
+      {% else %}<p class="list-card-empty"><i class="bi bi-p-circle" aria-hidden="true"></i>No cars are out right now.</p>{% endif %}
     </div>
-  </section>
-  <section class="col-md-6">
-    <div class="card h-100 list-card">
-      <h2 class="list-card-title"><i class="bi bi-hourglass-split" aria-hidden="true"></i>Waiting for payment <span class="count">{{ awaiting|length }}</span></h2>
+    <div class="tab-pane" id="today-waiting" role="tabpanel" aria-labelledby="today-tab-waiting" tabindex="0">
       {% if awaiting %}<ul class="list-group list-group-flush bk-list">{% for b in awaiting %}{% include "dashboard/_booking_item.html" %}{% endfor %}</ul>
-      {% else %}<p class="list-card-empty">Nobody is paying right now.</p>{% endif %}
+      {% else %}<p class="list-card-empty"><i class="bi bi-check2-circle" aria-hidden="true"></i>Nobody is paying right now.</p>{% endif %}
     </div>
-  </section>
-</div>
+  </div>
+</section>
 
-<section class="card list-card">
-  <h2 class="list-card-title"><i class="bi bi-clock-history" aria-hidden="true"></i>Latest bookings</h2>
+<section class="card list-card" aria-labelledby="latest-title">
+  <div class="list-card-head">
+    <h2 class="list-card-title" id="latest-title"><i class="bi bi-clock-history" aria-hidden="true"></i>Latest bookings</h2>
+    <a class="btn btn-ghost btn-sm" href="{% url 'dashboard:bookings' %}">See all<i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+  </div>
   {% if latest %}
-  <ul class="list-group list-group-flush bk-list bk-list-wide">{% for b in latest %}{% include "dashboard/_booking_item.html" %}{% endfor %}</ul>
-  <p class="list-card-more"><a class="btn btn-ghost btn-sm" href="{% url 'dashboard:bookings' %}">See all bookings<i class="bi bi-arrow-right" aria-hidden="true"></i></a></p>
-  {% else %}<p class="list-card-empty">No bookings yet. They appear here the moment a customer starts paying.</p>{% endif %}
+  <div class="table-responsive d-none d-md-block">
+    <table class="table table-hover latest-table">
+      <thead><tr><th scope="col">Booking</th><th scope="col">Customer</th><th scope="col">Car and dates</th><th scope="col" class="num">Amount</th><th scope="col">Status</th><th scope="col"><span class="visually-hidden">Call</span></th></tr></thead>
+      <tbody>
+        {% for b in latest %}
+        <tr>
+          <td><a class="plate plate-sm" href="{% url 'dashboard:booking_detail' b.ref %}">{{ b.ref }}</a><small>{{ b.created_at|date:"j M, H:i" }}</small></td>
+          <td>{{ b.customer_name }}{% if b.pickup_location and not view_location %}<small>{{ b.pickup_location.name }}</small>{% endif %}</td>
+          <td>{{ b.car.name }}<small>{{ b.pickup_date|date:"D j M" }} to {{ b.return_date|date:"D j M" }}</small></td>
+          <td class="num">KES {{ b.amount|intcomma }}{% if b.balance > 0 %}<small class="owes">Owes KES {{ b.balance|intcomma }}</small>{% endif %}</td>
+          <td><span class="status status-{{ b.status }}">{{ b.get_status_display }}</span></td>
+          <td class="row-actions"><a class="icon-btn" href="tel:{{ b.local_phone }}" aria-label="Call {{ b.customer_name }}"><i class="bi bi-telephone" aria-hidden="true"></i></a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <ul class="list-group list-group-flush bk-list d-md-none">{% for b in latest %}{% include "dashboard/_booking_item.html" %}{% endfor %}</ul>
+  {% else %}<p class="list-card-empty"><i class="bi bi-inbox" aria-hidden="true"></i>No bookings yet. They appear here the moment a customer starts paying.</p>{% endif %}
 </section>

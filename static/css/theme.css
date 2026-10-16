@@ -68,8 +68,9 @@
   --scrim: rgba(10, 13, 30, .6);
   --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%235A6380' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 
-  /* Type: Archivo variable (width 62-125%, weight 400-800) */
-  --font-sans: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  /* Type: Inter for text and headings; a narrow, heavy Archivo only for number plates */
+  --font-sans: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-plate: 'Archivo', 'Arial Narrow', Arial, sans-serif;
   --fs-display: clamp(2.25rem, 1.35rem + 4.5vw, 5rem);
   --fs-h1: clamp(1.75rem, 1.35rem + 2vw, 2.75rem);
   --fs-h2: clamp(1.375rem, 1.15rem + 1.1vw, 1.875rem);
@@ -78,15 +79,13 @@
   --fs-lead: clamp(1.0625rem, 1rem + .35vw, 1.2rem);
   --fs-small: .875rem;
   --fs-xs: .8125rem;
-  --wdth-display: 125%;
-  --wdth-wide: 115%;
-  --wdth-normal: 100%;
   --wdth-narrow: 70%;
   --fw-regular: 400;
-  --fw-medium: 550;
-  --fw-semibold: 650;
-  --fw-bold: 750;
-  --fw-black: 800;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 650;
+  --fw-black: 700;
+  --fw-plate: 800;
   --lh-tight: 1.1;
   --lh-snug: 1.3;
   --lh-body: 1.55;
@@ -250,18 +249,18 @@
 
 /* ===================================================================== Base */
 html { scroll-padding-top: calc(var(--header-h) + var(--space-4)); }
-body { min-height: 100dvh; overflow-x: clip; font-stretch: var(--wdth-normal); -webkit-font-smoothing: antialiased; }
+body { min-height: 100dvh; overflow-x: clip; }
 img, svg, video { max-width: 100%; }
 img { display: block; height: auto; }
 a { text-underline-offset: 3px; }
 ::selection { background: var(--plate); color: var(--plate-ink); }
 
 h1, h2, h3, h4, .h1, .h2, .h3, .h4 { margin: 0 0 var(--space-3); line-height: var(--lh-tight); font-weight: var(--fw-bold); text-wrap: balance; }
-h1, .h1 { font-size: var(--fs-h1); font-stretch: 118%; letter-spacing: -.01em; }
-h2, .h2 { font-size: var(--fs-h2); font-stretch: var(--wdth-wide); letter-spacing: -.01em; }
-h3, .h3 { font-size: var(--fs-h3); font-stretch: 110%; line-height: var(--lh-snug); }
-h4, .h4 { font-size: var(--fs-body); font-stretch: 110%; }
-.display { font-size: var(--fs-display); font-stretch: var(--wdth-display); font-weight: var(--fw-black); letter-spacing: -.02em; line-height: 1; }
+h1, .h1 { font-size: var(--fs-h1); font-weight: var(--fw-black); letter-spacing: -.02em; }
+h2, .h2 { font-size: var(--fs-h2); letter-spacing: -.015em; }
+h3, .h3 { font-size: var(--fs-h3); line-height: var(--lh-snug); letter-spacing: -.01em; }
+h4, .h4 { font-size: var(--fs-body); }
+.display { font-size: var(--fs-display); font-weight: var(--fw-black); letter-spacing: -.03em; line-height: 1.05; }
 .lead { font-size: var(--fs-lead); font-weight: var(--fw-regular); color: var(--text-muted); max-width: var(--measure); }
 small, .small { font-size: var(--fs-small); }
 strong, b { font-weight: var(--fw-bold); }
@@ -448,7 +447,7 @@ legend { float: none; width: auto; margin-bottom: .35rem; padding: 0; font-size:
 .plate {
   display: inline-block; background: var(--plate); color: var(--plate-ink);
   border: 2px solid var(--plate-ink); border-radius: var(--radius-sm); box-shadow: inset 0 0 0 2px var(--plate);
-  padding: .1em .55em; font-weight: var(--fw-black); font-stretch: var(--wdth-narrow); letter-spacing: .03em;
+  padding: .1em .55em; font-family: var(--font-plate); font-weight: var(--fw-plate); font-stretch: var(--wdth-narrow); letter-spacing: .03em;
   line-height: var(--lh-snug); white-space: nowrap; font-variant-numeric: tabular-nums;
 }
 .plate-sm { font-size: var(--fs-small); }
@@ -457,7 +456,7 @@ legend { float: none; width: auto; margin-bottom: .35rem; padding: 0; font-size:
 .plate-num {
   display: inline-grid; place-items: center; flex: none; min-width: 2.4rem; height: 2.2rem; padding: 0 .3rem;
   background: var(--plate); color: var(--plate-ink); border: 2px solid var(--plate-ink); border-radius: var(--radius-sm);
-  font-weight: var(--fw-black); font-stretch: var(--wdth-narrow); font-size: 1.3rem; line-height: 1;
+  font-family: var(--font-plate); font-weight: var(--fw-plate); font-stretch: var(--wdth-narrow); font-size: 1.3rem; line-height: 1;
 }
 
 /* Logo */

@@ -11,6 +11,7 @@ from fleet.test_utils import make_car, make_location, make_point, trip
 from .models import Booking
 from .notifications import notify_booking_paid
 from .receipts import build_pdf
+from . import tokens
 from .tokens import booking_token
 
 
@@ -85,16 +86,28 @@ class ReceiptAccessTests(TestCase):
 class ReceiptContentTests(TestCase):
     def test_pdf_contains_the_receipt_details(self):
         booking = paid_booking()
+        booking.pickup_location.address = 'Kenyatta Avenue'   # receipts show the Nairobi branch address
+        booking.pickup_location.save()
         pdf = build_pdf(booking)
         self.assertTrue(pdf.startswith(b'%PDF'))
         # ReportLab compresses page streams; check the text via the uncompressed version.
         with mock.patch('reportlab.rl_config.pageCompression', 0):
             raw = build_pdf(booking).decode('latin-1')
         for text in ('RECEIPT', booking.ref, 'SJK1ABC2DE', 'KRA PIN P051234567X', 'M-Pesa till 123456',
-                     'Moi Avenue, Nairobi', '0712 *** 678', 'Toyota Axio', 'Pick-up at JKIA', 'KES 15,000', 'PAID',
+                     'Kenyatta Avenue, Nairobi', '0712 *** 678', 'Toyota Axio', 'Pick-up at JKIA', 'KES 15,000', 'PAID',
                      'Thank you for hiring'):
             self.assertIn(text, raw)
         self.assertNotIn('254712345678', raw)
+        self.assertNotIn('Moi Avenue', raw)   # BUSINESS_ADDRESS is only the fallback
+
+    def test_printable_receipt_shows_the_nairobi_branch_address(self):
+        booking = paid_booking()
+        booking.pickup_location.address = 'Kenyatta Avenue'
+        booking.pickup_location.save()
+        page = self.client.get(tokens.links(booking)['receipt_page_url'])
+        office = page.content.decode().split('class="pr-biz"')[1].split('</p>')[0]   # the receipt's own address block
+        self.assertIn('Kenyatta Avenue, Nairobi', office)
+        self.assertNotIn('Moi Avenue', office)
 
     @override_settings(ADMIN_NOTIFY_EMAILS=['owner@example.com'], SITE_URL='https://www.zidicarhire.com')
     def test_confirmation_email_has_pdf_and_signed_link(self):

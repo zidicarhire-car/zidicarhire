@@ -1,9 +1,11 @@
 {% load humanize %}
 <li class="list-group-item bk-item">
   <a class="bk-link" href="{% url 'dashboard:booking_detail' b.ref %}">
-    <span class="bk-top"><strong class="mono-ref">{{ b.ref }}</strong> <span class="status status-{{ b.status }}">{{ b.get_status_display }}</span></span>
-    <span class="bk-main">{{ b.customer_name }} &middot; {{ b.car.name }}</span>
-    <span class="bk-sub">{% if when == 'pickup' %}Pick-up {{ b.pickup_time|time:"H:i" }}{% if b.pickup_point %}, {{ b.pickup_point.name }}{% endif %}{% elif when == 'return' %}Return {{ b.return_time|time:"H:i" }}{% if b.is_one_way %}, in {{ b.return_location.name }}{% endif %}{% else %}{{ b.pickup_date|date:"D j M" }} to {{ b.return_date|date:"D j M" }}{% endif %}{% if b.pickup_location and not view_location %} &middot; {{ b.pickup_location.name }}{% endif %} &middot; KES {{ b.amount|intcomma }}{% if b.balance > 0 %} &middot; <strong class="owes">owes KES {{ b.balance|intcomma }}</strong>{% endif %}</span>
+    <span class="bk-top"><span class="plate plate-sm">{{ b.ref }}</span> <span class="status status-{{ b.status }}">{{ b.get_status_display }}</span></span>
+    <span class="bk-main">{{ b.customer_name }}</span>
+    <span class="bk-sub"><i class="bi bi-car-front" aria-hidden="true"></i>{{ b.car.name }}{% if b.pickup_location and not view_location %}, {{ b.pickup_location.name }}{% endif %}</span>
+    <span class="bk-sub"><i class="bi {% if when %}bi-clock{% else %}bi-calendar3{% endif %}" aria-hidden="true"></i>{% if when == 'pickup' %}Pick-up at {{ b.pickup_time|time:"H:i" }}{% if b.pickup_point %}, {{ b.pickup_point.name }}{% endif %}{% elif when == 'return' %}Return at {{ b.return_time|time:"H:i" }}{% if b.is_one_way %}, in {{ b.return_location.name }}{% endif %}{% else %}{{ b.pickup_date|date:"D j M" }} to {{ b.return_date|date:"D j M" }}{% endif %}</span>
+    <span class="bk-money">KES {{ b.amount|intcomma }}{% if b.balance > 0 %} <strong class="owes">owes KES {{ b.balance|intcomma }}</strong>{% endif %}</span>
   </a>
   <a class="bk-call" href="tel:{{ b.local_phone }}" aria-label="Call {{ b.customer_name }}"><i class="bi bi-telephone" aria-hidden="true"></i></a>
 </li>

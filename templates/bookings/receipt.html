@@ -18,7 +18,7 @@
             <div>
               <img src="{% static 'img/zidicarhire-mark.svg' %}" alt="" width="120" height="50" class="pr-mark">
               <p class="pr-biz"><strong>{{ business.name }}</strong>
-                {% if business.address %}<br>{{ business.address }}{% endif %}
+                {% if office_address %}<br>{{ office_address }}{% endif %}
                 {% if business.phone %}<br>Phone {{ business.phone }}{% endif %}
                 {% if business.email %}<br>{{ business.email }}{% endif %}
                 {% if business.kra_pin %}<br>KRA PIN {{ business.kra_pin }}{% endif %}
