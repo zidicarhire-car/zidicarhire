@@ -1,6 +1,7 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -8,6 +9,7 @@ import { DatesSheet } from '@/components/dates-sheet';
 import { Button, Card, Chip, Icon, Plate, Row, SectionTitle, Text, type IconName } from '@/components/ui';
 import { useConfig } from '@/hooks/use-config';
 import { daysBetween, fmtDay, plural } from '@/lib/format';
+import { carsQuery } from '@/lib/queries';
 import { useSearch } from '@/state/search';
 import { radius, space, useColors } from '@/theme';
 
@@ -32,6 +34,12 @@ export default function Home() {
   const [picking, setPicking] = useState(false);
   const branches = config?.branches ?? [];
   const days = daysBetween(search.from, search.to);
+  const qc = useQueryClient();
+
+  // Start loading the car list for this city and these dates now, so the Cars tab opens with it ready.
+  useEffect(() => {
+    qc.prefetchQuery(carsQuery({ city: search.city, from: search.from, to: search.to }));
+  }, [qc, search.city, search.from, search.to]);
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ paddingBottom: space.xxl }}>

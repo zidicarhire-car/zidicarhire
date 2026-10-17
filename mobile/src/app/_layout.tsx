@@ -4,9 +4,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 
+import { keepWarmCache, restoreWarmCache } from '@/lib/warm-cache';
 import { SearchProvider } from '@/state/search';
 import { StaffProvider } from '@/state/staff';
 import { fonts, useColors } from '@/theme';
@@ -14,19 +15,24 @@ import { fonts, useColors } from '@/theme';
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } });
+// Last car lists and settings from the phone, read while the splash screen shows.
+const warm = restoreWarmCache(queryClient).then(() => { keepWarmCache(queryClient); });
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, ArchivoNarrow_700Bold,
   });
+  const [cacheReady, setCacheReady] = useState(false);
   const scheme = useColorScheme();
   const c = useColors();
 
+  useEffect(() => { warm.finally(() => setCacheReady(true)); }, []);
+  const ready = (loaded || !!error) && cacheReady;
   useEffect(() => {
-    if (loaded || error) SplashScreen.hideAsync();
-  }, [loaded, error]);
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
 
-  if (!loaded && !error) return null;
+  if (!ready) return null;
 
   const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
   const navTheme = { ...base, colors: { ...base.colors, primary: c.text, background: c.bg, card: c.surface, text: c.text, border: c.border } };

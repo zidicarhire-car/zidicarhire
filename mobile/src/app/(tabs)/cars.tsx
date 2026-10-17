@@ -6,9 +6,8 @@ import { CarCard } from '@/components/car-card';
 import { DatesSheet } from '@/components/dates-sheet';
 import { Button, Chip, EmptyState, ErrorText, Icon, Loading, Row, Text } from '@/components/ui';
 import { useConfig } from '@/hooks/use-config';
-import { get } from '@/lib/api';
 import { daysBetween, fmtDay, plural } from '@/lib/format';
-import type { CarList } from '@/lib/types';
+import { carsQuery } from '@/lib/queries';
 import { useSearch } from '@/state/search';
 import { radius, space, useColors } from '@/theme';
 
@@ -21,11 +20,9 @@ export default function Cars() {
   const [transmission, setTransmission] = useState('');
   const [sort, setSort] = useState('recommended');
 
-  const params = { city: search.city, from: search.from, to: search.to, category, transmission, sort };
-  const { data, isLoading, error, refetch, isRefetching } = useQuery({
-    queryKey: ['cars', params],
-    queryFn: () => get<CarList>('cars/', { params }),
-  });
+  const { data, isLoading, error, refetch, isRefetching } = useQuery(
+    carsQuery({ city: search.city, from: search.from, to: search.to, category, transmission, sort }),
+  );
   const branch = config?.branches.find((b) => b.slug === search.city);
 
   const header = (

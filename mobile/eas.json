@@ -10,12 +10,19 @@
     },
     "preview": {
       "distribution": "internal",
-      "android": { "buildType": "apk" },
-      "env": { "EXPO_PUBLIC_API_URL": "https://www.zidicarhire.com" }
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://www.zidicarhire.com"
+      },
+      "autoIncrement": true
     },
     "production": {
       "autoIncrement": true,
-      "env": { "EXPO_PUBLIC_API_URL": "https://www.zidicarhire.com" }
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://www.zidicarhire.com"
+      }
     }
   },
   "submit": {
