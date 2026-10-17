@@ -33,6 +33,43 @@ class StaticPagesTests(TestCase):
         self.assertContains(res, 'Find my booking', status_code=404)
 
 
+ANDROID = 'Mozilla/5.0 (Linux; Android 14; SM-A155F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36'
+WINDOWS = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'
+IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile Safari/604.1'
+APK, EXE = 'https://example.com/ZidiCarHire.apk', 'https://example.com/ZidiCarHire-Setup.exe'
+
+
+@override_settings(APP_ANDROID_URL=APK, APP_WINDOWS_URL=EXE)
+class GetTheAppTests(TestCase):
+    def home(self, ua, **cookies):
+        for k, v in cookies.items():
+            self.client.cookies[k] = v
+        return self.client.get('/', HTTP_USER_AGENT=ua)
+
+    def test_strip_matches_the_visitors_device(self):
+        self.assertContains(self.home(ANDROID), 'For Android.')
+        self.assertContains(self.home(WINDOWS), 'For Windows.')
+        self.assertNotContains(self.home(IPHONE), 'id="app-strip"')
+
+    def test_strip_stays_hidden_once_closed_or_inside_the_desktop_app(self):
+        self.assertNotContains(self.home(ANDROID, app_strip='off'), 'id="app-strip"')
+        self.assertNotContains(self.home(WINDOWS + ' ZidiCarHireDesktop/1.0.0'), 'id="app-strip"')
+
+    @override_settings(APP_ANDROID_URL='', APP_WINDOWS_URL='')
+    def test_nothing_is_offered_without_download_links(self):
+        res = self.home(ANDROID)
+        self.assertNotContains(res, 'id="app-strip"')
+        self.assertNotContains(res, 'Get the app')
+        self.assertContains(self.client.get('/app/'), 'Coming soon')
+
+    def test_app_page_has_both_downloads_and_no_strip(self):
+        res = self.client.get('/app/', HTTP_USER_AGENT=ANDROID)
+        self.assertContains(res, f'href="{APK}"')
+        self.assertContains(res, f'href="{EXE}"')
+        self.assertContains(res, 'install unknown apps')
+        self.assertNotContains(res, 'id="app-strip"')
+
+
 @override_settings(ADMIN_NOTIFY_EMAILS=['owner@example.com'])
 class ContactFormTests(TestCase):
     def post(self, **data):

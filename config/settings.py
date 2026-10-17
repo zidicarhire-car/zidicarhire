@@ -183,6 +183,10 @@ BUSINESS = {
     'till_name': MPESA_ACCOUNT_NAME,
 }
 
+# Download links for the apps, e.g. files on a GitHub release. Empty hides the "Get the app" strip for that platform.
+APP_ANDROID_URL = env_str('APP_ANDROID_URL')
+APP_WINDOWS_URL = env_str('APP_WINDOWS_URL')
+
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True

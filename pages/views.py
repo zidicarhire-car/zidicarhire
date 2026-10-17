@@ -37,6 +37,10 @@ def faq_page(request):
     return render(request, 'pages/faq.html', {'faq': items, 'jsonld': faq_jsonld(items)})
 
 
+def get_app(request):
+    return render(request, 'pages/app.html')
+
+
 def terms(request):
     return render(request, 'pages/terms.html')
 

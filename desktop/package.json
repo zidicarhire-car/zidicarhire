@@ -1,0 +1,53 @@
+{
+  "name": "zidicarhire-desktop",
+  "productName": "ZidiCarHire",
+  "version": "1.0.0",
+  "description": "ZIDICARHIRE car hire for Windows: book cars, pay with M-Pesa and run the staff dashboard.",
+  "author": "ZIDICARHIRE",
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "^44.9.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.zidicarhire.desktop",
+    "productName": "ZidiCarHire",
+    "copyright": "ZIDICARHIRE",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "build/icon.ico",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "ZidiCarHire",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "artifactName": "ZidiCarHire-Setup-${version}.${ext}"
+    }
+  }
+}

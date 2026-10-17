@@ -143,5 +143,12 @@
     if (link && window.bootstrap) window.bootstrap.Offcanvas.getInstance(link.closest('.offcanvas'))?.hide();
   });
 
+  /* "Get the app" strip: closing it hides it for 30 days (a cookie, so the server stops rendering it). */
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('[data-app-strip-close]')) return;
+    document.cookie = `app_strip=off; max-age=${60 * 60 * 24 * 30}; path=/; samesite=lax`;
+    document.getElementById('app-strip')?.remove();
+  });
+
   window.ZCH = { api, esc, kes, store, poll, busy, toast, applyTheme };
 })();

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Get the app | {{ business.name }}{% endblock %}
+{% block meta_description %}Get the {{ business.name }} app for Android or Windows. Book a car, pay with M-Pesa and keep your bookings in one place.{% endblock %}
+{% block head %}<link rel="canonical" href="{{ site_url }}{% url 'pages:app' %}">{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container-xl">
+    <h1>Get the app</h1>
+    <p class="lead">Book a car, pay with M-Pesa and keep your bookings in one place. Same cars and prices as this website.</p>
+  </div>
+</section>
+<section class="page">
+  <div class="container-xl">
+    <div class="app-grid">
+      <article class="app-card{% if app_offer == 'android' %} is-yours{% endif %}" aria-labelledby="app-android">
+        <div class="app-card-head">
+          <span class="page-icon"><i class="bi bi-android2" aria-hidden="true"></i></span>
+          <div>
+            <h2 id="app-android">Android phones</h2>
+            <p class="text-muted">For customers and staff. Staff sign in from the More tab.</p>
+          </div>
+        </div>
+        {% if apps.android %}
+        <a class="btn btn-plate btn-lg w-100" href="{{ apps.android }}" rel="noopener"><i class="bi bi-download" aria-hidden="true"></i>Download for Android</a>
+        <h3 class="app-steps-h">How to install</h3>
+        <ol class="app-steps">
+          <li>Tap <strong>Download for Android</strong> and open the file when it finishes.</li>
+          <li>If your phone asks, allow your browser to <strong>install unknown apps</strong>. This is normal for apps from outside the Play Store.</li>
+          <li>Tap <strong>Install</strong>, then open ZidiCarHire from your home screen.</li>
+        </ol>
+        {% else %}
+        <p class="app-soon"><i class="bi bi-hourglass-split" aria-hidden="true"></i>Coming soon. Until then, book on this website.</p>
+        {% endif %}
+      </article>
+
+      <article class="app-card{% if app_offer == 'windows' %} is-yours{% endif %}" aria-labelledby="app-windows">
+        <div class="app-card-head">
+          <span class="page-icon"><i class="bi bi-windows" aria-hidden="true"></i></span>
+          <div>
+            <h2 id="app-windows">Windows computers</h2>
+            <p class="text-muted">Book cars, and run the staff dashboard in its own window.</p>
+          </div>
+        </div>
+        {% if apps.windows %}
+        <a class="btn btn-plate btn-lg w-100" href="{{ apps.windows }}" rel="noopener"><i class="bi bi-download" aria-hidden="true"></i>Download for Windows</a>
+        <h3 class="app-steps-h">How to install</h3>
+        <ol class="app-steps">
+          <li>Click <strong>Download for Windows</strong> and open the installer.</li>
+          <li>If Windows shows <strong>Windows protected your PC</strong>, click <strong>More info</strong>, then <strong>Run anyway</strong>.</li>
+          <li>Follow the steps. ZidiCarHire is added to your Start menu and desktop.</li>
+        </ol>
+        {% else %}
+        <p class="app-soon"><i class="bi bi-hourglass-split" aria-hidden="true"></i>Coming soon. Until then, book on this website.</p>
+        {% endif %}
+      </article>
+    </div>
+
+    <p class="app-note"><i class="bi bi-apple" aria-hidden="true"></i>On an iPhone? Book on this website. To keep it handy, tap <strong>Share</strong> and then <strong>Add to Home Screen</strong>.</p>
+  </div>
+</section>
+{% endblock %}

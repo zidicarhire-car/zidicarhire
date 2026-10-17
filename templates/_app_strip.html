@@ -1,0 +1,12 @@
+{% load static %}<aside class="app-strip" id="app-strip" aria-label="Get the app">
+  <div class="container-xl app-strip-inner">
+    <img class="app-strip-icon" src="{% static 'img/app-icon.png' %}" alt="" width="40" height="40">
+    {% if app_offer == 'android' %}
+    <p><strong>ZidiCarHire app</strong><span>For Android. Book and pay faster, and keep your bookings on your phone.</span></p>
+    {% else %}
+    <p><strong>ZidiCarHire app</strong><span>For Windows. Book cars and run the staff dashboard from your desktop.</span></p>
+    {% endif %}
+    <a class="btn btn-plate btn-sm" href="{% url 'pages:app' %}">Get the app</a>
+    <button type="button" class="icon-btn app-strip-close" data-app-strip-close aria-label="Hide the app suggestion"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+  </div>
+</aside>
