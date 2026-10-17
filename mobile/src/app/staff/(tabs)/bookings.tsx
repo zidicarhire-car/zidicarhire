@@ -42,11 +42,11 @@ export default function StaffBookings() {
       <View style={{ padding: space.lg, gap: space.sm, backgroundColor: c.surface, borderBottomWidth: 1, borderBottomColor: c.border }}>
         <Row gap={space.sm} style={{ borderWidth: 1.5, borderColor: c.controlBorder, borderRadius: radius.md, paddingHorizontal: space.md, backgroundColor: c.bg }}>
           <Icon name="search" size={18} color={c.muted} />
-          <TextInput value={typed} onChangeText={setTyped} placeholder="Booking number, name, phone or M-Pesa code"
+          <TextInput value={typed} onChangeText={setTyped} placeholder="Ref, name, phone or M-Pesa code"
             placeholderTextColor={c.muted} autoCapitalize="none" autoCorrect={false} accessibilityLabel="Search bookings"
             style={{ flex: 1, minHeight: 46, fontSize: 16, fontFamily: fonts.regular, color: c.text }} />
         </Row>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+        <ScrollView horizontal style={{ flexGrow: 0 }} showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
           {STATUSES.map(([value, label]) => <Chip key={value} label={label} selected={status === value} onPress={() => setStatus(value)} />)}
         </ScrollView>
         {total !== undefined ? <Text variant="muted">{total} booking{total === 1 ? '' : 's'}</Text> : null}

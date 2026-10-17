@@ -49,7 +49,7 @@ export default function Home() {
       {/* Search card, overlapping the hero */}
       <Card style={{ marginHorizontal: space.lg, marginTop: -52, gap: space.md, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 16, elevation: 6 }}>
         <Text variant="label">City</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+        <ScrollView horizontal style={{ flexGrow: 0 }} showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
           {branches.map((b) => (
             <Chip key={b.slug} label={b.name} icon="location-outline" selected={search.city === b.slug} onPress={() => search.setCity(b.slug)} />
           ))}
@@ -80,7 +80,7 @@ export default function Home() {
 
         {/* Branches */}
         <SectionTitle>Our branches</SectionTitle>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.md }} style={{ marginHorizontal: -space.lg }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.md }} style={{ flexGrow: 0, marginHorizontal: -space.lg }}>
           <View style={{ width: space.lg - space.md }} />
           {branches.map((b) => (
             <Card key={b.slug} style={{ width: 240 }} onPress={() => { search.setCity(b.slug); router.navigate('/cars'); }}>

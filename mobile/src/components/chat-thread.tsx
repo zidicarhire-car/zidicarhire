@@ -3,11 +3,11 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { IconButton, Text } from '@/components/ui';
+import { Icon, IconButton, Text } from '@/components/ui';
 import type { ChatMessage } from '@/lib/types';
 import { fonts, radius, space, useColors } from '@/theme';
 
-export function ChatThread({ messages, mine, onSend, placeholder = 'Type a message', header, footer, error }: {
+export function ChatThread({ messages, mine, onSend, placeholder = 'Type a message', header, footer, error, empty }: {
   messages: ChatMessage[];
   /** Which sender is "me" (right-hand, indigo bubbles). */
   mine: (m: ChatMessage) => boolean;
@@ -16,6 +16,8 @@ export function ChatThread({ messages, mine, onSend, placeholder = 'Type a messa
   header?: ReactNode;
   footer?: ReactNode;
   error?: string;
+  /** Shown in the middle while there are no messages yet. */
+  empty?: string;
 }) {
   const c = useColors();
   const [text, setText] = useState('');
@@ -47,9 +49,18 @@ export function ChatThread({ messages, mine, onSend, placeholder = 'Type a messa
       {header}
       <FlatList
         ref={list}
+        style={{ flex: 1 }}
         data={messages}
         keyExtractor={(m) => String(m.id)}
-        contentContainerStyle={{ padding: space.lg, gap: space.sm }}
+        contentContainerStyle={{ padding: space.lg, gap: space.sm, flexGrow: 1 }}
+        ListEmptyComponent={empty ? (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.sm, padding: space.xl }}>
+            <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: c.tint, alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="chatbubbles-outline" size={26} color={c.text} />
+            </View>
+            <Text variant="muted" style={{ textAlign: 'center' }}>{empty}</Text>
+          </View>
+        ) : undefined}
         renderItem={({ item }) => {
           const me = mine(item);
           return (
@@ -70,7 +81,7 @@ export function ChatThread({ messages, mine, onSend, placeholder = 'Type a messa
       {footer}
       <SafeAreaView edges={['bottom']} style={{ backgroundColor: c.surface, borderTopWidth: 1, borderTopColor: c.border }}>
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: space.sm, padding: space.sm }}>
-          <TextInput value={text} onChangeText={setText} placeholder={placeholder} placeholderTextColor={c.muted} multiline maxLength={1000}
+          <TextInput value={text} onChangeText={setText} placeholder={placeholder} placeholderTextColor={c.placeholder} multiline maxLength={1000}
             accessibilityLabel="Message"
             style={{ flex: 1, minHeight: 44, maxHeight: 120, borderWidth: 1.5, borderColor: c.controlBorder, borderRadius: radius.md,
               paddingHorizontal: space.md, paddingTop: 11, fontSize: 16, fontFamily: fonts.regular, color: c.text, backgroundColor: c.bg }} />

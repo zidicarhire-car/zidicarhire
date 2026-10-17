@@ -30,7 +30,7 @@ export default function Cars() {
 
   const header = (
     <View style={{ gap: space.md, paddingBottom: space.sm }}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+      <ScrollView horizontal style={{ flexGrow: 0 }} showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
         {(config?.branches ?? []).map((b) => (
           <Chip key={b.slug} label={b.name} icon="location-outline" selected={search.city === b.slug} onPress={() => search.setCity(b.slug)} />
         ))}
@@ -43,7 +43,7 @@ export default function Cars() {
         <Text variant="muted">{plural(daysBetween(search.from, search.to), 'day')}</Text>
         <Icon name="chevron-forward" size={16} color={c.muted} />
       </Pressable>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+      <ScrollView horizontal style={{ flexGrow: 0 }} showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
         <Chip label="Any type" selected={!category} onPress={() => setCategory('')} />
         {(config?.categories ?? []).map((cat) => (
           <Chip key={cat.value} label={cat.label} selected={category === cat.value} onPress={() => setCategory(category === cat.value ? '' : cat.value)} />
@@ -54,7 +54,7 @@ export default function Cars() {
           <Chip key={t.value} label={t.label} icon="cog-outline" selected={transmission === t.value}
             onPress={() => setTransmission(transmission === t.value ? '' : t.value)} />
         ))}
-        <Chip label={sort === 'price_asc' ? 'Cheapest first' : sort === 'price_desc' ? 'Dearest first' : 'Free cars first'}
+        <Chip label={sort === 'price_asc' ? 'Lowest price first' : sort === 'price_desc' ? 'Highest price first' : 'Available first'}
           icon="swap-vertical" accessibilityLabel="Change the sort order"
           onPress={() => setSort(sort === 'recommended' ? 'price_asc' : sort === 'price_asc' ? 'price_desc' : 'recommended')} />
       </Row>

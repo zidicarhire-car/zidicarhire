@@ -21,7 +21,7 @@ export default function CustomerTabs() {
         tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? 'car' : 'car-outline'} size={25} color={color as string} />,
       }} />
       <Tabs.Screen name="bookings" options={{
-        title: 'My bookings',
+        title: 'Bookings', headerTitle: 'My bookings',
         tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={22} color={color as string} />,
       }} />
       <Tabs.Screen name="chat" options={{

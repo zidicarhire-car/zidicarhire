@@ -48,7 +48,7 @@ export default function Today() {
             {staff.user?.branch ? `${staff.user.branch.name} branch` : city ? staff.user?.branches.find((b) => b.slug === city)?.name : 'All of Kenya'}
           </Text>
           {staff.user?.is_owner && staff.user.branches.length ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+            <ScrollView horizontal style={{ flexGrow: 0 }} showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
               <Chip label="All of Kenya" selected={!city} onPress={() => setCity('')} />
               {staff.user.branches.map((b) => <Chip key={b.slug} label={b.name} selected={city === b.slug} onPress={() => setCity(b.slug)} />)}
             </ScrollView>

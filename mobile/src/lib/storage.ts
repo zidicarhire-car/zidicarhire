@@ -5,6 +5,7 @@
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 
 import type { Booking } from './types';
 
@@ -55,12 +56,17 @@ export const savedChatId = async () => {
 };
 export const saveChatId = (id: string | null) => (id ? AsyncStorage.setItem(CHAT, id) : AsyncStorage.removeItem(CHAT));
 
+// SecureStore is phone-only; the web build (used for testing) keeps the token in browser storage instead.
+const secure = Platform.OS === 'web'
+  ? { getItemAsync: AsyncStorage.getItem, setItemAsync: AsyncStorage.setItem, deleteItemAsync: AsyncStorage.removeItem }
+  : SecureStore;
+
 export const staffToken = async () => {
   try {
-    return await SecureStore.getItemAsync(STAFF_TOKEN);
+    return await secure.getItemAsync(STAFF_TOKEN);
   } catch {
     return null;
   }
 };
 export const saveStaffToken = (token: string | null) =>
-  token ? SecureStore.setItemAsync(STAFF_TOKEN, token) : SecureStore.deleteItemAsync(STAFF_TOKEN);
+  token ? secure.setItemAsync(STAFF_TOKEN, token) : secure.deleteItemAsync(STAFF_TOKEN);

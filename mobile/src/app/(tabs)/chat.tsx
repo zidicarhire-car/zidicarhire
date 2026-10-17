@@ -137,6 +137,7 @@ export default function Chat() {
       mine={(m) => m.sender === 'visitor'}
       onSend={send}
       error={error}
+      empty="Ask about prices, booking, payment or pick-up places. Tap “Talk to a person” to reach our team."
       header={
         <Row style={{ paddingHorizontal: space.lg, paddingVertical: space.sm, backgroundColor: c.surface, borderBottomWidth: 1, borderBottomColor: c.border }}>
           <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: poll.data?.agent_online ? '#5BD46A' : c.muted }} />
@@ -144,7 +145,7 @@ export default function Chat() {
         </Row>
       }
       footer={
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled"
+        <ScrollView horizontal style={{ flexGrow: 0 }} showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled"
           contentContainerStyle={{ gap: space.sm, paddingHorizontal: space.lg, paddingVertical: space.sm }}>
           <Chip label={wantsAgent ? 'Team member requested' : 'Talk to a person'} selected={!wantsAgent} icon="person-outline"
             onPress={wantsAgent ? undefined : askPerson} />

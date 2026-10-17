@@ -217,7 +217,7 @@ export default function BookScreen() {
   ) : step === 'details' ? (
     <Row gap={space.sm}>
       <Button title="" icon="arrow-back" kind="ghost" accessibilityLabel="Back to dates" onPress={() => setStep('dates')} />
-      <Button title="Continue to payment" style={{ flex: 1 }} onPress={() => {
+      <Button title="Continue" style={{ flex: 1 }} onPress={() => {
         if (!validate()) return;
         saveCustomer({ name: form.name.trim(), phone: form.phone.trim(), email: form.email.trim() });
         if (q && minPay < q.total && (Number(payNow) < minPay || Number(payNow) > q.total)) setPayNow(String(minPay));
@@ -227,7 +227,7 @@ export default function BookScreen() {
   ) : step === 'pay' ? (
     <Row gap={space.sm}>
       <Button title="" icon="arrow-back" kind="ghost" accessibilityLabel="Back to your details" onPress={() => setStep('details')} />
-      <Button title={`Pay ${kes(payAmount)} with M-Pesa`} kind="mpesa" style={{ flex: 1 }} loading={busy} onPress={pay} />
+      <Button title={`Pay ${kes(payAmount)}`} accessibilityLabel={`Pay ${kes(payAmount)} with M-Pesa`} kind="mpesa" style={{ flex: 1 }} loading={busy} onPress={pay} />
     </Row>
   ) : step === 'failed' ? (
     <Row gap={space.sm}>
@@ -267,7 +267,7 @@ export default function BookScreen() {
           {step === 'dates' ? (
             <>
               <Text variant="heading">When do you need the car?</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+              <ScrollView horizontal style={{ flexGrow: 0 }} showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
                 {[[1, '1 day'], [3, '3 days'], [7, '1 week'], [14, '2 weeks'], [30, '1 month']].map(([n, label]) => (
                   <Chip key={label} label={String(label)} onPress={() => quickPick(Number(n))} />
                 ))}
@@ -418,9 +418,9 @@ export default function BookScreen() {
                 {booking.receipt_url ? <Button title="Download receipt" icon="download-outline" size="lg"
                   onPress={() => WebBrowser.openBrowserAsync(booking.receipt_url!)} /> : null}
                 <Row gap={space.sm}>
-                  {booking.ics_url ? <Button title="Add to calendar" icon="calendar-outline" kind="ghost" style={{ flex: 1 }}
+                  {booking.ics_url ? <Button title="Add to calendar" icon="calendar-outline" kind="ghost" size="sm" style={{ flex: 1 }}
                     onPress={() => Linking.openURL(booking.ics_url!)} /> : null}
-                  <Button title="Chat with us" icon="chatbubbles-outline" kind="ghost" style={{ flex: 1 }}
+                  <Button title="Chat with us" icon="chatbubbles-outline" kind="ghost" size="sm" style={{ flex: 1 }}
                     onPress={() => { router.back(); router.navigate('/chat'); }} />
                 </Row>
               </View>
@@ -458,7 +458,7 @@ function Choice({ title, values, value, onChange }: { title: string; values: str
   return (
     <View style={{ gap: space.sm }}>
       <Text variant="label">{title}</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+      <ScrollView horizontal style={{ flexGrow: 0 }} showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
         {values.map((t) => <Chip key={t} label={t} selected={value === t} onPress={() => onChange(t)} />)}
       </ScrollView>
     </View>

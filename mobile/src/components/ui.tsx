@@ -205,7 +205,7 @@ export function Field({ label, error, hint, style, ...input }: TextInputProps & 
     <View style={{ gap: 6 }}>
       <Text variant="label">{label}</Text>
       <TextInput
-        placeholderTextColor={c.muted}
+        placeholderTextColor={c.placeholder}
         accessibilityLabel={label}
         {...input}
         style={[{
@@ -256,9 +256,9 @@ export function Loading({ label = 'Loading…' }: { label?: string }) {
 export function Fact({ label, value, strong }: { label: string; value: ReactNode; strong?: boolean }) {
   return (
     <Row style={{ justifyContent: 'space-between', paddingVertical: 6, alignItems: 'flex-start' }} gap={space.lg}>
-      <Text variant={strong ? 'label' : 'muted'} style={{ flexShrink: 1 }}>{label}</Text>
+      <Text variant={strong ? 'label' : 'muted'} style={{ flexShrink: 0, maxWidth: '62%' }}>{label}</Text>
       {typeof value === 'string' || typeof value === 'number'
-        ? <Text variant={strong ? 'subheading' : 'label'} style={{ textAlign: 'right', flexShrink: 1 }}>{value}</Text>
+        ? <Text variant={strong ? 'subheading' : 'label'} style={{ textAlign: 'right', flex: 1 }}>{value}</Text>
         : value}
     </Row>
   );

@@ -81,7 +81,7 @@ export default function StaffBooking() {
           {a.return ? <Button title="Mark returned" icon="enter-outline" onPress={() => confirm(`Mark ${b.car} as returned? It becomes free to book again from today.`, 'return', 'Yes, returned')} /> : null}
           {a.relocate ? <Button title={`Car arrived in ${b.return_city}`} icon="git-branch-outline" kind="ghost"
             onPress={() => confirm(`Has ${b.car} arrived in ${b.return_city}? It will be listed there from now on.`, 'relocate', 'Yes, move the car')} /> : null}
-          {a.balance ? <Button title={`Record balance payment (${kes(b.balance)} owed)`} icon="cash-outline" kind="mpesa"
+          {a.balance ? <Button title={`Record balance (${kes(b.balance)})`} accessibilityLabel={`Record balance payment, ${kes(b.balance)} owed`} icon="cash-outline" kind="mpesa"
             onPress={() => { setAmount(String(b.balance)); setError(''); setSheet('balance'); }} /> : null}
           {a.mark_paid ? <Button title="Mark paid manually" icon="checkmark-circle-outline" kind="ghost" onPress={() => { setError(''); setSheet('mark_paid'); }} /> : null}
           {a.dates ? <Button title="Change dates" icon="calendar-outline" kind="ghost" onPress={() => {
@@ -172,17 +172,17 @@ export default function StaffBooking() {
       </FormSheet>
 
       <FormSheet visible={sheet === 'dates'} title={`Change dates for ${b.ref}`} busy={busy} error={error}
-        confirm={preview ? 'Change to these dates' : 'Check dates and price'}
+        confirm={preview ? 'Save new dates' : 'Check price'}
         onClose={() => setSheet(null)}
         onConfirm={() => act(preview ? 'change_dates' : 'preview_dates', dates)}>
         <Button title={`${fmtDay(dates.pickup_date || b.pickup_date)} → ${fmtDay(dates.return_date || b.return_date)}`} icon="calendar-outline" kind="ghost"
           onPress={() => setPickingDates(true)} />
         <Text variant="label">Pick-up time</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+        <ScrollView horizontal style={{ flexGrow: 0 }} showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
           {(config?.booking.times ?? []).map((t) => <Chip key={t} label={t} selected={dates.pickup_time === t} onPress={() => { setPreview(null); setDates({ ...dates, pickup_time: t }); }} />)}
         </ScrollView>
         <Text variant="label">Return time</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+        <ScrollView horizontal style={{ flexGrow: 0 }} showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
           {(config?.booking.times ?? []).map((t) => <Chip key={t} label={t} selected={dates.return_time === t} onPress={() => { setPreview(null); setDates({ ...dates, return_time: t }); }} />)}
         </ScrollView>
         {preview ? (
