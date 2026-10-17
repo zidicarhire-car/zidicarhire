@@ -52,6 +52,9 @@ npx eas-cli@latest build --profile production --platform android  # an .aab for 
 `eas.json` holds the build profiles. Every build uses the live site unless `EXPO_PUBLIC_API_URL` says otherwise.
 iPhone builds use the same commands with `--platform ios` and need an Apple Developer account.
 
+The cloud build installs packages with `npm ci` on Node 22 (npm 10). After adding or updating a package, refresh the
+lock file with that npm so the build accepts it: `npx npm@10 install --package-lock-only`.
+
 ## Checks
 
 ```
