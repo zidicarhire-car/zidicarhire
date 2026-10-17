@@ -11,7 +11,9 @@
     "ios": {
       "bundleIdentifier": "com.zidicarhire.app",
       "supportsTablet": true,
-      "config": { "usesNonExemptEncryption": false }
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.zidicarhire.app",
@@ -20,7 +22,10 @@
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "single",
@@ -41,13 +46,20 @@
         "expo-image-picker",
         {
           "photosPermission": "Staff choose car photos to add to the fleet.",
-          "cameraPermission": "Staff take photos of cars to add to the fleet."
+          "cameraPermission": "Staff take photos of cars to add to the fleet.",
+          "microphonePermission": false
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b7059890-8213-4f7b-ac04-3a5b4df92715"
+      }
+    },
+    "owner": "telongsoftwareinc"
   }
 }
