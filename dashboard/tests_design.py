@@ -68,14 +68,14 @@ class StylesheetTests(SimpleTestCase):
     def test_pages_load_the_layers_in_order(self):
         base = (Path(settings.BASE_DIR) / 'templates' / 'base.html').read_text(encoding='utf-8')
         head = (Path(settings.BASE_DIR) / 'templates' / '_theme_head.html').read_text(encoding='utf-8')
-        order = [head.index(n) for n in ('data-bs-theme', 'bootstrap@5.3.3/dist/css/bootstrap.min.css',
-                                         'bootstrap-icons@1.11.3', 'css/theme.css')]
+        order = [head.index(n) for n in ('data-bs-theme', 'vendor/bootstrap.min.css', 'vendor/bootstrap-icons.css', 'css/theme.css')]
         self.assertEqual(order, sorted(order), 'theme script first, then Bootstrap, icons, theme.css')
         self.assertLess(base.index('_theme_head.html'), base.index('css/site.css'))
-        for tag in re.findall(r'<(?:link|script)[^>]+cdn\.jsdelivr\.net/npm/[^>]+>', head):
-            self.assertIn('integrity="sha384-', tag)
-            self.assertIn('crossorigin="anonymous"', tag)
-        self.assertIn('<script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"', head)
+        self.assertIn("<script defer src=\"{% static 'vendor/bootstrap.bundle.min.js' %}\">", head)
+        self.assertNotRegex(head, r'(href|src)="https?://', 'everything comes from our own domain')
+        vendor = Path(settings.BASE_DIR) / 'static' / 'vendor'
+        self.assertIn('Bootstrap  v5.3.3', (vendor / 'bootstrap.min.css').read_text(encoding='utf-8')[:200])
+        self.assertIn('Bootstrap Icons 1.11.3', (vendor / 'bootstrap-icons.css').read_text(encoding='utf-8'))
         for template in ('dashboard/base.html', 'dashboard/login.html', '500.html'):
             text = (Path(settings.BASE_DIR) / 'templates' / template).read_text(encoding='utf-8')
             self.assertIn('_theme_head.html', text, template)
