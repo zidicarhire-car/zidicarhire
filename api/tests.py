@@ -177,6 +177,17 @@ class StaffApiTests(ApiTestCase):
         reply = self.post(f'/api/v1/staff/chats/{conv.id}/reply/', {'body': 'Hello Brian'}, **self.auth(token))
         self.assertEqual(reply.status_code, 201)
 
+    def test_change_dates_preview_then_apply(self):
+        booking = self.paid_booking()
+        token = self.login().json()['token']
+        new_end = (self.end + timedelta(days=2)).isoformat()
+        dates = {'pickup_date': self.start.isoformat(), 'pickup_time': '10:00', 'return_date': new_end, 'return_time': '10:00'}
+        preview = self.post(f'/api/v1/staff/bookings/{booking.ref}/action/', {'action': 'preview_dates', **dates}, **self.auth(token))
+        self.assertEqual(preview.json()['preview']['days'], 5)
+        done = self.post(f'/api/v1/staff/bookings/{booking.ref}/action/', {'action': 'change_dates', **dates}, **self.auth(token))
+        self.assertEqual(done.json()['booking']['return_date'], new_end)
+        self.assertIn('?t=', done.json()['booking']['receipt_url'])
+
     def test_car_toggle(self):
         token = self.login().json()['token']
         res = self.post(f'/api/v1/staff/cars/{self.car.pk}/toggle/', **self.auth(token))

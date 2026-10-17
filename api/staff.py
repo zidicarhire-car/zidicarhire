@@ -5,6 +5,8 @@ reused where they exist.
 """
 from functools import wraps
 
+from django.conf import settings
+
 from django.contrib.auth import authenticate
 from django.core.paginator import Paginator
 from django.db.models import Prefetch
@@ -14,7 +16,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
-from bookings import services
+from bookings import services, tokens
 from bookings.models import Booking, BookingEvent
 from bookings.pricing import QuoteError
 from bookings.utils import rate_limited
@@ -137,6 +139,7 @@ def _detail(booking):
         'id_number': booking.id_number, 'licence_number': booking.licence_number,
         'whatsapp_link': booking.whatsapp_link,
         'allowed': _allowed(booking),
+        **tokens.links(booking, absolute=settings.SITE_URL),   # signed receipt and calendar links
         'events': [{'kind': e.kind, 'label': e.get_kind_display(), 'who': e.who, 'message': e.message,
                     'at': timezone.localtime(e.created_at).strftime('%d %b, %H:%M')} for e in booking.events.all()],
         'payments': [{'status': p.status, 'label': p.get_status_display(), 'amount': p.amount, 'phone': p.masked_phone,
